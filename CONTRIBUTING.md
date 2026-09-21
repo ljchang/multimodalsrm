@@ -1,19 +1,22 @@
 # Contributing
 
-Model integration is pending. Infrastructure contributions can proceed independently; changes to model algorithms should remain in the source development repository until the handoff described in [the integration plan](docs/model-integration.md).
+The extracted production models live in this repository. Research campaigns should consume a pinned package source commit or release. See the [integration provenance](docs/model-integration.md) before moving code between repositories.
 
-Use Python 3.12 and install `.[dev]` into an isolated environment. Before submitting a pull request, run:
+Use Python 3.12 or later and an isolated environment. Install the base development tools with `python -m pip install -e '.[dev]'`; use `'.[dev,bayesian]'` for Bayesian work. Before submitting a pull request, run the checks applicable to the change:
 
 ```sh
 ruff check .
 ruff format --check .
-python -m pytest tests/infrastructure
+python -m pytest tests/infrastructure tests/core
+JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python -m pytest tests/bayesian
+python examples/r_quickstart.py
+JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python examples/gp_map_quickstart.py
 python -m build
 python -m twine check --strict dist/*
 ```
 
-Validate workflow edits with `actionlint` when available. Tests should exercise observable behavior and use synthetic data. Do not commit participant observations, fitted states, private data paths or research archive payloads. Keep the base package import independent of optional Bayesian/plotting backends and legacy comparator dependencies.
+Bayesian tests and examples require the optional Bayesian extra. CI also checks installed artifacts. Validate workflow edits with `actionlint` when available. Tests should exercise observable behavior using synthetic data. Do not commit participant observations, fitted states, private data paths or research archive payloads. Keep the base package import independent of optional Bayesian/plotting backends and legacy comparator dependencies.
 
-Once models are integrated, run the relevant `tests/core` and `tests/bayesian` suites, with JAX float64 enabled for the latter. Do not change a statistical target, default, coordinate convention or archive schema as an incidental consequence of packaging work. Explain any intentional change and its validation in the pull request.
+Do not change a statistical target, default, coordinate convention or archive schema as an incidental consequence of packaging work. Explain intentional changes and their validation in the pull request. Preserve target exclusion before preprocessing and participant isolation in independent-run inference. Keep serialization identifiers stable; see [migration](docs/migration.md).
 
-Contributions are made under the repository's MIT license. Retain applicable authorship and third-party notices when transferring code. Report scientific limitations separately from software bugs and reproducibility failures.
+Contributions are made under the repository's MIT license. Retain applicable authorship and third-party notices when transferring code. Report software checks, numerical qualification, fit convergence, uncertainty calibration, response recovery and empirical validity separately. A small synthetic example is not a recovery study.

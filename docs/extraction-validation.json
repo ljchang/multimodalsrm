@@ -1,0 +1,43 @@
+{
+  "source_commit": "67128c7a562cab67499bdc0604357731a628aa9e",
+  "platform": "Darwin arm64",
+  "python": "3.12.13",
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "jax": "0.11.2",
+    "jaxlib": "0.11.2",
+    "numpyro": "0.22.0",
+    "arviz": "1.3.0"
+  },
+  "model_tests": {
+    "unique_passed": 1519,
+    "core_passed": 251,
+    "bayesian_passed": 1268,
+    "failed": 0,
+    "skipped": 0,
+    "method": "Entire installed-wheel core/Bayesian directories, four local Bayesian file shards; the updated participant-workflow file was rerun in full after restoring one omitted test."
+  },
+  "implementation_modules": 79,
+  "installed_implementation_hashes_match": true,
+  "handoff_checks": {
+    "source_ast_and_import_equivalence": "Passed independent review, allowing Ruff formatting/import ordering and two optional-extra error messages.",
+    "fresh_fit_parity": "Exact R objective history/loadings/predictions and GP MAP/posterior/update numeric arrays and statistical diagnostics on matched synthetic inputs. Elapsed-time telemetry and derived fit/evidence IDs excluded from fresh-fit comparison.",
+    "old_gp_archive_schemas": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "old_gp_archive_replay": "Exact retained arrays/configuration/diagnostics and available query moments; calibrated predictions and seeded posterior joint paths also match. No refitting during replay.",
+    "wheel_and_sdist_examples": "R fit/prediction/calibration and GP MAP/save/load passed from isolated installed artifacts.",
+    "base_only": "All 251 core tests passed with JAX/NumPyro absent.",
+    "review": "One omitted public posterior-participant test and its independent SciPy oracle restored; scoped re-review cleared the finding."
+  },
+  "limits": [
+    "No new scientific convergence, response-recovery or uncertainty-calibration study.",
+    "Historical R joblib and warmup checkpoints require their original environment; no compatibility unpickler or checkpoint identity bypass.",
+    "Hosted destination CI results must be checked on the pull request. No package release or upload performed."
+  ]
+}

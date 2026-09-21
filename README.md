@@ -5,44 +5,58 @@
 
 Shared response models for observations measured across people, modalities and native sampling times.
 
-**Status: distribution infrastructure under construction.** This repository currently contains packaging, CI and release infrastructure. The R-MSRM and GP-MSRM implementations have not yet been imported. Version `0.1.0.dev0` is a local development scaffold, not a usable model release. A passing CI badge currently describes infrastructure checks; model suites are explicitly pending and package publication is blocked.
+**Development version: `0.1.0.dev0`.** This repository contains the extracted R-MSRM and GP-MSRM implementations. It has not been released on PyPI. Install from a checkout for development; a configured Trusted Publisher does not mean a release has occurred. Software checks, fit convergence, uncertainty calibration and empirical recovery are separate claims.
 
-## Planned model families
+## Models
 
-- **R-MSRM (`MultimodalSRM`)**: regularized estimation of one shared latent response per run, with participant–modality mappings and modality response kernels.
-- **GP-MSRM (`BayesianMultimodalSRM`)**: a continuous shared latent Gaussian process with explicit priors, MAP estimation and supported posterior workflows.
+- **R-MSRM (`MultimodalSRM`)** estimates one exact common latent response per run by default, with participant–modality mappings and regularized response kernels.
+- **GP-MSRM (`BayesianMultimodalSRM`)** uses a continuous shared latent Gaussian process, individual observation mappings, explicit priors, MAP estimation and supported posterior workflows.
 
-Both families will retain native observation times, masks, missing streams and explicit information boundaries for held-out prediction. Bayesian capabilities are being completed in the source research repository before a verified handoff. Learned FIR responses are deferred.
+Both use named native-time observations, masks and missing streams. They preserve explicit information boundaries for held-out prediction. Learned FIR responses are deferred. Legacy neighborhood, graph, mixture and reference estimators are not exported by this package. See the [capability and backend matrix](docs/capabilities.md) before choosing a workflow.
 
-The initial distribution will focus on these two models. Legacy neighborhood, graph, mixture and reference models remain in their research repository. Implementation tests, convergence, calibrated uncertainty, response recovery and empirical usefulness are separate claims.
+## Install from source
 
-## Contributing to the scaffold
-
-Python 3.12 is the initial CI target. From a clone of this repository:
+Python 3.12 or later is required. From a clone:
 
 ```sh
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e '.[dev]'
-python -m pytest tests/infrastructure
-ruff check .
-ruff format --check .
-python -m build
-python -m twine check --strict dist/*
+python -m pip install -e .
+python examples/r_quickstart.py
 ```
 
-Current usable import: `from multimodalsrm import __version__`. Model classes are not exported yet. Once integrated and released, the planned installation is `pip install multimodalsrm` for R-MSRM and `pip install 'multimodalsrm[bayesian]'` for GP-MSRM. The provisional Bayesian dependency versions will be reconciled with the final verified handoff.
+For the optional Bayesian runtime:
 
-## Development and releases
+```sh
+python -m pip install -e '.[bayesian]'
+JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python examples/gp_map_quickstart.py
+```
 
-- [Model integration and extraction plan](docs/model-integration.md)
+The base install does not require JAX, NumPyro, ArviZ or plotting libraries. The Bayesian extra pins the runtime used by the source handoff; enabling float64 is required. These source-install commands do not depend on a PyPI release.
+
+## Data and imports
+
+```python
+from multimodalsrm import MultimodalSRM, TimeSeries, Identity, Gaussian, Response
+from multimodalsrm.bayesian import BayesianMultimodalSRM, BayesianPriors
+
+# values: (observations, features); times: (observations,).
+# Each modality retains its own timestamps. A mask marks observed entries.
+# data = {participant: {run: {modality: TimeSeries(values, times, mask)}}}
+```
+
+Use consistent timestamp units across streams. Separate runs have separate latent responses; participants viewing the same run share one response. `features=K` chooses the latent dimensionality rather than estimating K. The [runnable tutorials](docs/tutorials.md) demonstrate fitting, explicit target exclusion, independent new runs and GP archive replay on small synthetic data.
+
+## Documentation and development
+
+- [Tutorials](docs/tutorials.md) and [capabilities](docs/capabilities.md)
+- [Migration and archive compatibility](docs/migration.md)
+- [Source integration and provenance](docs/model-integration.md)
 - [CI and test policy](docs/testing.md)
-- [Release and Trusted Publisher setup](docs/releasing.md)
-- [Tutorial scope](docs/tutorials.md)
-- [Contributing](CONTRIBUTING.md) and [changelog](CHANGELOG.md)
+- [Release setup](docs/releasing.md), [contributing](CONTRIBUTING.md) and [changelog](CHANGELOG.md)
 
-CI builds a wheel and source distribution and tests both installed artifacts on Linux and macOS. After model integration, core and Bayesian suites run separately on both platforms. PyPI publication uses a versioned GitHub Release; manual release workflow runs target TestPyPI. Neither route can publish the scaffold.
+The development workflow tests installed wheels and source distributions, with separate core and Bayesian suites. See the current CI run and integration record for test evidence. Passing CI does not certify scientific validity or authorize a new release.
 
 ## License and citation
 
-MIT licensed; see [LICENSE](LICENSE). Citation metadata is in [CITATION.cff](CITATION.cff). There is no package DOI or associated publication claimed by this scaffold. Research data and fitted model archives are not distributed.
+MIT licensed; see [LICENSE](LICENSE). The implementation was extracted from Luke J. Chang's [shared-response-models](https://github.com/ljchang/shared-response-models) research repository with contributor provenance retained in the [integration record](docs/model-integration.md). Citation metadata is in [CITATION.cff](CITATION.cff). No package DOI or associated publication is claimed. Research observations and fitted archives are not distributed.

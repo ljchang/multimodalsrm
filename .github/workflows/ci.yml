@@ -110,6 +110,9 @@ jobs:
       - name: Install distribution and test outside the checkout
         env:
           DIST_FORMAT: ${{ matrix.format }}
+          JAX_ENABLE_X64: 'true'
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
         run: |
           python -m pip install pytest packaging
           if [ "$DIST_FORMAT" = wheel ]; then
@@ -119,11 +122,20 @@ jobs:
           fi
           python -m pip check
           cp tests/infrastructure/test_package.py "$RUNNER_TEMP/test_package.py"
+          cp examples/*.py "$RUNNER_TEMP/"
           cd "$RUNNER_TEMP"
           python -I -m pytest -q --import-mode=importlib test_package.py
+          python -I r_quickstart.py
+          if [ "$DIST_FORMAT" = wheel ]; then
+            for package in "$GITHUB_WORKSPACE"/dist/*.whl; do python -m pip install "${package}[bayesian]"; done
+          else
+            for package in "$GITHUB_WORKSPACE"/dist/*.tar.gz; do python -m pip install "${package}[bayesian]"; done
+          fi
+          python -m pip check
+          python -I gp_map_quickstart.py
 
   models:
-    name: Model ${{ matrix.suite }} (${{ matrix.os }})
+    name: Model ${{ matrix.suite }} shard ${{ matrix.shard }} (${{ matrix.os }})
     needs: [build, integration]
     if: needs.integration.outputs.ready == 'true'
     runs-on: ${{ matrix.os }}
@@ -132,7 +144,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        suite: [core, bayesian]
+        suite: [bayesian]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+        include:
+          - {os: ubuntu-latest, suite: core, shard: 0}
+          - {os: ubuntu-latest, suite: core, shard: 1}
+          - {os: macos-latest, suite: core, shard: 0}
+          - {os: macos-latest, suite: core, shard: 1}
     env:
       JAX_ENABLE_X64: 'true'
       OPENBLAS_NUM_THREADS: '1'
@@ -152,6 +170,7 @@ jobs:
       - name: Install and run integrated model suite
         env:
           MODEL_SUITE: ${{ matrix.suite }}
+          MODEL_SHARD: ${{ matrix.shard }}
         run: |
           for wheel in dist/*.whl; do
             if [ "$MODEL_SUITE" = bayesian ]; then
@@ -161,8 +180,8 @@ jobs:
             fi
           done
           python -m pip check
-          python -I -m pytest -q --import-mode=importlib --junitxml=results.xml "tests/$MODEL_SUITE"
-          python scripts/check_test_report.py results.xml
+          if [ "$MODEL_SUITE" = bayesian ]; then count=8; else count=2; fi
+          python scripts/run_model_tests.py "$MODEL_SUITE" --shard "$MODEL_SHARD" --count "$count"
 
   required:
     name: Required checks

@@ -1,0 +1,491 @@
+{
+  "source_repository": "https://github.com/ljchang/shared-response-models",
+  "source_commit": "67128c7a562cab67499bdc0604357731a628aa9e",
+  "source_tree": "4b57aaf86c967798d112b9b011a51fa0cfb9ffc6",
+  "files": [
+    {
+      "source": "src/personalized_srm/multimodal/_observation_preparation.py",
+      "destination": "src/multimodalsrm/_observation_preparation.py",
+      "source_sha256": "ae9a1ec7aa194a95d08ae2b2cbc0ae85c17398e44341d9e4cefd5fc22b5fbf8b",
+      "destination_sha256": "c36ba46e5cd5ae61a90487bbd0d3a6cbe2442e1da72edf2d2e8026c7c9a275fc"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/_parallel.py",
+      "destination": "src/multimodalsrm/_parallel.py",
+      "source_sha256": "8c552308fc68287a110110ad62ee6931283de147ce25d9dbd6c0bcc9ebec1b2a",
+      "destination_sha256": "d86c49cf4c02c8ae2df558466312f74a891b228aac7b4ca606cb1025d9c7ebe4"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/alignment.py",
+      "destination": "src/multimodalsrm/alignment.py",
+      "source_sha256": "053ed6df99a9a4eb76538097bc2667b349add79131eb868c2bf81e2ea9c30fe1",
+      "destination_sha256": "bad8ebb041901245b72e059cf6ef8b761c9e7a8d159676b2cc7ce23611f7c065"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/__init__.py",
+      "destination": "src/multimodalsrm/bayesian/__init__.py",
+      "source_sha256": "f9de6ded47d7b9d72a783366b6e6f1d4fbeb65029b173f9f01f74d145cfa5d1a",
+      "destination_sha256": "c6f7139fb7b55815392485d31ce6604d2a362ef565c1a1bcca824bdd1d14a22d"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/_archive.py",
+      "destination": "src/multimodalsrm/bayesian/_archive.py",
+      "source_sha256": "11e58959bf62803b86219798e7833fddd29f6f6e748febdb139694599add65d5",
+      "destination_sha256": "bbd364b7fb68bc21b57d556fc69ce4bc25d566633ef5f35b794ec12e8f513a47"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/_backend.py",
+      "destination": "src/multimodalsrm/bayesian/_backend.py",
+      "source_sha256": "863f08017ac1d9a116b86b9f07238157dd27984896cb8095c10e91f70cd509ce",
+      "destination_sha256": "182c2bd2eff6c609dc90257acbbfb94854213857d02d8c5140c334f187fc81d9"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/baselines.py",
+      "destination": "src/multimodalsrm/bayesian/baselines.py",
+      "source_sha256": "e69f5033d2b2aa771c15f04a3a5673b6515d0e2ae853f87114376c849beafc40",
+      "destination_sha256": "2fa3a9b69a519771f180527cb1d6196f6008586679c72d46af5c698e56a7f7a9"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/blocks.py",
+      "destination": "src/multimodalsrm/bayesian/blocks.py",
+      "source_sha256": "196e74dd6b8e3897a81cd03fe4797a6d2c4922d18d9b567a9346779c8808ac32",
+      "destination_sha256": "a7d594797e2bbc113bddae84e2c3b94180e46387b53edd871f585f2af7cdb56f"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/calibration.py",
+      "destination": "src/multimodalsrm/bayesian/calibration.py",
+      "source_sha256": "1398b3995332a3fadab0e7f94e8d7738f4e4d5e93df872f350c9ef5fa6936b46",
+      "destination_sha256": "a39f0784c877621e20e10e14b81ed341dfed51bc4f955360a45c5efb345d92dc"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/calibration_archive.py",
+      "destination": "src/multimodalsrm/bayesian/calibration_archive.py",
+      "source_sha256": "372e132863e660f42c7cf747f335e4b7d6ff7aea30e8b203dc1cfc5528dfc674",
+      "destination_sha256": "771928996b705cfa136969ae0faea82478b619f18dc1a6e0f837d4081f04688b"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/calibration_problem.py",
+      "destination": "src/multimodalsrm/bayesian/calibration_problem.py",
+      "source_sha256": "9120a75e0dfc0e9ce515a0cb306bdf6150833afa1108dae3bdd28492104a747c",
+      "destination_sha256": "9120a75e0dfc0e9ce515a0cb306bdf6150833afa1108dae3bdd28492104a747c"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/covariance_pairs.py",
+      "destination": "src/multimodalsrm/bayesian/covariance_pairs.py",
+      "source_sha256": "0871ec25ea12e592cec9fb8058c42f4ba4eaaafeafe31f9349d9be7207793e6c",
+      "destination_sha256": "27d925d5f10e16e693807bed331d6c690b0e6940e2f813cb9c870907cc06159e"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/diagnostics.py",
+      "destination": "src/multimodalsrm/bayesian/diagnostics.py",
+      "source_sha256": "b9e0c55b0774ad77dc61f1911f46b02974bf0749dc51100fbe776ec7ca475100",
+      "destination_sha256": "6641e929db539193bf0821eb472ac308f9113c7b96c1627d2fd328d9beea8deb"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/execution.py",
+      "destination": "src/multimodalsrm/bayesian/execution.py",
+      "source_sha256": "a901fd8b305c8b04b8bd1dddbe85fe30c452683aca2f486c0e436efa78f53db7",
+      "destination_sha256": "a901fd8b305c8b04b8bd1dddbe85fe30c452683aca2f486c0e436efa78f53db7"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/factorization.py",
+      "destination": "src/multimodalsrm/bayesian/factorization.py",
+      "source_sha256": "653bef60f9285a08af7885632279e74ae8c0e0c0b43406b99c00687e0c353d6d",
+      "destination_sha256": "f8a2d4dad3eda9567f1907e7459f5b3634dd1d111b86574718b2e4b915d0e1c9"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/fitting.py",
+      "destination": "src/multimodalsrm/bayesian/fitting.py",
+      "source_sha256": "330e07d952f50b2c71122c1775a7042b0d9864ea83654c7020b28e1b61fe31e9",
+      "destination_sha256": "6b0eabfec3fc38d83cd97ea660733009b687425c1e5ad162abc04d9290c74911"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/gp_hyperparameters.py",
+      "destination": "src/multimodalsrm/bayesian/gp_hyperparameters.py",
+      "source_sha256": "b0e6691f1e58f1d364c9ad0c62b5cb223802278fcb591f8c2a67d37b603b9ae3",
+      "destination_sha256": "baf04a1abb96cdf42a2b882dd206f367fa67bcdb5216f6af75a08ff0703d6c48"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/grouped.py",
+      "destination": "src/multimodalsrm/bayesian/grouped.py",
+      "source_sha256": "4170a693b1b0dd9c8fa5076045aadae48fcd0555bd804eedcd9bc3aae4dd4db3",
+      "destination_sha256": "9b05eefa7887b4f2897b246e729e0d5dca970e7d5fd8a31ba5bf51a42d5fb872"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/grouped_score.py",
+      "destination": "src/multimodalsrm/bayesian/grouped_score.py",
+      "source_sha256": "93a45baa82b4df98c42f920b81713397f23eebcc8f2ff4a5406bd13deae2f38e",
+      "destination_sha256": "93a45baa82b4df98c42f920b81713397f23eebcc8f2ff4a5406bd13deae2f38e"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/identity.py",
+      "destination": "src/multimodalsrm/bayesian/identity.py",
+      "source_sha256": "838ef271f68766a8e10c89fd200477b1bf4340cac544d5ac86367e905ed6fa0c",
+      "destination_sha256": "838ef271f68766a8e10c89fd200477b1bf4340cac544d5ac86367e905ed6fa0c"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/map_conditioning.py",
+      "destination": "src/multimodalsrm/bayesian/map_conditioning.py",
+      "source_sha256": "3e1a1cde77389ed9bd951aa51b9b36ce673a55cf4cd0a1367cca97c48dc75c96",
+      "destination_sha256": "e2486f5311302e2ff9b0ae22a0e4c2a5c0a15d98b1c9b7229c5637dadb73162d"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/map_parallel.py",
+      "destination": "src/multimodalsrm/bayesian/map_parallel.py",
+      "source_sha256": "7d356e9b0e3c9af1cb4211e7bb0ffcc3db364be957b0ec6acb3d51a64cbf849d",
+      "destination_sha256": "11e6c7f81e235ae18589a0fea9dd2f1c35b4ee02eaa9d4a49b3080c44ae1372d"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/model.py",
+      "destination": "src/multimodalsrm/bayesian/model.py",
+      "source_sha256": "01679ec11940e1194d236e5e46cbf2ab53410e3cf9cf2440dda7d33ac75d4026",
+      "destination_sha256": "351fb8edc09cee9d0635cb0f1478b05eb6e879b8906cc6303e1ddf006e9e16ad"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/multifactor.py",
+      "destination": "src/multimodalsrm/bayesian/multifactor.py",
+      "source_sha256": "0283d960f250eba636051afe45ababcfd2e3294f2c60702199e13d75bd3e0fe4",
+      "destination_sha256": "705a454df9542b94a005e2dd80b74b8deb5a50a19d14ce2bcfc96f04bad81c07"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/multifactor_cholesky.py",
+      "destination": "src/multimodalsrm/bayesian/multifactor_cholesky.py",
+      "source_sha256": "21198cc31795fa6aa094dd0cd3e0261d7d085e199ed7db95edb643d01f84dc44",
+      "destination_sha256": "eb73b0c68829605867e3df0e5e9cbda4a85df4da84a6634cf8ca90b49c005c9f"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/multifactor_score.py",
+      "destination": "src/multimodalsrm/bayesian/multifactor_score.py",
+      "source_sha256": "49c5f362000f14892b8afb1dc8f355ee670eec320877cb43d979cf0167619aa9",
+      "destination_sha256": "59065f10176f8cfc20036c2a13ccc4d70b11f3f099de234c30057d93e17cd62e"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/noise_profile.py",
+      "destination": "src/multimodalsrm/bayesian/noise_profile.py",
+      "source_sha256": "6be992c91c11a4e172d6a543faf2ed909b889e347cc5c711aba8fea07b3c49d4",
+      "destination_sha256": "3336dc004df0e255b99e4e62701bd7ad27df1208da6bfa9153367aa8c1f0c197"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/observation_adapter.py",
+      "destination": "src/multimodalsrm/bayesian/observation_adapter.py",
+      "source_sha256": "cd329343f67632d1b89a7f149f9ac9b4dde58fff0568b501810e73374d25903c",
+      "destination_sha256": "6d33c5fc9b610acc78d3f87d93015092904e801d12a7dc55c4d46a053a4e15e3"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/orientation_diagnostics.py",
+      "destination": "src/multimodalsrm/bayesian/orientation_diagnostics.py",
+      "source_sha256": "621a5e796d02fdb31d701e735da8193203fa94fa82c770d5f7d3cf1b70940aba",
+      "destination_sha256": "7f05fd0ffb1b561dcfad6e822872b0e2410fd00ba2ebd214241d57e1149e3ed7"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/orientation_persistence.py",
+      "destination": "src/multimodalsrm/bayesian/orientation_persistence.py",
+      "source_sha256": "3a7d01c458a84de1d78e3e74e5220c9c9615698a3426ffdf02ef542325348dc7",
+      "destination_sha256": "7b10476df2e150a9f9d042bb5ea1b5b3564d2e9b2ca811ea4ef7a8b23a2fd09d"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/orthogonal.py",
+      "destination": "src/multimodalsrm/bayesian/orthogonal.py",
+      "source_sha256": "731c4caa6eca132f3076d460a66909d5b384e82ce388034317f0a243c2ada794",
+      "destination_sha256": "523e0f993c6b4261fd35cf59d327da06c41b85d56499afbd9342faadfdd08417"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/persistence.py",
+      "destination": "src/multimodalsrm/bayesian/persistence.py",
+      "source_sha256": "0ac77fa2e3364efb41e21d117fd7593bf2e0eeccd6c69ade7ae1b5c73d334f46",
+      "destination_sha256": "572f80448b1d8bee1fc153bb819ff5fc1bc504077c40207f63263391a8e6d7d2"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/polishing.py",
+      "destination": "src/multimodalsrm/bayesian/polishing.py",
+      "source_sha256": "b819659cdd0f7737465e93188204c81c46bf921f6cf32274470772c93fe44228",
+      "destination_sha256": "acc4cf71e29a67dc078083305e55256e09d5209d49685f033ad343e1f06add95"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/posterior_coordinates.py",
+      "destination": "src/multimodalsrm/bayesian/posterior_coordinates.py",
+      "source_sha256": "6a5c9127d4643e174511846eb849ab914206e8c2b43a6973f20acff239b1b0eb",
+      "destination_sha256": "6c8952c085db1b87a4203e94466496e23ec06f15be77f77f7ebecff4c1c17d44"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/posterior_participants.py",
+      "destination": "src/multimodalsrm/bayesian/posterior_participants.py",
+      "source_sha256": "3327040498dd5ca691a47400df2a3c806151d33204ac39fbdb1a706da589635f",
+      "destination_sha256": "b6c849736ff1eee432863b3d35c26df99972b87bed165eda0a84a9bb276da545"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/posterior_persistence.py",
+      "destination": "src/multimodalsrm/bayesian/posterior_persistence.py",
+      "source_sha256": "b97c6e0e41db75f1b0c2e75e3f788babd1115e569b799b0b56f98d42a4855991",
+      "destination_sha256": "c59a5f3bbd10d8342079f7e90fb7df2deea57cbb8faca23ba66076830bad386b"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/posterior_updates.py",
+      "destination": "src/multimodalsrm/bayesian/posterior_updates.py",
+      "source_sha256": "a491cd8fe5fb1a5af012ee7587c51fa3361e0747995e191082b9cb7a59a4b513",
+      "destination_sha256": "d16c32d2ef6b866c1401f50e7108dca37752bb5644eb9dd10fead24f163928be"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/prediction.py",
+      "destination": "src/multimodalsrm/bayesian/prediction.py",
+      "source_sha256": "a22f8a27bb8e03f1bdd25dde51cdedfd25973b68bb9e7957869a6cbc14db0b7b",
+      "destination_sha256": "4f8774a0b18d1de8c5ed60a0d3b98609ca5b809b35d0516ff0427c2d308aafef"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/priors.py",
+      "destination": "src/multimodalsrm/bayesian/priors.py",
+      "source_sha256": "94372671d4f62fb51d96e636996490cbbdbfbe1ea25986b2e8314617f54617b2",
+      "destination_sha256": "c338ebf0b419c4541bd648e8fc94907bb69543b0686516d5964d8503e5571fac"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/problem.py",
+      "destination": "src/multimodalsrm/bayesian/problem.py",
+      "source_sha256": "c000aa70f7275028d791255a87a91719639b64f71ad2c14c7b8dfe2bd7325d2e",
+      "destination_sha256": "64525625e513cff6888056050c29ed8a0a946cd4bd58d435d7d7e8bae03bf1dc"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/quality.py",
+      "destination": "src/multimodalsrm/bayesian/quality.py",
+      "source_sha256": "8378366f2327d34443b7d1e98cfd54118463610e513751a0f7b2694988461f27",
+      "destination_sha256": "ccf52adc2ca56b92e0ffc864c2798e432b2dcc17065c71bba40397f751bb7a79"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/reference.py",
+      "destination": "src/multimodalsrm/bayesian/reference.py",
+      "source_sha256": "c996911bd456fbc6bd4b1c935d7ecd7a4a246f6a997d9289c49fe49a76cf642d",
+      "destination_sha256": "56dc09949b95f9d28a7913110947f7b838d16bed067b09ec6791ed8c94d5782a"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/refinement_coordinates.py",
+      "destination": "src/multimodalsrm/bayesian/refinement_coordinates.py",
+      "source_sha256": "26cd23e325d170604f559542ca3e52e05145058d8734bd0c631dd40ac20a5890",
+      "destination_sha256": "26cd23e325d170604f559542ca3e52e05145058d8734bd0c631dd40ac20a5890"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/response_quadrature.py",
+      "destination": "src/multimodalsrm/bayesian/response_quadrature.py",
+      "source_sha256": "2cb574cfd14c49e902e55a02a8ab2c0dcb65100296b84ffcee4453dbb1be471a",
+      "destination_sha256": "5ac3cb097cf6a1c03d1b6ebe239fb5bf4fdc7633d53e94a22f62279c8aea9f8a"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/response_scope.py",
+      "destination": "src/multimodalsrm/bayesian/response_scope.py",
+      "source_sha256": "8f19f694c293ff05f5631b5349e4cbacd3afc5cda3884d98ea9825e19876a734",
+      "destination_sha256": "2e07d88e51bbbce9b41f8a3b4efaa4d323f7370c0a8ba2fa9e8477f38d4661fa"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/results.py",
+      "destination": "src/multimodalsrm/bayesian/results.py",
+      "source_sha256": "455ba981ea82fc8b84c6a2588a35880304c10f01999b658eae1cc52aa4592a34",
+      "destination_sha256": "99adc9c28f9d0cf7f801a3f41d7aac0183dbf7d4d53004ac90f1883097bcb9a2"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/spectral.py",
+      "destination": "src/multimodalsrm/bayesian/spectral.py",
+      "source_sha256": "51628a7513976dc2d1ca335e052352d9c2ad876bca82ad98eb22802cecf6f8ce",
+      "destination_sha256": "66ead36ec80c2c1028ff5a346cd2e665cd85be0cc7c56b2d73f6ff8052639814"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space.py",
+      "destination": "src/multimodalsrm/bayesian/state_space.py",
+      "source_sha256": "8fda3d2382c97d4a3ff0f866b0cd3ef2f1da7523af73812f4b748c9b93a6d9aa",
+      "destination_sha256": "02f6838bb0709ec8a8f087233d94e3d6c308205dbb928c9b156b1f64718ab461"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_bach.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_bach.py",
+      "source_sha256": "af59fbb65e219265346b8c6e3978fae46d9d02119f476edfb9a82b1525647118",
+      "destination_sha256": "11eeca90c0526d5eb97cacb33deaf296e9b75f3a3ef0544df063d945e0f8320a"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_compact.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_compact.py",
+      "source_sha256": "4498fb7eb3ff82b811c3cc527e1cc255a72622e0172e08b487eddd09aa3f2723",
+      "destination_sha256": "a6c761636b185a4e4dc75a584158bf8d15978faeded7e9a5edf7c6f77eef0a18"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_delays.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_delays.py",
+      "source_sha256": "cedb3571d576a6fa873c25e731492ea1d93ac7937c4cb4e4a4f1c8fa46e4e87d",
+      "destination_sha256": "3882e75c449597c6cf58a05cb42b8930ecfed9dc0bec23e7593b17d06fd4ac25"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_gaussian.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_gaussian.py",
+      "source_sha256": "98ae89df2d534b2bb7bbe362addc6c5c06f1c8dd6f7096163c1c16d640bcc684",
+      "destination_sha256": "ee83f9142710b5319329000087ade155553ffe6c9f07eca0c08d3b26f1822a94"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_gaussian_rational.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_gaussian_rational.py",
+      "source_sha256": "62587fe623b2f9ed1687825df24b08d44a3671747e2f0058a656a0c04d5a8cb6",
+      "destination_sha256": "35599b9e60f3f19a545a8c22f26300f0e9c6fa587120bf682283b2fa4c820ba5"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_parameters.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_parameters.py",
+      "source_sha256": "ff846d209a747e1ebe2a8809ea000d271dc7145050f966e3ec327b5df7bb4f79",
+      "destination_sha256": "72673aa8631a329f07d8a98735001ad9fb6ced8f7c36f0b4323c6bf4ebd0feb6"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_rational.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_rational.py",
+      "source_sha256": "c6fff67bf4cd21915bc9cf25c15f435a041cd1c9b23cc7c2f93101e28f872376",
+      "destination_sha256": "a47d7fde85209a045eed9cdf8c6ffdeba469b398a4ae2baa883a18c569c3e330"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/state_space_responses.py",
+      "destination": "src/multimodalsrm/bayesian/state_space_responses.py",
+      "source_sha256": "291fbaa23c6677273c729569869f31c2ea7f45982683bc7098bec545a3d045ee",
+      "destination_sha256": "b5a0d9135b7bc11b51fd7ba372761f70f380af969b99ca01dd93616d1a371ab8"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/temporal_noise.py",
+      "destination": "src/multimodalsrm/bayesian/temporal_noise.py",
+      "source_sha256": "a436d48cb09462a2a9c3ab5dcb00bb7d74b6e96b455d0dab5a7b378790b48fa6",
+      "destination_sha256": "ebc76d18a1e38cef3eb8e9ed1af2b8e827fdbf1bf644cb9f113bfd0df7e49626"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/timing.py",
+      "destination": "src/multimodalsrm/bayesian/timing.py",
+      "source_sha256": "263415a5fe8d64c4e1c817abc0fdac71721e0fd4abd6289de0c92f0288d16e6c",
+      "destination_sha256": "0bc81a88d0be7dbab33a544240378e649003cf4275a6b7be79612545abe2eccf"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/trajectories.py",
+      "destination": "src/multimodalsrm/bayesian/trajectories.py",
+      "source_sha256": "bac115c91754e639502f6b11e9af886594308c73d63b6ce826e124c057c02d04",
+      "destination_sha256": "49bab87bac83de790ebab9e15cf600addc5199bd88f72f31acc7fb271d10dd84"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/transform.py",
+      "destination": "src/multimodalsrm/bayesian/transform.py",
+      "source_sha256": "0664e3864ec579764a53f9f310e5b7fcf2a32f14a02593115152113a49f1f6ee",
+      "destination_sha256": "c699ad2f2e23ca9ebb34831f60764a170645ab56e36ff23b4e63ae3ee3c8bd3a"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/updated_posterior_persistence.py",
+      "destination": "src/multimodalsrm/bayesian/updated_posterior_persistence.py",
+      "source_sha256": "144cde131514c13bd16214fa69415e1083068c3ea9a652044e62b4f5ddc0b0d5",
+      "destination_sha256": "b2057a4f38d2bf0e4f2a9dbf182cacc9ff658a7a52e1f42afb71df643ca26a9c"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/warmup_checkpoint.py",
+      "destination": "src/multimodalsrm/bayesian/warmup_checkpoint.py",
+      "source_sha256": "b5164089b5a05087d3a35710abd9d2689594d985bd49e2efa42dfa5be38cb81b",
+      "destination_sha256": "2631479feb5816390eee21c04d2ccc56b39f7bced1a1a34756d607729f6a8232"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/bayesian/workflow.py",
+      "destination": "src/multimodalsrm/bayesian/workflow.py",
+      "source_sha256": "f871b3f22a6121fa44cfe01cce06c5a0776b1d86708ea9b1587ac3b198fd6e8e",
+      "destination_sha256": "542ec728d60da9901733e9a5255327f7f5a2311d17296d6e1f11d8b83a839a40"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/calibration.py",
+      "destination": "src/multimodalsrm/calibration.py",
+      "source_sha256": "2cdb8120e2464e336045ef2fd3f7d60b93bad607e9df12e5daf397b7dda29ea0",
+      "destination_sha256": "d50a755dd0178ca8afbe02c41e61b970ef744e631368d73a498d995d73a3003c"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/data.py",
+      "destination": "src/multimodalsrm/data.py",
+      "source_sha256": "885d75b6a487c2d75a5ccbdca6616bd4ff74641235d6422901f95606c75b62af",
+      "destination_sha256": "5a39621cdced26fdb77a2f64a8659dda164081ee1f59a10affe25f06ec06456f"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/estimator.py",
+      "destination": "src/multimodalsrm/estimator.py",
+      "source_sha256": "386c93c8681a4bbfff6514bf1a9ceb39ee79f428ee9cee03701a7ed80ba126c3",
+      "destination_sha256": "08c1420ce60628a265fcf9232b5591018b22c9fc9a47e33e1442e60f23493ef3"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/grouping.py",
+      "destination": "src/multimodalsrm/grouping.py",
+      "source_sha256": "7f58fefae2570abd9b80c3be792536d5db7b0ad36e4687db05a483ab375dd80e",
+      "destination_sha256": "7f58fefae2570abd9b80c3be792536d5db7b0ad36e4687db05a483ab375dd80e"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/inference.py",
+      "destination": "src/multimodalsrm/inference.py",
+      "source_sha256": "6983d9a63a67bda0949f8c73c56552ddde361f95c8da2e2ec7f766692ce5a74b",
+      "destination_sha256": "e8c6701b43562edab20af7a630c0b6f294d50aad409db78672ad4eda2e664adb"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/initialization.py",
+      "destination": "src/multimodalsrm/initialization.py",
+      "source_sha256": "5c901086d07a591e31362664a94ef7a508782bd8b25d2f6e0e88da6b8fc8dd83",
+      "destination_sha256": "1a4cf46e85de2c30b04e0f1a736fe7a5de0049c0ce6ad88a8a6fe1b0985f765e"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/inspection.py",
+      "destination": "src/multimodalsrm/inspection.py",
+      "source_sha256": "e97a3b1773531e8a4a28a41ba9777725f2519467f73ef67436a2fc85a51cd4a6",
+      "destination_sha256": "83a4545db1b756f11d2e1024b1feb747e6cd44630e5d11747eaac0d89b2c7950"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/kernel_optimization.py",
+      "destination": "src/multimodalsrm/kernel_optimization.py",
+      "source_sha256": "5ccf49a117cb8922956c72bb3dd2f63babbe1999cb7c90a6a0d6b703c8ae8aee",
+      "destination_sha256": "cbd4b21281165b032239585d97b89ba3ec51a884ecaa8bca916e2abde33c28c4"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/kernels.py",
+      "destination": "src/multimodalsrm/kernels.py",
+      "source_sha256": "89f690fea3c129109d322ec7cbd227828810e6b7a1adbc7c7453ba6698ebbbf0",
+      "destination_sha256": "3ee12a6b4ec3f1674d61d778c5e6bcdddb69174ea07900f469ab02626b86c67a"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/objective.py",
+      "destination": "src/multimodalsrm/objective.py",
+      "source_sha256": "66fcf3b8e9b10dc6bcd252be9a6215473f7091438d5e3cb7de53ff028922ebf2",
+      "destination_sha256": "8d266e38a20e103a0aaf4208e744f0f7ead1cba213fb787f99c93014299b2138"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/operators.py",
+      "destination": "src/multimodalsrm/operators.py",
+      "source_sha256": "f5194aa3c6d814f971b46eb2a4c171e212710bfbe12a47c66025edff7238541f",
+      "destination_sha256": "db5891d829514f2307483f35b6061606764f519b48ddb2e909dfdb2f41ba41e3"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/optimization.py",
+      "destination": "src/multimodalsrm/optimization.py",
+      "source_sha256": "134a9d659eba42a1505236fa3bf1a8b5baf67b7971e64c48e505da863b66be6f",
+      "destination_sha256": "42475e7e960c74122120709141794817a9b17c2a067e947f1ef37bf8dfacf73e"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/posterior_results.py",
+      "destination": "src/multimodalsrm/posterior_results.py",
+      "source_sha256": "cbe133b744b48faad915b9ec361ef7f8f2a27486adfd91f40f17cb77f76a7653",
+      "destination_sha256": "cbe133b744b48faad915b9ec361ef7f8f2a27486adfd91f40f17cb77f76a7653"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/results.py",
+      "destination": "src/multimodalsrm/results.py",
+      "source_sha256": "4e1496b45a5e5738d0dde34289357de27badedcc8d516a0b58484838a4cf4fdb",
+      "destination_sha256": "cf0fc852d268d7efaf6f974f30d374758d36eb6d54e9b81d7adc46a9dab100f5"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/selection.py",
+      "destination": "src/multimodalsrm/selection.py",
+      "source_sha256": "f3ea659556128c55c64dd2f27b6837a7d480b861ecdf056c900823e7b8e11aba",
+      "destination_sha256": "da7b90bb7571276b3db125d5903fda733049cead2ace9f328e2b86d5ac03a440"
+    },
+    {
+      "source": "src/personalized_srm/multimodal/validation.py",
+      "destination": "src/multimodalsrm/validation.py",
+      "source_sha256": "70b0227037e64ebd2a6cd81bde1c67ca59a3e7e9f796f6acc67d55078a84a08c",
+      "destination_sha256": "f16631538f6e4f014e99ffdda9a500eb49be0b62374a2e8a681999d963103086"
+    }
+  ],
+  "notes": [
+    "Implementation copied byte-for-byte before namespace-specific packaging edits.",
+    "Public root initializer intentionally excludes unrelated legacy model exports.",
+    "No research arrays, fitted archives, Git LFS objects or source history copied."
+  ],
+  "transformations": [
+    "Ruff import ordering and formatting only.",
+    "Optional dependency error strings now name multimodalsrm[bayesian].",
+    "Root initializer and version are package-specific and not direct source copies."
+  ]
+}
