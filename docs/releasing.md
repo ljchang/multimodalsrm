@@ -29,7 +29,7 @@ Create the matching GitHub environments. The workflow uses OIDC with `id-token: 
 
 Publish a GitHub Release for the intended version tag. The Release workflow resolves the tagged commit, checks source readiness/version agreement, builds the distributions once, runs the full suite against those artifacts and uploads those same artifacts to PyPI only after the full workflow succeeds. A main-branch push alone never publishes. Prerelease GitHub Releases can publish genuine prerelease versions to PyPI; reserve manual runs for TestPyPI rehearsal.
 
-Successful registration or CI does not prove an upload succeeded. Verify the published project version and clean installation after the first real deployment. The current scaffold has no model release and intentionally cannot exercise an actual upload yet.
+Successful registration or CI does not prove an upload succeeded. Verify the published project version and clean installation after the first real deployment. The package currently has no published model release. Its development version must be replaced by a reviewed release version before an upload can pass the version gate.
 
 ## Failures
 

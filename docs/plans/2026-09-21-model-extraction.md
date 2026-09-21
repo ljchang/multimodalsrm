@@ -1,3 +1,8 @@
+---
+search:
+  exclude: true
+---
+
 # Model extraction implementation plan
 
 Goal: port the two supported models from merged source commit `67128c7a562cab67499bdc0604357731a628aa9e` into the standalone MIT package, preserving numerical behavior and explicit capability limits.

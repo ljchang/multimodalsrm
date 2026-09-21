@@ -22,3 +22,5 @@ Bayesian tests and examples require the optional Bayesian extra. CI also checks 
 Do not change a statistical target, default, coordinate convention or archive schema as an incidental consequence of packaging work. Explain intentional changes and their validation in the pull request. Preserve target exclusion before preprocessing and participant isolation in independent-run inference. Keep serialization identifiers stable; see [migration](docs/migration.md).
 
 Contributions are made under the repository's MIT license. Retain applicable authorship and third-party notices when transferring code. Report software checks, numerical qualification, fit convergence, uncertainty calibration, response recovery and empirical validity separately. A small synthetic example is not a recovery study.
+
+Documentation lives in `docs/` and is published with Zensical. Install `requirements-docs.txt`, preview with `zensical serve`, and check links with `zensical build --clean --strict`. See the [documentation guide](docs/documentation.md) for navigation and deployment.

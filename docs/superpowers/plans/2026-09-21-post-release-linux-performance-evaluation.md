@@ -1,3 +1,8 @@
+---
+search:
+  exclude: true
+---
+
 # Post-release Linux performance evaluation plan
 
 > **For agentic workers:** Use `superpowers:executing-plans` when the user resumes this evaluation after the release prerequisite is satisfied. This draft authorizes documentation only. Do not start experiments, optimize implementations, access the workstation, or publish a package from this plan alone.

@@ -17,6 +17,7 @@ spec.loader.exec_module(policy)
         ["README.md"],
         ["docs/testing.md", "docs/figures/example.svg", "CHANGELOG.md"],
         ["CONTRIBUTING.md", "docs/nested/guide.rst"],
+        ["zensical.toml", "requirements-docs.txt", "docs/index.md"],
     ],
 )
 def test_prose_and_documentation_assets_are_lightweight(paths):

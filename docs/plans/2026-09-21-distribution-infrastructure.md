@@ -1,3 +1,8 @@
+---
+search:
+  exclude: true
+---
+
 # Distribution infrastructure implementation plan
 
 **Goal:** Establish the public MIT-licensed `ljchang/multimodalsrm` repository with verified packaging, CI and gated TestPyPI/PyPI release workflows.

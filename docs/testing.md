@@ -4,11 +4,11 @@ Routine reviews use the fast `ci.yml` workflow. The complete `full-tests.yml` wo
 
 | Change or event | Checks |
 | --- | --- |
-| Documentation-only PR or main push | Ruff, infrastructure/policy tests, integration metadata, wheel/sdist build and strict Twine checks; no numerical dependencies or model tests |
+| Documentation-only PR or main push | Ruff, infrastructure/policy tests, integration metadata, wheel/sdist build, strict Twine checks and a strict documentation-site build; no numerical dependencies or model tests |
 | Code, tests, examples, dependencies, workflows or mixed changes | All documentation checks, the full core suite and curated Bayesian smoke tests against the built wheel on Linux, plus both quickstarts |
 | Manual full-suite run or release | Complete Linux/macOS core and Bayesian suites and clean wheel/sdist installation checks |
 
-Documentation-only means changes entirely within `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, or recognized prose/image files under `docs/`. Unknown paths, executable documentation, mixed changes and unavailable history receive code checks. The workflow always reports **Required checks**; only documentation profiles may skip its model jobs. New commits cancel superseded fast runs.
+Documentation-only means changes entirely within `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `zensical.toml`, `requirements-docs.txt`, or recognized prose/image files under `docs/`. Unknown paths, executable documentation, mixed changes and unavailable history receive code checks. The workflow always reports **Required checks**; only documentation profiles may skip its model jobs. New commits cancel superseded fast runs.
 
 The Bayesian smoke manifest is `tests/smoke-tests.json`. It exercises likelihood/prior contracts, factorization, response filters, learned GP timescales and a short sampler checkpoint/resume check. It is deliberately limited. For numerical changes, run the affected tests and request the complete suite before merging when broader coverage is needed. Passing fast CI does not imply the full suite passed.
 

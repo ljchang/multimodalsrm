@@ -19,7 +19,7 @@ Use `save_model` and `load_model` from `multimodalsrm.bayesian.workflow`. The JS
 
 Schemas 1 and 2 represent MAP group and MAP participant states; schema 3 represents training posteriors; schema 4 represents updated posterior states. The loader reconstructs a fitted model for prediction/reporting without a new parameter optimization or MCMC run. Saved diagnostics retain their original success, failure or undefined status. The extraction check replayed source-generated synthetic archives for all four schemas under the new namespace, including calibrated predictions and seeded posterior paths. See the [validation record](extraction-validation.json). Successful replay does not requalify the old scientific result under a new runtime.
 
-Keep original archives unchanged. Archives can contain native observations and posterior draws, so store them with the research data rather than committing them to the package. Saving requires a new destination. Preserve any training standardizer with `save_model(..., standardizer=scaler)` and use the restored standardizer consistently. The [MAP quickstart](../examples/gp_map_quickstart.py) performs a synthetic save/load comparison.
+Keep original archives unchanged. Archives can contain native observations and posterior draws, so store them with the research data rather than committing them to the package. Saving requires a new destination. Preserve any training standardizer with `save_model(..., standardizer=scaler)` and use the restored standardizer consistently. The [MAP quickstart](https://github.com/ljchang/multimodalsrm/blob/main/examples/gp_map_quickstart.py) performs a synthetic save/load comparison.
 
 ## R pickle/joblib models
 
