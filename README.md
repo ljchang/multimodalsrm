@@ -54,6 +54,8 @@ Use consistent timestamp units across streams. Separate runs have separate laten
 - [Source integration and provenance](docs/model-integration.md)
 - [CI and test policy](docs/testing.md)
 - [Release setup](docs/releasing.md), [contributing](CONTRIBUTING.md) and [changelog](CHANGELOG.md)
+- [Post-release Linux CPU/GPU evaluation plan](docs/superpowers/plans/2026-09-21-post-release-linux-performance-evaluation.md)
+- [Prior Apple MPS feasibility findings](docs/performance/2026-09-19-apple-mps-feasibility.md)
 
 The development workflow tests installed wheels and source distributions, with separate core and Bayesian suites. See the current CI run and integration record for test evidence. Passing CI does not certify scientific validity or authorize a new release.
 
