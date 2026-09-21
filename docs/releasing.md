@@ -21,13 +21,13 @@ Create the matching GitHub environments. The workflow uses OIDC with `id-token: 
 
 1. Complete the [model handoff](model-integration.md), required suites, clean installed-artifact checks and documentation.
 2. Set the single version in `src/multimodalsrm/_version.py`, for example `0.1.0rc1`, and update the changelog. The version must not be a development or local build.
-3. Commit reviewed changes, let CI pass and create the matching Git tag, for example `v0.1.0rc1`.
-4. Manually run **Release** with that tag. Manual runs publish only to TestPyPI after resolving the tag to one commit and rerunning all applicable CI checks.
+3. Commit reviewed changes, let fast PR CI pass and create the matching Git tag, for example `v0.1.0rc1`. You can also run **Full test suite** manually on a branch before tagging; it does not publish.
+4. Manually run **Release** with that tag. Manual runs publish only to TestPyPI after resolving the tag to one commit and running `full-tests.yml`: the complete Linux/macOS model matrix and installed wheel/sdist checks. Fast PR CI never replaces this release gate.
 5. Install the exact candidate from TestPyPI in a clean environment and exercise its workflows. Resolve dependencies from PyPI separately; avoid allowing TestPyPI to supply arbitrary runtime dependencies. Record the version, artifact hashes and results.
 
 ## Production
 
-Publish a GitHub Release for the intended version tag. The Release workflow resolves the tagged commit, checks source readiness/version agreement, builds the distributions once, tests those artifacts and uploads those same artifacts to PyPI. A main-branch push alone never publishes. Prerelease GitHub Releases can publish genuine prerelease versions to PyPI; reserve manual runs for TestPyPI rehearsal.
+Publish a GitHub Release for the intended version tag. The Release workflow resolves the tagged commit, checks source readiness/version agreement, builds the distributions once, runs the full suite against those artifacts and uploads those same artifacts to PyPI only after the full workflow succeeds. A main-branch push alone never publishes. Prerelease GitHub Releases can publish genuine prerelease versions to PyPI; reserve manual runs for TestPyPI rehearsal.
 
 Successful registration or CI does not prove an upload succeeded. Verify the published project version and clean installation after the first real deployment. The current scaffold has no model release and intentionally cannot exercise an actual upload yet.
 

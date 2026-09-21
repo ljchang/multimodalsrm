@@ -1,0 +1,207 @@
+name: Full test suite
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      source_ref:
+        type: string
+        default: ''
+      release_tag:
+        type: string
+        default: ''
+      require_models:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  infrastructure:
+    name: Infrastructure and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[dev]'
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: python -m pytest -q tests/infrastructure
+
+  integration:
+    name: Model integration status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.status.outputs.ready }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'packaging>=24'
+      - id: status
+        run: python scripts/check_release.py >> "$GITHUB_OUTPUT"
+      - name: Enforce release readiness
+        if: inputs.require_models
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: python scripts/check_release.py --tag "$RELEASE_TAG"
+      - name: Report pending model integration
+        if: steps.status.outputs.ready != 'true'
+        run: echo 'Model suites are pending import. Passing infrastructure CI does not qualify either model; package publishing remains blocked.' >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install build twine
+      - run: python -m build
+      - run: python -m twine check --strict dist/*
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: python-distributions
+          path: dist/*
+          if-no-files-found: error
+
+  installed:
+    name: Installed ${{ matrix.format }} (${{ matrix.os }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        format: [wheel, sdist]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: python-distributions
+          path: dist
+      - name: Install distribution and test outside the checkout
+        env:
+          DIST_FORMAT: ${{ matrix.format }}
+          JAX_ENABLE_X64: 'true'
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: |
+          python -m pip install pytest packaging
+          if [ "$DIST_FORMAT" = wheel ]; then
+            python -m pip install dist/*.whl
+          else
+            python -m pip install dist/*.tar.gz
+          fi
+          python -m pip check
+          cp tests/infrastructure/test_package.py "$RUNNER_TEMP/test_package.py"
+          cp examples/*.py "$RUNNER_TEMP/"
+          cd "$RUNNER_TEMP"
+          python -I -m pytest -q --import-mode=importlib test_package.py
+          python -I r_quickstart.py
+          if [ "$DIST_FORMAT" = wheel ]; then
+            for package in "$GITHUB_WORKSPACE"/dist/*.whl; do python -m pip install "${package}[bayesian]"; done
+          else
+            for package in "$GITHUB_WORKSPACE"/dist/*.tar.gz; do python -m pip install "${package}[bayesian]"; done
+          fi
+          python -m pip check
+          python -I gp_map_quickstart.py
+
+  models:
+    name: Model ${{ matrix.suite }} shard ${{ matrix.shard }} (${{ matrix.os }})
+    needs: [build, integration]
+    if: needs.integration.outputs.ready == 'true'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        suite: [bayesian]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+        include:
+          - {os: ubuntu-latest, suite: core, shard: 0}
+          - {os: ubuntu-latest, suite: core, shard: 1}
+          - {os: macos-latest, suite: core, shard: 0}
+          - {os: macos-latest, suite: core, shard: 1}
+    env:
+      JAX_ENABLE_X64: 'true'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: python-distributions
+          path: dist
+      - name: Install and run integrated model suite
+        env:
+          MODEL_SUITE: ${{ matrix.suite }}
+          MODEL_SHARD: ${{ matrix.shard }}
+        run: |
+          for wheel in dist/*.whl; do
+            if [ "$MODEL_SUITE" = bayesian ]; then
+              python -m pip install "${wheel}[test,bayesian]"
+            else
+              python -m pip install "${wheel}[test]"
+            fi
+          done
+          python -m pip check
+          if [ "$MODEL_SUITE" = bayesian ]; then count=8; else count=2; fi
+          python scripts/run_model_tests.py "$MODEL_SUITE" --shard "$MODEL_SHARD" --count "$count"
+
+  required:
+    name: Full suite required checks
+    if: always()
+    needs: [infrastructure, integration, build, installed, models]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      INFRASTRUCTURE: ${{ needs.infrastructure.result }}
+      INTEGRATION: ${{ needs.integration.result }}
+      BUILD: ${{ needs.build.result }}
+      INSTALLED: ${{ needs.installed.result }}
+      MODELS: ${{ needs.models.result }}
+      READY: ${{ needs.integration.outputs.ready }}
+    steps:
+      - name: Require every applicable check
+        run: |
+          test "$INFRASTRUCTURE" = success
+          test "$INTEGRATION" = success
+          test "$BUILD" = success
+          test "$INSTALLED" = success
+          if [ "$READY" = true ]; then
+            test "$MODELS" = success
+          else
+            test "$MODELS" = skipped
+          fi

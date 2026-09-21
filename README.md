@@ -57,7 +57,7 @@ Use consistent timestamp units across streams. Separate runs have separate laten
 - [Post-release Linux CPU/GPU evaluation plan](docs/superpowers/plans/2026-09-21-post-release-linux-performance-evaluation.md)
 - [Prior Apple MPS feasibility findings](docs/performance/2026-09-19-apple-mps-feasibility.md)
 
-The development workflow tests installed wheels and source distributions, with separate core and Bayesian suites. See the current CI run and integration record for test evidence. Passing CI does not certify scientific validity or authorize a new release.
+Routine PR checks use documentation-only checks or Linux core regressions and Bayesian smoke tests, depending on the changed files. The full Linux/macOS suites and wheel/source-distribution checks run on request and before every release. See the [test policy](docs/testing.md) and current CI run for coverage and evidence. Passing CI does not certify scientific validity or authorize a new release.
 
 ## License and citation
 
