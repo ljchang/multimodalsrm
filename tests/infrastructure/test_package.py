@@ -23,6 +23,11 @@ def test_import_does_not_load_optional_or_legacy_backends():
             "-I",
             "-c",
             "import sys; import multimodalsrm; "
+            "from multimodalsrm import MultimodalSRM, TimeSeries, Response; "
+            "from multimodalsrm.bayesian import BayesianMultimodalSRM; "
+            "assert MultimodalSRM.__module__ == 'multimodalsrm.estimator'; "
+            "assert BayesianMultimodalSRM.__module__ == 'multimodalsrm.bayesian.model'; "
+            "assert not any(n.startswith('personalized_srm') for n in sys.modules); "
             "assert not {'jax', 'numpyro', 'arviz', 'nltools', 'torch'} & sys.modules.keys()",
         ],
         text=True,
