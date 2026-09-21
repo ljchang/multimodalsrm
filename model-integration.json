@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "status": "awaiting-model-import",
+  "source_repository": "https://github.com/ljchang/shared-response-models",
+  "source_commit": null,
+  "test_suites": {
+    "core": [],
+    "bayesian": []
+  }
+}

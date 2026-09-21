@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, cite this repository and the exact version or commit."
+title: MultimodalSRM
+type: software
+authors:
+  - family-names: Chang
+    given-names: Luke J.
+repository-code: https://github.com/ljchang/multimodalsrm
+url: https://github.com/ljchang/multimodalsrm
+license: MIT
+abstract: >-
+Distribution infrastructure for regularized and Gaussian-process shared response
+models with native-time multimodal observations. Model integration is pending.
