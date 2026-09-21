@@ -27,7 +27,7 @@ A learned `length_scale` uses a bounded physical `Prior` with finite, strictly p
 
 R `predict(data, targets=..., source=...)` excludes all named target payloads before preparation. Its `source` selects within-participant, across-participant or combined observations. R fitting estimates preprocessing from training data and reuses it for new-run predictions.
 
-For GP MAP, `condition(donors, targets=..., mode="frozen")` conditions new runs while holding training MAP parameters fixed. Its uncertainty is conditional on that MAP, not parameter-posterior uncertainty. The small [GP example](../examples/gp_map_quickstart.py) demonstrates this route. GP uses supplied observation units; if using `TrainingStandardizer`, fit it on training observations only, exclude held-out targets before transforming donors, and save it with the model.
+For GP MAP, `condition(donors, targets=..., mode="frozen")` conditions new runs while holding training MAP parameters fixed. Its uncertainty is conditional on that MAP, not parameter-posterior uncertainty. The small [GP example](https://github.com/ljchang/multimodalsrm/blob/main/examples/gp_map_quickstart.py) demonstrates this route. GP uses supplied observation units; if using `TrainingStandardizer`, fit it on training observations only, exclude held-out targets before transforming donors, and save it with the model.
 
 For a full supported GP posterior:
 

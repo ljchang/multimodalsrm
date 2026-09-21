@@ -21,3 +21,5 @@ local_data/
 *.nii
 *.nii.gz
 .env
+site/
+.cache/

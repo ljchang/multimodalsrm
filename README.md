@@ -49,7 +49,9 @@ Use consistent timestamp units across streams. Separate runs have separate laten
 
 ## Documentation and development
 
+- [Documentation overview](docs/index.md), [installation](docs/getting-started.md), and [model concepts](docs/concepts.md)
 - [Tutorials](docs/tutorials.md) and [capabilities](docs/capabilities.md)
+- [Preview and contribute to the Zensical site](docs/documentation.md)
 - [Migration and archive compatibility](docs/migration.md)
 - [Source integration and provenance](docs/model-integration.md)
 - [CI and test policy](docs/testing.md)

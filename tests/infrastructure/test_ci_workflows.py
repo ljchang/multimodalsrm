@@ -49,3 +49,25 @@ def test_fast_workflow_has_stable_gate_and_no_top_level_path_skip():
     for name in ("core", "bayesian"):
         assert fast["jobs"][name]["if"] == "needs.quality.outputs.profile == 'code'"
     assert "--smoke" in fast["jobs"]["bayesian"]["steps"][-1]["run"]
+
+
+def test_required_quality_job_builds_documentation_strictly():
+    steps = workflow("ci.yml")["jobs"]["quality"]["steps"]
+    commands = [step.get("run", "") for step in steps]
+    assert "python -m pip install -r requirements-docs.txt" in commands
+    assert "zensical build --clean --strict" in commands
+
+
+def test_pages_deployment_is_main_only_with_scoped_permissions():
+    docs = workflow("docs.yml")
+    assert set(docs["on"]) == {"push", "workflow_dispatch"}
+    assert docs["on"]["push"]["branches"] == ["main"]
+    assert docs["permissions"] == {"contents": "read"}
+    build, deploy = docs["jobs"]["build"], docs["jobs"]["deploy"]
+    for job in (build, deploy):
+        assert job["if"] == "github.ref == 'refs/heads/main'"
+    assert deploy["needs"] == "build"
+    assert deploy["permissions"] == {"pages": "write", "id-token": "write"}
+    assert deploy["environment"]["name"] == "github-pages"
+    assert any(step.get("run") == "zensical build --clean --strict" for step in build["steps"])
+    assert build["steps"][-1]["with"]["path"] == "site"

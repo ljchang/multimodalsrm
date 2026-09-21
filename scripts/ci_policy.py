@@ -7,7 +7,13 @@ import re
 import subprocess
 from pathlib import Path, PurePosixPath
 
-ROOT_DOCS = {"README.md", "CHANGELOG.md", "CONTRIBUTING.md"}
+ROOT_DOCS = {
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "zensical.toml",
+    "requirements-docs.txt",
+}
 DOC_SUFFIXES = {".md", ".rst", ".txt", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
 
 

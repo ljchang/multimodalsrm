@@ -1,6 +1,6 @@
 # Runnable synthetic tutorials
 
-Install the package from this checkout as described in the [README](../README.md), then run the scripts below. They use fixed random seeds and small generated observations; no research data or external downloads are needed.
+Install the package from this checkout as described in the [installation guide](getting-started.md), then run the scripts below. They use fixed random seeds and small generated observations; no research data or external downloads are needed.
 
 ## R-MSRM: fit and held-out prediction
 
@@ -8,7 +8,7 @@ Install the package from this checkout as described in the [README](../README.md
 python examples/r_quickstart.py
 ```
 
-The [R example](../examples/r_quickstart.py) generates two participants and two training runs with unequal brain/rating clocks. It fits one exact shared latent response per run, uses an Identity reference, and estimates Gaussian lag with width fixed via `estimate=True, fixed={"width": 0.3}`. A new run is used for target-excluded prediction and latent inference. It also calibrates a newcomer from a separate recording with fitted donors, then predicts that participant's independent next run.
+The [R example](https://github.com/ljchang/multimodalsrm/blob/main/examples/r_quickstart.py) generates two participants and two training runs with unequal brain/rating clocks. It fits one exact shared latent response per run, uses an Identity reference, and estimates Gaussian lag with width fixed via `estimate=True, fixed={"width": 0.3}`. A new run is used for target-excluded prediction and latent inference. It also calibrates a newcomer from a separate recording with fitted donors, then predicts that participant's independent next run.
 
 The script prints shapes, valid observation counts, fitted response parameters and convergence status. Target observations are present in the synthetic input to demonstrate the API's explicit exclusion rule; they do not inform their predictions. R preprocessing is learned during fitting and reused. Inspect validity masks, especially near response-support boundaries. This is an API example, not a timing/filter recovery experiment or a general convergence guarantee.
 
@@ -19,7 +19,7 @@ python -m pip install -e '.[bayesian]'
 JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python examples/gp_map_quickstart.py
 ```
 
-The [GP example](../examples/gp_map_quickstart.py) creates two native-rate modalities for two participants, fits grouped MAP with a fixed-width/estimated-lag Gaussian response, and conditions a distinct new run with frozen training MAP parameters. It saves the model to a temporary archive, reloads it and checks that predictions and validity masks agree. The archive is removed automatically after the demonstration. Change the destination to a new persistent directory for a real analysis.
+The [GP example](https://github.com/ljchang/multimodalsrm/blob/main/examples/gp_map_quickstart.py) creates two native-rate modalities for two participants, fits grouped MAP with a fixed-width/estimated-lag Gaussian response, and conditions a distinct new run with frozen training MAP parameters. It saves the model to a temporary archive, reloads it and checks that predictions and validity masks agree. The archive is removed automatically after the demonstration. Change the destination to a new persistent directory for a real analysis.
 
 The script prints MAP diagnostics. Its conditional Gaussian prediction uncertainty excludes parameter-posterior uncertainty; no MCMC is run. It works in supplied observation units without a learned external standardizer. The Bayesian runtime must enable float64 before fitting. These small examples check usage and replay, not physiological recovery or interval coverage.
 

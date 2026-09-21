@@ -1,0 +1,2 @@
+# Keep documentation builds independent of the numerical model dependencies.
+zensical==0.0.63

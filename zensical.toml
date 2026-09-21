@@ -1,0 +1,68 @@
+[project]
+site_name = "MultimodalSRM"
+site_description = "Shared response models across people, modalities, and native sampling times."
+site_url = "https://ljchang.github.io/multimodalsrm/"
+site_author = "Luke J. Chang"
+repo_url = "https://github.com/ljchang/multimodalsrm"
+repo_name = "ljchang/multimodalsrm"
+edit_uri = "edit/main/docs/"
+docs_dir = "docs"
+site_dir = "site"
+strict = true
+nav = [
+  { "Home" = "index.md" },
+  { "Get started" = [
+    { "Installation" = "getting-started.md" },
+    { "Prepare your data" = "data.md" },
+    { "Run the tutorials" = "tutorials.md" },
+  ] },
+  { "Models" = [
+    { "How the models work" = "concepts.md" },
+    { "Capabilities and diagnostics" = "capabilities.md" },
+    { "Migration and saved models" = "migration.md" },
+  ] },
+  { "Development" = [
+    { "Contribute to the docs" = "documentation.md" },
+    { "Testing" = "testing.md" },
+    { "Releases" = "releasing.md" },
+    { "Integration and provenance" = "model-integration.md" },
+  ] },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.action.edit", "content.action.view", "content.code.copy",
+  "navigation.tabs", "navigation.sections", "navigation.path",
+  "navigation.footer", "navigation.top", "search.highlight", "toc.follow",
+]
+
+[project.theme.font]
+text = "Inter"
+code = "JetBrains Mono"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "teal"
+accent = "teal"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "teal"
+accent = "teal"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to light mode"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.details = {}
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.superfences = {}
