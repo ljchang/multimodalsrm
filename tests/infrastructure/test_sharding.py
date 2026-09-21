@@ -1,6 +1,7 @@
 """Every test file must belong to exactly one nonempty CI shard."""
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -34,3 +35,31 @@ def test_invalid_shard_rejected(tmp_path, shard, count):
 def test_empty_shard_rejected(tmp_path):
     with pytest.raises(ValueError, match="Empty"):
         module.select_files(tmp_path, 0, 1)
+
+
+def test_smoke_manifest_selects_existing_cases_in_the_correct_suite(tmp_path):
+    directory = tmp_path / "tests/bayesian"
+    directory.mkdir(parents=True)
+    (directory / "test_model.py").touch()
+    manifest = tmp_path / "tests/smoke-tests.json"
+    manifest.write_text(json.dumps({"bayesian": ["tests/bayesian/test_model.py::test_fit"]}))
+    assert module.select_smoke(tmp_path, "bayesian") == [
+        str(directory / "test_model.py") + "::test_fit"
+    ]
+
+
+@pytest.mark.parametrize(
+    "cases",
+    [
+        [],
+        ["tests/bayesian/test_missing.py"],
+        ["tests/core/test_other.py"],
+        ["../test_outside.py"],
+        [42],
+    ],
+)
+def test_invalid_smoke_manifest_is_rejected(tmp_path, cases):
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests/smoke-tests.json").write_text(json.dumps({"bayesian": cases}))
+    with pytest.raises(ValueError):
+        module.select_smoke(tmp_path, "bayesian")

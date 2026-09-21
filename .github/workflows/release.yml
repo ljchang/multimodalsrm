@@ -45,7 +45,7 @@ jobs:
   verify:
     name: Verify release distributions
     needs: resolve
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/full-tests.yml
     with:
       source_ref: ${{ needs.resolve.outputs.sha }}
       release_tag: ${{ needs.resolve.outputs.tag }}

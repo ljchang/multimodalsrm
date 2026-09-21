@@ -8,12 +8,14 @@ Use Python 3.12 or later and an isolated environment. Install the base developme
 ruff check .
 ruff format --check .
 python -m pytest tests/infrastructure tests/core
-JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python -m pytest tests/bayesian
+JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python scripts/run_model_tests.py bayesian --smoke
 python examples/r_quickstart.py
 JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python examples/gp_map_quickstart.py
 python -m build
 python -m twine check --strict dist/*
 ```
+
+For documentation-only edits, lint, infrastructure checks and a package build are sufficient. Code PRs run the full core suite and Bayesian smoke tests on Linux. Bayesian changes should also run the affected tests; request **Full test suite** in GitHub Actions for broader numerical or platform coverage before merging. Every release must pass that complete suite, including Linux/macOS and installed wheels/source distributions. See the [test policy](docs/testing.md) for routing rules and full-suite commands.
 
 Bayesian tests and examples require the optional Bayesian extra. CI also checks installed artifacts. Validate workflow edits with `actionlint` when available. Tests should exercise observable behavior using synthetic data. Do not commit participant observations, fitted states, private data paths or research archive payloads. Keep the base package import independent of optional Bayesian/plotting backends and legacy comparator dependencies.
 

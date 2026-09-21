@@ -32,7 +32,7 @@ plots = ["matplotlib>=3.8"]
 test = ["pytest>=9", "packaging>=24", "matplotlib>=3.8", "psutil>=5.9"]
 dev = [
   "pytest>=9", "packaging>=24", "matplotlib>=3.8", "psutil>=5.9",
-  "ruff>=0.11", "build>=1.2", "twine>=6",
+  "ruff>=0.11", "build>=1.2", "twine>=6", "PyYAML>=6",
 ]
 
 [project.urls]

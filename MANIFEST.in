@@ -5,4 +5,5 @@ recursive-include docs *.json
 recursive-include examples *.py
 recursive-include scripts *.py
 recursive-include tests *.py
+recursive-include tests *.json
 global-exclude __pycache__ *.py[cod] .DS_Store
