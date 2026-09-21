@@ -39,6 +39,8 @@ Current usable import: `from multimodalsrm import __version__`. Model classes ar
 - [CI and test policy](docs/testing.md)
 - [Release and Trusted Publisher setup](docs/releasing.md)
 - [Tutorial scope](docs/tutorials.md)
+- [Post-release Linux CPU/GPU evaluation plan](docs/superpowers/plans/2026-09-21-post-release-linux-performance-evaluation.md)
+- [Prior Apple MPS feasibility findings](docs/performance/2026-09-19-apple-mps-feasibility.md)
 - [Contributing](CONTRIBUTING.md) and [changelog](CHANGELOG.md)
 
 CI builds a wheel and source distribution and tests both installed artifacts on Linux and macOS. After model integration, core and Bayesian suites run separately on both platforms. PyPI publication uses a versioned GitHub Release; manual release workflow runs target TestPyPI. Neither route can publish the scaffold.
