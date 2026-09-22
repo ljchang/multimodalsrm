@@ -1,4 +1,4 @@
-"""Fast-tail Bach full inference against refined finite-response quadrature.
+"""Fast-tail Bateman full inference against refined finite-response quadrature.
 
 Independent finite convolutions generate data; this is a numerical backend
 qualification, not a timing-recovery or general canonical-SCR accuracy claim.
@@ -10,14 +10,14 @@ from numpy.testing import assert_allclose, assert_array_equal
 from scipy.integrate import quad
 from sklearn.base import clone
 
-from multimodalsrm import BachSCR, Identity, Response, TimeSeries
+from multimodalsrm import BatemanSCR, Identity, Response, TimeSeries
 
 from .test_bayesian_problem import api
 
 
-def bach_fixture(learned_lag=True):
+def bateman_fixture(learned_lag=True):
     b = api()
-    kernel = BachSCR(lambda2=0.25, lag=0.3)
+    kernel = BatemanSCR(rise=0.7, decay=2.0, lag=0.3)
     response = (
         Response.lag_only(kernel, bounds={"lag": (-0.4, 0.8)}, pooling="shared")
         if learned_lag
@@ -67,7 +67,6 @@ def bach_fixture(learned_lag=True):
                             lambda u: float(kernel(u)) * latent(t - u),
                             *kernel.support,
                             epsabs=1e-11,
-                            points=[kernel.lag + kernel.t0],
                         )[0]
                         for t in clock
                     ]
@@ -82,11 +81,11 @@ def bach_fixture(learned_lag=True):
 
 
 @pytest.mark.parametrize("learned_lag", [False, True], ids=["fixed", "lag-only"])
-def test_bach_objective_physical_gradient_and_posterior_refined_oracle(learned_lag, monkeypatch):
+def test_bateman_objective_physical_gradient_and_posterior_refined_oracle(learned_lag, monkeypatch):
     from multimodalsrm.bayesian.persistence import _prepare
     from multimodalsrm.bayesian.prediction import project
 
-    model, data = bach_fixture(learned_lag)
+    model, data = bateman_fixture(learned_lag)
     _, state = _prepare(model, data)
     references = []
     for order in [192, 384]:
@@ -125,7 +124,7 @@ def test_bach_objective_physical_gradient_and_posterior_refined_oracle(learned_l
         assert_allclose(actual, expected, atol=5e-6, rtol=0)
 
     def unavailable(*args, **kwargs):
-        raise AssertionError("dense fallback during Bach state inference")
+        raise AssertionError("dense fallback during Bateman state inference")
 
     monkeypatch.setattr(state, "covariance", unavailable)
     monkeypatch.setattr(state, "temporal_covariance", unavailable)
@@ -133,10 +132,10 @@ def test_bach_objective_physical_gradient_and_posterior_refined_oracle(learned_l
     assert np.isfinite(project(state, x[None], "train", query, key=None, include_noise=False)).all()
 
 
-def test_bach_public_fit_condition_target_exclusion_and_archive(tmp_path):
+def test_bateman_public_fit_condition_target_exclusion_and_archive(tmp_path):
     from multimodalsrm.bayesian.workflow import load_model, save_model
 
-    state, data = bach_fixture()
+    state, data = bateman_fixture()
     grouped = clone(state).set_params(linear_algebra="grouped", response_quadrature_order=384)
     state.fit(data)
     grouped.fit(data)
@@ -160,18 +159,15 @@ def test_bach_public_fit_condition_target_exclusion_and_archive(tmp_path):
     actual, expected = prediction(state), prediction(grouped)
     assert_allclose(actual.values, expected.values, atol=4e-4, rtol=0)
     assert_allclose(actual.variance, expected.variance, atol=4e-4, rtol=0)
-    assert (
-        actual.metadata["covariance_approximation"]["bach_supported_learning"]
-        == "additional_lag_only_fixed_shape"
-    )
+    assert actual.metadata["covariance_approximation"]["scr_supported_learning"] == "rise_decay_lag"
     parameters = state.map_parameters_.copy()
     donors["b"]["held"]["signal"] = object()
     poisoned = prediction(state)
     assert_array_equal(poisoned.values, actual.values)
     assert_array_equal(poisoned.variance, actual.variance)
     assert_array_equal(state.map_parameters_, parameters)
-    save_model(tmp_path / "bach", state)
-    restored, _ = load_model(tmp_path / "bach")
+    save_model(tmp_path / "bateman", state)
+    restored, _ = load_model(tmp_path / "bateman")
     assert restored.configuration_ == state.configuration_
     assert_array_equal(restored.map_parameters_, parameters)
     assert_array_equal(restored.relative_lag_draws()["signal"], [[physical_lag]])

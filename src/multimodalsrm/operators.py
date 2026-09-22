@@ -13,7 +13,6 @@ from scipy.special import ndtr
 
 from .data import validate_times
 from .kernels import (
-    BachSCR,
     BatemanSCR,
     DoubleGamma,
     Gamma,
@@ -161,8 +160,6 @@ def observation_operator(grid, times, kernel, support=None):
         resolution = kernel.scale / 2
     elif isinstance(kernel, DoubleGamma):
         resolution = min(kernel.peak_scale, kernel.undershoot_scale) / 2
-    elif isinstance(kernel, BachSCR):
-        resolution = kernel.sigma / 2
     else:
         resolution = None
     shape_knots = (

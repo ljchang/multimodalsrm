@@ -7,9 +7,9 @@ from itertools import combinations
 import numpy as np
 from scipy.optimize import brentq, minimize_scalar
 
-from ..kernels import BachSCR, BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
+from ..kernels import BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
 
-FAMILIES = {k.__name__: k for k in (Identity, Gaussian, Gamma, DoubleGamma, BachSCR, BatemanSCR)}
+FAMILIES = {k.__name__: k for k in (Identity, Gaussian, Gamma, DoubleGamma, BatemanSCR)}
 
 
 def structured_shape(kernel, reference_lag):

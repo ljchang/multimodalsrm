@@ -1,4 +1,4 @@
-"""BachSCR posteriors use the same finite, L2-normalized response as MAP."""
+"""BatemanSCR posteriors use the same finite, L2-normalized response as MAP."""
 
 import copy
 import warnings
@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
-from multimodalsrm import BachSCR, Identity, Response, TimeSeries
+from multimodalsrm import BatemanSCR, Identity, Response, TimeSeries
 from multimodalsrm.bayesian import BayesianPriors, BayesianProblem, Prior
 from multimodalsrm.bayesian.persistence import _prepare
 
@@ -22,14 +22,14 @@ from .test_bayesian_gamma_posterior import (
 SCR_ELL_PRIOR = Prior.lognormal(np.log(3.0), 0.35).bounded(1.0, 6.0)
 
 
-def bach_fixture(k=3, *, mode="shape_lag", learned=True, order=64):
+def bateman_fixture(k=3, *, mode="shape_lag", learned=True, order=64):
     model, data = gamma_fixture(k, learned=False, order=order)
-    kernel = BachSCR(lag=0.1)
+    kernel = BatemanSCR(rise=0.7, decay=2.0, lag=0.1)
     fixed = {
         "fixed": kernel.parameters,
         "lag": {n: v for n, v in kernel.parameters.items() if n != "lag"},
-        "shape_lag": {"t0": kernel.t0},
-        "shape_t0": {"lag": kernel.lag},
+        "shape_lag": {},
+        "shape": {"lag": kernel.lag},
     }[mode]
     response = Response(
         kernel,
@@ -37,10 +37,8 @@ def bach_fixture(k=3, *, mode="shape_lag", learned=True, order=64):
         fixed=fixed,
         pooling="shared",
         bounds={
-            "t0": (2.5, 3.5),
-            "sigma": (0.5, 0.9),
-            "lambda1": (0.26, 0.38),
-            "lambda2": (0.055, 0.085),
+            "rise": (0.4, 1.2),
+            "decay": (1.5, 3.0),
             "lag": (-0.1, 0.3),
         },
     )
@@ -66,8 +64,8 @@ def bach_fixture(k=3, *, mode="shape_lag", learned=True, order=64):
     return model, data
 
 
-def prepared_bach(*args, **kw):
-    model, data = bach_fixture(*args, **kw)
+def prepared_bateman(*args, **kw):
+    model, data = bateman_fixture(*args, **kw)
     model._config()
     model.adapter_, model.problem_ = _prepare(model, data)
     p = model.problem_
@@ -81,10 +79,10 @@ def prepared_bach(*args, **kw):
     return model, p, x, data
 
 
-@pytest.mark.parametrize("mode", ["fixed", "lag", "shape_lag", "shape_t0"])
+@pytest.mark.parametrize("mode", ["fixed", "lag", "shape_lag", "shape"])
 @pytest.mark.parametrize("learned", [False, True])
-def test_bach_posterior_preserves_map_likelihood_prior_and_parameter_selection(mode, learned):
-    model, p, x, data = prepared_bach(mode=mode, learned=learned)
+def test_bateman_posterior_preserves_map_likelihood_prior_and_parameter_selection(mode, learned):
+    model, p, x, data = prepared_bateman(mode=mode, learned=learned)
     map_model = copy.deepcopy(model).set_params(inference="map")
     map_model._config()
     _, pm = _prepare(map_model, data)
@@ -99,33 +97,27 @@ def test_bach_posterior_preserves_map_likelihood_prior_and_parameter_selection(m
     assert {n[2] for n in p.names if n[0] == "filter"} == free
 
 
-def test_bach_requires_explicit_quadrature_and_identifiable_timing_selection():
-    model, data = bach_fixture(learned=False, order=None)
+def test_bateman_requires_explicit_quadrature():
+    model, data = bateman_fixture(learned=False, order=None)
     with pytest.raises(ValueError, match="quadrature"):
         model._config()
-    model.response_quadrature_order = 32
-    with pytest.warns(UserWarning, match="timing-confounded"):
-        model.responses["signal"] = Response(BachSCR(), estimate=True, pooling="shared")
-    model.priors.filters["signal"]["t0"] = Prior.normal(3.0745, 0.3)
-    with pytest.raises(ValueError, match="fix BachSCR t0"):
-        _prepare(model, data)
 
 
-def test_bach_stability_guard_uses_lower_gp_prior_bound():
-    model, data = bach_fixture()
+def test_bateman_stability_guard_uses_lower_gp_prior_bound():
+    model, data = bateman_fixture()
     model.length_scale = Prior.lognormal(np.log(3), 0.2).bounded(0.1, 6)
     with pytest.raises(ValueError, match="support/GP timescale"):
         _prepare(model, data)
 
 
-@pytest.mark.parametrize("mode", ["shape_lag", "shape_t0"])
-def test_bach_shapes_timescale_and_gradients_match_physical_response(mode):
-    _, p, x, _ = prepared_bach(mode=mode, order=256)
+@pytest.mark.parametrize("mode", ["shape_lag", "shape"])
+def test_bateman_shapes_timescale_and_gradients_match_physical_response(mode):
+    _, p, x, _ = prepared_bateman(mode=mode, order=256)
     for fraction, crossed in ((0.05, False), (0.95, False), (0.05, True), (0.95, True)):
         for i, n in enumerate(p.names):
             if n[0] in ("filter", "gp"):
                 lo, hi = p.bounds[i]
-                f = 1 - fraction if crossed and n[-1] in ("sigma", "lambda1") else fraction
+                f = 1 - fraction if crossed and n[-1] in ("rise",) else fraction
                 x[i] = lo + f * (hi - lo)
         k = reference_kernel(p, x, 1)
         u, coeff = map(np.asarray, p.response_quadrature.nodes(x, 1))
@@ -154,14 +146,14 @@ def test_bach_shapes_timescale_and_gradients_match_physical_response(mode):
 
 
 @pytest.mark.parametrize("k", [3, 5])
-def test_bach_multicomponent_density_joint_moments_and_haar(k):
+def test_bateman_multicomponent_density_joint_moments_and_haar(k):
     from multimodalsrm.bayesian.blocks import ParameterSubspace
     from multimodalsrm.bayesian.orthogonal import (
         validate_orthogonal_target,
     )
     from multimodalsrm.bayesian.trajectories import joint_moments
 
-    _, p, x, _ = prepared_bach(k, order=128)
+    _, p, x, _ = prepared_bateman(k, order=128)
     times = np.array([96.0, 99.0])
     nll, mean, cov = reference_moments(p, x, "train", times, order=1024)
     actual_mean, actual_cov = joint_moments(p, "train", times)(x, np.eye(k))
@@ -188,9 +180,9 @@ def test_bach_multicomponent_density_joint_moments_and_haar(k):
 
 
 @pytest.fixture(scope="module")
-def bach_workflow():
+def bateman_workflow():
     # Deliberately tiny execution test; never interpreted as convergence evidence.
-    model, data = bach_fixture(5, order=16)
+    model, data = bateman_fixture(5, order=16)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         model.fit(data)
@@ -207,7 +199,9 @@ def bach_workflow():
 
 
 @pytest.mark.parametrize("kind", ["training", "donor", "calibration", "participant"])
-def test_bach_public_workflow_archives_and_joint_paths(bach_workflow, kind, tmp_path, monkeypatch):
+def test_bateman_public_workflow_archives_and_joint_paths(
+    bateman_workflow, kind, tmp_path, monkeypatch
+):
     from scipy.stats import multivariate_normal
 
     from multimodalsrm.bayesian import _archive, workflow
@@ -215,7 +209,7 @@ def test_bach_public_workflow_archives_and_joint_paths(bach_workflow, kind, tmp_
     from .test_bayesian_multifactor import log_prior
     from .test_bayesian_persistence import assert_result_equal, forbid_inference_fitting
 
-    model = bach_workflow[kind]
+    model = bateman_workflow[kind]
     p = model.problem_
     x = model.map_parameters_
     assert p.names.count(ELL) == 1
@@ -258,18 +252,18 @@ def test_bach_public_workflow_archives_and_joint_paths(bach_workflow, kind, tmp_
                 assert_result_equal(actual[s][r][m], v)
 
 
-def test_bach_workflow_rejects_mutated_scr_quadrature(bach_workflow, tmp_path):
+def test_bateman_workflow_rejects_mutated_scr_quadrature(bateman_workflow, tmp_path):
     from multimodalsrm.bayesian import workflow
 
-    for kind, model in bach_workflow.items():
+    for kind, model in bateman_workflow.items():
         bad = copy.deepcopy(model)
         bad.problem_.response_quadrature.scr_rule[1][0] *= 2
         with pytest.raises(ValueError, match="quadrature|likelihood|target"):
             workflow.save_model(tmp_path / kind, bad)
 
 
-def test_scalar_fixed_bach_posterior_and_donor_dispatch():
-    model, data = bach_fixture(1, mode="fixed", learned=False, order=16)
+def test_scalar_fixed_bateman_posterior_and_donor_dispatch():
+    model, data = bateman_fixture(1, mode="fixed", learned=False, order=16)
     model.linear_algebra = "dense"
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

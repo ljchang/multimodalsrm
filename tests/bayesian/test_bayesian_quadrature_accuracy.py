@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from scipy.integrate import quad
 
-from multimodalsrm import BachSCR, Response
+from multimodalsrm import BatemanSCR, Response
 
 from .test_bayesian_problem import api
 
@@ -18,7 +18,7 @@ def test_high_order_scr_noise_score_matches_independent_integration():
         ResponseQuadrature,
     )
 
-    kernel = BachSCR(lambda2=0.06)
+    kernel = BatemanSCR(rise=0.7, decay=1 / 0.06)
     response = Response(kernel, estimate=False, pooling="shared")
     times = np.array([0.0, 0.1])
     residual = np.array([0.2, -0.2])

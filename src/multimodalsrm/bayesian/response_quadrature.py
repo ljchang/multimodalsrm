@@ -10,10 +10,10 @@ from functools import lru_cache
 import numpy as np
 
 from .. import _bateman
-from ..kernels import BachSCR, BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
+from ..kernels import BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
 from ._backend import runtime
 
-FAMILIES = (Identity, Gaussian, Gamma, DoubleGamma, BachSCR, BatemanSCR)
+FAMILIES = (Identity, Gaussian, Gamma, DoubleGamma, BatemanSCR)
 
 
 def validate_order(order):
@@ -104,16 +104,6 @@ class ResponseQuadrature:
             kernel = response.initial_kernel()
             if type(kernel) not in FAMILIES:
                 raise ValueError("unsupported quadrature response family")
-            if type(kernel) is BachSCR and {"t0", "lag"} <= set(response.free_parameters):
-                raise ValueError("fix BachSCR t0 when learning lag")
-            if type(kernel) is BachSCR:
-                t0_max = (
-                    response.parameter_bounds()["t0"][1]
-                    if "t0" in response.free_parameters
-                    else kernel.t0
-                )
-                if t0_max >= 90:
-                    raise ValueError("BachSCR t0 must remain below its 90-second support")
             if type(kernel) is DoubleGamma:
                 bounds = response.parameter_bounds()
 
@@ -183,28 +173,9 @@ class ResponseQuadrature:
                 if type(kernel) is Gamma
                 else component("peak_", u) - p["undershoot_ratio"] * component("undershoot_", u)
             )
-        elif type(kernel) is BatemanSCR:
+        else:  # BatemanSCR; supported families were validated at construction.
             u, q = map(jnp.asarray, self.scr_rule)
             raw = _bateman.raw(u, p["rise"], p["decay"], jnp)
-        else:
-            u, q = map(jnp.asarray, self.scr_rule)
-            log_components = []
-            for key in ("lambda1", "lambda2"):
-                rate = p[key]
-                center = p["t0"] + rate * p["sigma"] ** 2
-                low, high = -center / p["sigma"], (u - center) / p["sigma"]
-                # log-CDF subtraction avoids overflow in broad/fast-decay shapes.
-                log_hi, log_lo = jsp.special.log_ndtr(high), jsp.special.log_ndtr(low)
-                difference = -jnp.expm1(log_lo - log_hi)
-                log_components.append(
-                    -rate * u
-                    + rate * p["t0"]
-                    + 0.5 * (rate * p["sigma"]) ** 2
-                    + log_hi
-                    + jnp.log(difference)
-                )
-            log_raw = jsp.special.logsumexp(jnp.stack(log_components), axis=0)
-            raw = jnp.exp(log_raw - jnp.max(log_raw))
         coefficients = q * raw / jnp.sqrt(jnp.sum(q * raw**2))
         return u + p["lag"], coefficients
 

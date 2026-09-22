@@ -25,8 +25,8 @@ model = BayesianMultimodalSRM(
 
 The noise prior describes observation **variance** in supplied data units; the
 numbers above are illustrative. Grouping applies to all supported responses, including Identity, Gaussian,
-Gamma, DoubleGamma, BachSCR and BatemanSCR. Parameter restrictions are unchanged:
-Gamma shapes and Bach shape parameters remain fixed; supported widths, scales,
+Gamma, DoubleGamma and BatemanSCR. Parameter restrictions are unchanged:
+Gamma shapes remain fixed; supported widths, scales,
 ratios, Bateman rise/decay and response lags may be learned. Gaussian approximations
 and finite-response tail qualifications retain their existing covariance error bounds.
 

@@ -6,7 +6,6 @@ from .data import TimeSeries
 from .estimator import MultimodalSRM
 from .inspection import KernelEstimate
 from .kernels import (
-    BachSCR,
     BatemanSCR,
     DoubleGamma,
     Gamma,
@@ -38,7 +37,6 @@ __all__ = [
     "Gaussian",
     "Gamma",
     "DoubleGamma",
-    "BachSCR",
     "BatemanSCR",
     "SampledKernel",
     "Response",

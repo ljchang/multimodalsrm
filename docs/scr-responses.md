@@ -1,6 +1,6 @@
 # Skin-conductance responses
 
-Use `BatemanSCR` as the common response option for new skin-conductance models. The same `Response` configuration works in R-MSRM, dense/grouped GP MAP and posterior inference, and state-space GP MAP. `BachSCR` remains available for reproducing existing analyses and fitted archives.
+`BatemanSCR` is the built-in response family for skin-conductance models. The same `Response` configuration works in R-MSRM, dense/grouped GP MAP and posterior inference, and state-space GP MAP. `BachSCR` has been removed from the development version; see the migration instructions below for historical analyses.
 
 This addition is available from the development checkout; it is not included in the published `0.1.0` release. Install the checkout as described in the [installation guide](getting-started.md).
 
@@ -21,7 +21,7 @@ responses = {
 
 `rise` and `decay` are positive time constants in seconds, and `lag` shifts the onset. They do not directly specify the time of the peak. Swapping the two time constants leaves the response unchanged; separated bounds identify their labels when both are learned. Equal constants are supported numerically and reduce to a shape-two Erlang response.
 
-The untruncated unit-mass transfer function is `1 / ((1 + s*rise) * (1 + s*decay))`. This is the difference-of-exponentials SCR model used by [Benedek and Kaernbach (2010)](https://doi.org/10.1016/j.jneumeth.2010.04.028). The toolbox retains the same support convention as Bach: 90 seconds after lag, with **continuous finite L2 normalization**. The initial constants are starting values, not validated physiological defaults or a fitted conversion of canonical Bach.
+The untruncated unit-mass transfer function is `1 / ((1 + s*rise) * (1 + s*decay))`. This is the difference-of-exponentials SCR model used by [Benedek and Kaernbach (2010)](https://doi.org/10.1016/j.jneumeth.2010.04.028). The toolbox uses a support of 90 seconds after lag, with **continuous finite L2 normalization**. The initial constants are starting values, not validated physiological defaults or a fitted conversion of canonical Bach.
 
 ## Use with R and GP models
 
@@ -72,6 +72,21 @@ The observations are synthetic. The example checks fitting, valid prediction and
 
 Replace `Response(BachSCR(...), ...)` with an explicit `Response(BatemanSCR(...), ...)`, choose time-constant bounds and GP priors, and **refit the model**. There is no automatic conversion of Bach parameters, fitted loadings or lag estimates. Their reference shapes differ, so a difference in fitted `lag` alone cannot establish a change in physiological timing.
 
-`BachSCR` continues to use its original formula, parameter names, defaults, normalization and archive identifier. Loading a Bach archive never substitutes Bateman. The generic model default remains Identity when no responses are supplied; the toolbox does not infer which streams contain skin conductance.
+The development version removes `BachSCR` from public imports, R/GP fitting,
+response approximations and the archive type registry. Loading a GP archive
+containing a Bach record raises an explicit migration error before reconstructing
+or fitting a model. Historical R pickle/joblib models also require their original
+environment. No Bach archive is silently substituted with Bateman.
+
+Release **0.1.0** supports Bach. The last development snapshot before this removal
+is commit [`8eeb84fcc8d2c6a37f36ce748a13e6c3782e0ce8`](https://github.com/ljchang/multimodalsrm/commit/8eeb84fcc8d2c6a37f36ce748a13e6c3782e0ce8).
+For exact reproduction, retain the actual source revision, dependencies and
+preprocessing used for the original fit; an arbitrary older release does not
+replace that provenance. Warmup checkpoints must resume in their original
+source/runtime environment. If original observations are unavailable, use that
+environment for prediction from the Bach fit.
+
+Archives using the remaining supported response families retain their existing
+identifiers and schema. The generic model default remains Identity when no responses are supplied; the toolbox does not infer which streams contain skin conductance.
 
 Numerical tests cover independent convolution integrals, finite normalization, equal and near-equal poles, cell-integral derivatives, rational transfer functions, likelihood/gradient/prediction agreement, posterior execution and archive replay. Before changing an established scientific analysis, compare held-out prediction, inferred latents and response timing on representative recordings. The initial synthetic comparison supported Bateman as the simpler baseline; neither matching Bach's shape nor a synthetic fit alone establishes empirical superiority.

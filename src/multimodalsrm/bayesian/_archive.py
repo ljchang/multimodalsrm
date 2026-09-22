@@ -12,7 +12,6 @@ import numpy as np
 
 from ..data import TimeSeries, readonly_array
 from ..kernels import (
-    BachSCR,
     BatemanSCR,
     DoubleGamma,
     Gamma,
@@ -33,7 +32,6 @@ CLASSES = {
         Gaussian,
         Gamma,
         DoubleGamma,
-        BachSCR,
         BatemanSCR,
         Response,
         Prior,
@@ -143,6 +141,13 @@ def decode(value, arrays, used):
         result = [decode(v, arrays, used) for v in items]
         return tuple(result) if kind == "tuple" else result
     if kind == "record" and set(value) == {"type", "class", "fields"}:
+        if value["class"] == "BachSCR":
+            raise ValueError(
+                "BachSCR support has been removed. Reproduce this archive with its original "
+                "Bach-supporting package version (Bach is supported in release 0.1.0), "
+                "or configure BatemanSCR and refit from the original observations. "
+                "Bach parameters and fitted models cannot be converted automatically."
+            )
         cls = CLASSES.get(value["class"])
         record_fields = value["fields"]
         # Fill only additive fitting defaults in older archives; all other

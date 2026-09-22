@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 from scipy.integrate import quad
 
 from multimodalsrm import (
-    BachSCR,
+    BatemanSCR,
     DoubleGamma,
     Gamma,
     Gaussian,
@@ -24,7 +24,7 @@ def mixed_fixture(*, algebra="dense", order=64, features=1):
 
     kernels = dict(
         brain=DoubleGamma(),
-        eda=BachSCR(),
+        eda=BatemanSCR(),
         ratings=Gamma(3.0, 0.7, 0.4),
         face=Gaussian(0.8, 0.2),
     )
@@ -37,10 +37,8 @@ def mixed_fixture(*, algebra="dense", order=64, features=1):
     responses["eda"] = Response(
         kernels["eda"],
         pooling="shared",
-        fixed={
-            k: v for k, v in kernels["eda"].parameters.items() if k in ("t0", "sigma", "lambda1")
-        },
-        bounds=dict(lambda2=(0.055, 0.085), lag=(-0.5, 0.5)),
+        fixed={"rise": kernels["eda"].rise},
+        bounds=dict(decay=(2.5, 3.5), lag=(-0.5, 0.5)),
     )
     priors = b.BayesianPriors(
         noise=b.Prior.lognormal(np.log(0.3), 0.5),
@@ -50,7 +48,7 @@ def mixed_fixture(*, algebra="dense", order=64, features=1):
                 scale=b.Prior.normal(0.7, 0.1),
                 lag=b.Prior.normal(0.4, 0.2),
             ),
-            "eda": dict(lambda2=b.Prior.normal(0.07, 0.01), lag=b.Prior.normal(0.0, 0.2)),
+            "eda": dict(decay=b.Prior.normal(3.0, 0.3), lag=b.Prior.normal(0.0, 0.2)),
         },
     )
     model = b.BayesianMultimodalSRM(
@@ -270,21 +268,6 @@ def test_structured_quality_reports_shape_and_reference_clock():
     assert 4.9 < rows["brain"]["peak_delay_seconds"] < 5.1
     assert rows["brain"]["has_negative_lobe"] is True
     assert rows["eda"]["fwhm_seconds"] > 0
-
-
-@pytest.mark.parametrize("t0,sigma", [(95.0, 0.1), (120.0, 0.7)])
-def test_scr_rejects_peak_outside_finite_support(t0, sigma):
-    from multimodalsrm.bayesian.response_quadrature import (
-        ResponseQuadrature,
-    )
-
-    with pytest.raises(ValueError, match="t0.*90"):
-        ResponseQuadrature(
-            {"eda": Response(BachSCR(t0=t0, sigma=sigma), estimate=False, pooling="shared")},
-            {},
-            3.0,
-            64,
-        )
 
 
 def test_structured_reference_does_not_claim_fixed_dispersion():

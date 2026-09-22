@@ -2,10 +2,9 @@
 
 Lag is an additional reference-shape shift in seconds. Gaussian truncates at
 six standard deviations; gamma families truncate each tail at survival 1e-8.
-Bach's canonical response truncates at 90 seconds, matching PsPM's duration.
+The Bateman SCR response truncates at 90 seconds after lag.
 """
 
-import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass, fields, replace
 from functools import cached_property
@@ -13,7 +12,6 @@ from itertools import product
 
 import numpy as np
 from scipy.integrate import quad
-from scipy.special import ndtr
 from scipy.stats import gamma as gamma_distribution
 
 from . import _bateman
@@ -30,7 +28,7 @@ class Kernel:
         return {
             f.name: float(getattr(self, f.name))
             for f in fields(self)
-            if f.name not in ("version", "lags", "values")
+            if f.name not in ("lags", "values")
         }
 
     def _validate(self):
@@ -204,8 +202,8 @@ class BatemanSCR(Kernel):
     ``rise`` and ``decay`` are positive time constants in seconds; ``lag``
     shifts the onset. Equal constants are supported. Exchanging constants
     leaves the response unchanged: use separated bounds to identify labels.
-    The response ends 90 seconds after lag, as does BachSCR. This is an
-    alternative shape, not a conversion of Bach parameters or fitted models.
+    The response ends 90 seconds after lag and uses continuous finite L2
+    normalization.
     """
 
     rise: float = 0.7
@@ -231,54 +229,6 @@ class BatemanSCR(Kernel):
 
     def _raw(self, x):
         return _bateman.raw(np.maximum(x - self.lag, 0), self.rise, self.decay)
-
-
-@dataclass(frozen=True)
-class BachSCR(Kernel):
-    """Bach et al. (2010), canonical evoked SCR, without derivative bases.
-
-    g(u)=exp(-(u-t0)^2/(2 sigma^2)) for u>=0; d(u)=exp(-lambda1*u)
-    +exp(-lambda2*u) for u>=0; raw(t)=integral_0^t g(u)d(t-u)du.
-    Closed-form integration gives a grid-independent continuous counterpart of
-    PsPM pspm_bf_scrf_f.m's sampled convolution. Our L2 normalization deliberately
-    replaces PsPM peak normalization. Reference: Bach DR et al., Int J
-    Psychophysiol 75:349-356, doi:10.1016/j.ijpsycho.2010.01.005.
-    Verified against https://raw.githubusercontent.com/bachlab/PsPM/develop/src/pspm_bf_scrf_f.m
-    """
-
-    version: str = "2010"
-    t0: float = 3.0745
-    sigma: float = 0.7013
-    lambda1: float = 0.3176
-    lambda2: float = 0.0708
-    lag: float = 0.0
-    positive_parameters = ("t0", "sigma", "lambda1", "lambda2")
-    reference = "Bach et al. (2010), Int J Psychophysiol 75:349-356; PsPM pspm_bf_scrf_f.m"
-    truncation = (
-        "fixed 90-second response duration after additional lag; no tail-probability guarantee"
-    )
-
-    def __post_init__(self):
-        self._validate()
-        if self.version != "2010":
-            raise ValueError("only BachSCR version 2010 is supported")
-
-    @property
-    def support(self):
-        return (self.lag, self.lag + 90.0)
-
-    def _raw(self, x):
-        t = np.clip(x - self.lag, 0, 90)
-        answer = np.zeros_like(t)
-        for rate in (self.lambda1, self.lambda2):
-            center = self.t0 + rate * self.sigma**2
-            answer += (
-                np.exp(-rate * t + rate * self.t0 + 0.5 * (rate * self.sigma) ** 2)
-                * self.sigma
-                * np.sqrt(2 * np.pi)
-                * (ndtr((t - center) / self.sigma) - ndtr(-center / self.sigma))
-            )
-        return np.where(x >= self.lag, answer, 0.0)
 
 
 @dataclass(frozen=True, eq=False)
@@ -424,12 +374,6 @@ class Response:
                 else self.prior.reference
             )
             kernel.with_parameters(**ref)
-        if isinstance(kernel, BachSCR) and {"t0", "lag"}.issubset(self.free_parameters):
-            warnings.warn(
-                "BachSCR t0 and lag are both free and may be timing-confounded",
-                UserWarning,
-                stacklevel=2,
-            )
 
     def initial_kernel(self):
         return self.kernel.with_parameters(**self.fixed)
@@ -500,13 +444,6 @@ class Response:
 
     @property
     def metadata(self):
-        timing_confounds = []
-        if isinstance(self.initial_kernel(), BachSCR) and {"t0", "lag"}.issubset(
-            self.free_parameters
-        ):
-            timing_confounds.append(
-                "BachSCR t0 and lag are both free and may encode redundant timing shifts."
-            )
         return {
             **self.initial_kernel().metadata,
             "pooling": self.pooling,
@@ -518,5 +455,5 @@ class Response:
             "prior_scaling": "0.5 * strength * squared coordinate distance",
             "lag_prior": self.lag_prior,
             "prior": self.prior,
-            "timing_confounds": timing_confounds,
+            "timing_confounds": [],
         }
