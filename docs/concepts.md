@@ -1,5 +1,7 @@
 # How the models work
 
+For concrete settings, see the [API choice guide](api-guide.md). For worked visual explanations, see [temporal kernels](temporal-kernels.md) and [model mathematics](model-mathematics.md).
+
 ## One shared response, several observation streams
 
 Suppose several people observe the same movie. Brain measurements and behavioral ratings can reflect a shared time-varying signal while having different numbers of features, sampling rates, delays, and noise.

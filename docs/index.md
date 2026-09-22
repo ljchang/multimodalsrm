@@ -8,6 +8,7 @@ Use it to fit a common representation, infer latent responses on new recordings,
 
 [Get started](getting-started.md){ .md-button .md-button--primary }
 [How it works](concepts.md){ .md-button }
+[API and choices](api-guide.md){ .md-button }
 
 !!! info "Version 0.1.0"
     Install the package from PyPI. These pages follow `main`; use the `v0.1.0` source tag when matching an analysis to this release.
@@ -32,6 +33,6 @@ Both model families accept native timestamps, masks, and missing streams. The de
 4. Read the [capability and diagnostic guide](capabilities.md) before using advanced Bayesian workflows.
 5. Consult [migration and persistence](migration.md) when loading historical fitted models.
 
-These first guides cover the data contract, model concepts, and runnable R/GP MAP examples. Detailed posterior tutorials and a complete API reference are future additions. Successful software checks do not establish fit convergence, uncertainty calibration, response recovery, or empirical usefulness.
+Use the [API choice guide](api-guide.md) to compare settings, the [illustrated kernel guide](temporal-kernels.md) to understand response shapes, and [model mathematics](model-mathematics.md) for the equations behind the diagrams. Detailed posterior tutorials remain future work. Successful software checks do not establish fit convergence, uncertainty calibration, response recovery, or empirical usefulness.
 
 The project is [MIT licensed](https://github.com/ljchang/multimodalsrm/blob/main/LICENSE). Code, issues, and contributions live on [GitHub](https://github.com/ljchang/multimodalsrm).

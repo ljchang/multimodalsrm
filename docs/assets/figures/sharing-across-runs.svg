@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 495" role="img"><title>Sharing across people, modalities and runs</title><rect width="1080" height="495" fill="#fff"/><style>text{font-family:Arial,sans-serif;fill:#233f54}.title{font-size:23px;font-weight:600}.label{font-size:19px}.note{font-size:16px}</style>
+<text x="540" y="33" class="title" text-anchor="middle">Distinct run trajectories; the same filters and maps reused across runs</text>
+<rect x="30" y="155" width="194" height="83" rx="6" fill="#f7fafc" stroke="#8655a0" stroke-width="2"/>
+<text x="127.0" y="182" class="label" text-anchor="middle">Run r</text>
+<text x="127.0" y="207" class="label" text-anchor="middle">K-factor zᵣ(t)</text>
+<rect x="320" y="80" width="210" height="82" rx="6" fill="#f7fafc" stroke="#087d82" stroke-width="2"/>
+<text x="425.0" y="107" class="label" text-anchor="middle">Modality m</text>
+<text x="425.0" y="132" class="label" text-anchor="middle">hₘ ∗ zᵣ</text>
+<rect x="320" y="281" width="210" height="82" rx="6" fill="#f7fafc" stroke="#087d82" stroke-width="2"/>
+<text x="425.0" y="308" class="label" text-anchor="middle">Modality q</text>
+<text x="425.0" y="333" class="label" text-anchor="middle">h_q ∗ zᵣ</text>
+<path d="M224,193 L320,121" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M312,117 L320,121 L312,125" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M224,199 L320,322" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M312,318 L320,322 L312,326" stroke="#718798" stroke-width="2" fill="none"/>
+<rect x="641" y="60" width="391" height="77" rx="6" fill="#f7fafc" stroke="#ad7332" stroke-width="2"/>
+<text x="836.5" y="87" class="label" text-anchor="middle">Participant i · Wᵢₘ</text>
+<text x="836.5" y="112" class="label" text-anchor="middle">Tᵢₘᵣ × Pᵢₘ observations</text>
+<rect x="641" y="176" width="391" height="77" rx="6" fill="#f7fafc" stroke="#ad7332" stroke-width="2"/>
+<text x="836.5" y="203" class="label" text-anchor="middle">Participant j · Wⱼₘ</text>
+<text x="836.5" y="228" class="label" text-anchor="middle">Tⱼₘᵣ × Pⱼₘ observations</text>
+<rect x="641" y="297" width="391" height="77" rx="6" fill="#f7fafc" stroke="#ad7332" stroke-width="2"/>
+<text x="836.5" y="324" class="label" text-anchor="middle">Participant i · Wᵢq</text>
+<text x="836.5" y="349" class="label" text-anchor="middle">Tᵢqᵣ × Pᵢq observations</text>
+<path d="M530,121 L641,100" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M633,96 L641,100 L633,104" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M530,121 L641,211" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M633,207 L641,211 L633,215" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M530,322 L641,337" stroke="#718798" stroke-width="2" fill="none"/>
+<path d="M633,333 L641,337 L633,341" stroke="#718798" stroke-width="2" fill="none"/>
+<text x="540" y="413" class="label" text-anchor="middle">Run r′ has its own zᵣ′(t). It reuses hₘ, h_q and the fitted Wᵢₘ, Wⱼₘ, Wᵢq.</text>
+<text x="540" y="447" class="note" text-anchor="middle">No participant graph. No participant-specific training trajectory. No cross-run convolution.</text>
+<text x="540" y="476" class="note" text-anchor="middle">At test time, decode each participant independently when measuring alignment.</text>
+</svg>

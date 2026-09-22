@@ -26,6 +26,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -r requirements-docs.txt
+      - run: python scripts/build_api_reference.py --check
       - run: zensical build --clean --strict
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
