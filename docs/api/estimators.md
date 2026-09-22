@@ -161,8 +161,11 @@ modality/time functionals. `"dense"` remains the default reference.
 Both paths retain the original scalar-observation capacity guard.
 
 `linear_algebra="state_space"` uses exact Matérn-3/2 Kalman inference
-with stationary initialization and native observation times. It supports
-MAP with Identity, Gaussian, or integer-shape Gamma/DoubleGamma responses
+with stationary initialization and native observation times. It groups
+filtering and smoothing updates at exact modality/time nodes when all
+responses are fixed and the noise prior has strictly positive support.
+Learned responses or noise priors admitting zero retain scalar updates.
+MAP supports Identity, Gaussian, or integer-shape Gamma/DoubleGamma responses
 and independent observation noise. Widths/scales, undershoot ratios, and
 lags may be learned; Gamma shapes remain fixed. Gaussian responses use
 a qualified rational approximation; Gamma tails are restored. A temporal

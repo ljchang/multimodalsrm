@@ -27,6 +27,7 @@ nav = [
   ] },
   { "API reference" = [
     { "Choose your settings" = "api-guide.md" },
+    { "Upcoming API changes" = "upcoming-changes.md" },
     { "Estimators" = "api/estimators.md" },
     { "Responses and priors" = "api/responses.md" },
     { "Search and sampling" = "api/configuration.md" },

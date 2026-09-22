@@ -12,15 +12,17 @@ $$
 
 The horizontal axis of $h$ is **response lag** $u$, not observation time. Positive lag uses an earlier latent value and moves the observed response later. A symmetric Gaussian is two-sided; causal families have no response before their shifted onset. They are causal relative to the model origin only when their onset lag is nonnegative.
 
-[![One shared synthetic drive and its Identity, Gaussian, Gamma, DoubleGamma, BachSCR and BatemanSCR responses.](assets/figures/kernel-convolution.svg)](assets/figures/kernel-convolution.svg)
+[![One shared synthetic drive and its Identity, Gaussian, Gamma, DoubleGamma and BatemanSCR responses.](assets/figures/kernel-convolution.svg)](assets/figures/kernel-convolution.svg)
 
 **Read from top to bottom:** every row filters the same synthetic drive. Dotted lines mark its two event centers. Smooth, delayed peaks and an undershoot arise from the chosen response. Curves use the implementation's L2 normalization and a common vertical scale; their amplitudes are not unit-area averages. These are illustrations, not fitted data or recovery results.
 
 ## Available response families
 
-[![Response curves for all seven exported kernel families, with explicit Identity impulse and a custom sampled example.](assets/figures/kernel-families.svg)](assets/figures/kernel-families.svg)
+These are the response families used for new examples. `BachSCR` is moving to historical-only support; see [legacy Bach analyses](#legacy-bach-analyses) and the [queued removal](upcoming-changes.md).
 
-Each panel shows the stated constructor. The SCR panels show the first 35 seconds of their 90-second support so the rise is visible. Identity is drawn as a symbolic unit impulse: it has no finite sampled height.
+[![Response curves for six response families for new workflows, with explicit Identity impulse and a custom sampled example.](assets/figures/kernel-families.svg)](assets/figures/kernel-families.svg)
+
+Each panel shows the stated constructor. The Bateman panel shows the first 35 seconds of its 90-second support so the rise is visible. Identity is drawn as a symbolic unit impulse: it has no finite sampled height.
 
 | Family | Parameters and defaults | Shape and support | Useful interpretation |
 | --- | --- | --- | --- |
@@ -28,11 +30,10 @@ Each panel shows the stated constructor. The SCR panels show the first 35 second
 | `Gaussian()` | `width=1.0`, `lag=0.0` | Symmetric bell, support `lag ± 6*width` | Smooth measurement response with a center lag; two-sided, generally noncausal |
 | `Gamma()` | `shape=3.0`, `scale=1.0`, `lag=0.0` | One-sided positive rise and decay; upper tail cut at survival probability $10^{-8}$ | A response whose peak occurs after onset |
 | `DoubleGamma()` | `peak_shape=6.0`, `peak_scale=1.0`, `undershoot_shape=16.0`, `undershoot_scale=1.0`, `undershoot_ratio=1/6`, `lag=0.0` | Positive gamma minus a later gamma; both tails cut at $10^{-8}$ | HRF-like shape with an undershoot, not an automatically validated HRF |
-| `BachSCR()` | `version="2010"`, `t0=3.0745`, `sigma=0.7013`, `lambda1=0.3176`, `lambda2=0.0708`, `lag=0.0` | Causal Gaussian drive convolved with two exponential decays; 90 seconds after lag | Canonical evoked SCR shape, using this package's L2 normalization |
 | `BatemanSCR()` | `rise=0.7`, `decay=3.0`, `lag=0.0` | Two exponential stages, 90 seconds after lag | Flexible SCR alternative; time constants can be learned where supported |
 | `SampledKernel(lags, values)` | Explicit increasing lags and matching finite nonzero values | Piecewise-linear interpolation, zero outside supplied support | A fixed externally specified response; not learned FIR estimation |
 
-Times, widths, scales and time constants use the timestamp unit, normally seconds. Gamma shapes and the undershoot ratio are dimensionless. Bach's `lambda1` and `lambda2` are rates (inverse seconds), whereas Bateman's `rise` and `decay` are time constants (seconds).
+Times, widths, scales and time constants use the timestamp unit, normally seconds. Gamma shapes and the undershoot ratio are dimensionless. Bateman's `rise` and `decay` are time constants (seconds), not decay rates.
 
 ### What the formulas mean
 
@@ -52,7 +53,6 @@ Write $s=u-\mathrm{lag}$ and let $g(s;\alpha,\beta)$ be the gamma density with s
 | Gaussian | $q(u)=\exp[-s^2/(2\,\mathrm{width}^2)]$ |
 | Gamma | $q(u)=g(s;\mathrm{shape},\mathrm{scale})$, zero for $s<0$ |
 | DoubleGamma | $q(u)=g(s;\alpha_p,\beta_p)-\rho g(s;\alpha_u,\beta_u)$ |
-| BachSCR | $q(u)=\int_0^s \exp[-(v-t_0)^2/(2\sigma^2)]\,[e^{-\lambda_1(s-v)}+e^{-\lambda_2(s-v)}],dv$ for $s\geq0$ |
 | BatemanSCR | $q(u)\propto(e^{-s/\mathrm{decay}}-e^{-s/\mathrm{rise}})/(\mathrm{decay}-\mathrm{rise})$ for $s\geq0$ |
 
 For equal Bateman constants $\tau$, the last expression has the limit $s e^{-s/\tau}/\tau^2$; the implementation supports that limit. Exchanging `rise` and `decay` gives the same curve, so separated bounds are needed if those labels should be identifiable.
@@ -63,7 +63,7 @@ Gamma shapes must be at least one and positive scale parameters must exceed zero
 
 [![Gaussian lag moves the response, width spreads it, Gamma shape changes its peak, and Bateman decay extends its tail.](assets/figures/kernel-parameters.svg)](assets/figures/kernel-parameters.svg)
 
-The same lag sign convention applies across families. Width, shape and decay also affect apparent timing, so a single lag estimate is not the entire response. In BachSCR, estimating both `t0` and `lag` introduces redundant timing shifts; GP learning requires fixing `t0` when learning lag.
+The same lag sign convention applies across families. Width, shape and decay also affect apparent timing, so a single lag estimate is not the entire response.
 
 ## Fix, estimate or partially fix a response
 
@@ -110,7 +110,6 @@ print(lag_only.free_parameters)  # ('lag',)
 | Identity | Yes | Analytic | Yes |
 | Gaussian | Yes | Analytic approximation with tail check; explicit quadrature also available | Rational/Laguerre approximation with error check |
 | Gamma / DoubleGamma | Yes | Explicit `response_quadrature_order` | Fixed integer shapes; supported scales, lag and ratio may be learned |
-| BachSCR | Yes | Explicit quadrature; fix `t0` when learning lag | Fixed shape; optional lag learning; restored-tail tolerance matters |
 | BatemanSCR | Yes | Explicit quadrature | Rise, decay and lag may be learned; restored-tail check |
 | SampledKernel | Fixed curve | Unsupported | Unsupported |
 
@@ -132,6 +131,10 @@ $$
 The middle panel shows **prior draws**, not estimates. It uses the same underlying random normal vector for the three examples to illustrate the covariance change. The bottom panel changes a response filter instead. Both can make an observed signal smoother, so strong held-out prediction alone cannot identify their separate contributions.
 
 R-MSRM uses a latent derivative penalty controlled by `temporal_strength`; it does not expose this GP prior. See [model mathematics](model-mathematics.md) for how the response enters each objective.
+
+## Legacy Bach analyses
+
+The current documentation baseline still exports `BachSCR`; [PR #32](https://github.com/ljchang/multimodalsrm/pull/32) removes that import and its inference paths. Use `BatemanSCR` for new SCR configurations. Bach and Bateman are different response families: replacing the class name does not convert fitted parameters or an existing archive. Preserve the original environment to reproduce a Bach fit, or refit Bateman from the original observations. The generated [API reference](api/responses.md) lists Bach only when it is actually exported by the source being documented.
 
 ## Finite support changes which data are usable
 

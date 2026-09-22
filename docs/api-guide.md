@@ -2,6 +2,9 @@
 
 Start here when you know what you want to estimate but are unsure which arguments to use. The linked reference pages list every public export, constructor default, and public method defined on those classes. These pages follow the checked-out source; the installed release may have fewer options.
 
+!!! info "Current settings and queued changes"
+    This reference follows the checked-out source. The [upcoming changes guide](upcoming-changes.md) covers the queued BachSCR removal and `SearchConfig.r_init` option. Bateman is used for new SCR examples; Bach is documented as a legacy API while it remains exported.
+
 ## The choices at a glance
 
 | Question | Setting | Meaning |
@@ -9,7 +12,7 @@ Start here when you know what you want to estimate but are unsure which argument
 | How is the common response represented? | `MultimodalSRM` or `BayesianMultimodalSRM` | A regularized latent grid, or a continuous latent GP |
 | How many common factors? | `features=K` | Dimension of the shared response, not an inferred count of biological processes |
 | What makes the latent response smooth? | R: `temporal_strength`; GP: `length_scale` | A derivative penalty, or the Matérn-3/2 prior timescale |
-| How does a modality respond to that signal? | `responses={name: Response(...)}` | Identity, Gaussian, Gamma, DoubleGamma, BachSCR, BatemanSCR, or a fixed sampled curve where supported |
+| How does a modality respond to that signal? | `responses={name: Response(...)}` | Identity, Gaussian, Gamma, DoubleGamma, BatemanSCR, or a fixed sampled curve where supported |
 | Which response parameters are learned? | `estimate`, `fixed`, `bounds` | Learn unfixed parameters within their bounds, or fix the entire response |
 | Who shares a response filter? | `Response.pooling` | Shared across people, partially pooled, or separate; GP requires `"shared"` |
 | Who shares the latent trajectory? | R: `latent_pooling` | Default `"shared"` is exact equality; extensions change the model |
@@ -71,11 +74,13 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `random_state=0` | Reproducibility seed, or `None`. |
 | `max_observations=800` | Per-run eligible scalar-observation guard, retained by grouped and state-space paths. Raising it permits a larger problem but does not guarantee feasible runtime. |
 | `covariance_tolerance=1e-7` | Error tolerance for supported analytic/response approximation checks. Does **not** certify response quadrature or spectral accuracy. |
-| `response_quadrature_order=None` | Explicit integer order 8–1024 per panel for dense/grouped structured response integrals. Needed for Gamma, DoubleGamma, BachSCR and BatemanSCR on those paths. Compare orders for numerical qualification. |
+| `response_quadrature_order=None` | Explicit integer order 8–1024 per panel for dense/grouped structured response integrals. Needed for Gamma, DoubleGamma and BatemanSCR on those paths. Compare orders for numerical qualification. |
 | `state_space_gaussian="auto"` | Also `"rational"` or `"laguerre"`; selects a Gaussian response approximation for state-space MAP. |
 | `spectral=None` | `SpectralConfig(rank=..., padding=...)` is required only for `linear_algebra="spectral"`. Padding is per side in timestamp units; rank/padding need joint accuracy checks. |
 | `run_baseline_sd=None` | Optional fixed per-modality Gaussian run-offset prior SDs. These are marginalized observation offsets, not private latent trajectories. Outside the full posterior workflow. |
 | `noise_timescales=None` | Optional fixed per-modality OU residual timescales for dense/grouped MAP, without run baselines. Distinct from the shared latent timescale and response width. |
+
+Fixed-response state-space filtering and smoothing automatically group exactly matching modality/time observations when noise support is strictly positive. This is separate from selecting `linear_algebra="grouped"`; no new switch is needed. See [grouped state-space computation](grouped-state-space.md) and the [queued learned-response extension](upcoming-changes.md).
 
 ### Search and sampling
 
@@ -93,6 +98,8 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `SamplerConfig` | `mass_matrix="dense"`, `max_dense_parameters=1024` | Dense or diagonal metric and dense-metric capacity guard. |
 | `SamplerConfig` | `start_objective_window=5.0`, `start_jitter=0.08` | Selection/jitter of sampling starting points. |
 | `SamplerConfig` | `orientation_refresh="none"` or `"haar"` | Optional common rotation/reflection refresh for supported full multifactor targets with isotropic unbounded Gaussian loading priors. |
+
+The queued R initialization change adds `SearchConfig(r_init=True)` and uses `r_init=False` for historical starts. This field is **pending** in this documentation baseline; see [upcoming changes](upcoming-changes.md#r-initialization-changes-a-search-default).
 
 ### A GP MAP configuration with a learned Gaussian lag
 

@@ -187,6 +187,8 @@ DoubleGamma(
 
 `from multimodalsrm import BachSCR` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L237)
 
+Legacy response: see [pending removal and migration](../upcoming-changes.md). This entry appears only while the checked-out source exports BachSCR.
+
 ```python
 BachSCR(
     version='2010',

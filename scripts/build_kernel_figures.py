@@ -12,7 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from multimodalsrm import BachSCR, BatemanSCR, DoubleGamma, Gamma, Gaussian, SampledKernel
+from multimodalsrm import BatemanSCR, DoubleGamma, Gamma, Gaussian, SampledKernel
 
 OUT = Path(__file__).resolve().parents[1] / "docs/assets/figures"
 COLORS = ["#087e8b", "#9963a5", "#bd6329", "#3377a8", "#ae4766", "#61842b"]
@@ -37,6 +37,8 @@ plt.rcParams.update(
 def save(fig, name):
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / f"{name}.svg", metadata={"Date": None}, bbox_inches="tight")
+    svg = OUT / f"{name}.svg"
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n")
     fig.savefig(Path(gettempdir()) / f"{name}.png", dpi=130, bbox_inches="tight")
     plt.close(fig)
 
@@ -50,7 +52,7 @@ def curve(ax, kernel, label=None, **kwargs):
 
 
 def families():
-    fig, axes = plt.subplots(4, 2, figsize=(8.4, 12.8), layout="constrained")
+    fig, axes = plt.subplots(3, 2, figsize=(8.4, 9.6), layout="constrained")
     ax = axes.flat[0]
     ax.annotate("", (0, 1), (0, 0), arrowprops={"arrowstyle": "->", "color": COLORS[0], "lw": 2})
     ax.axhline(0, color="#9ba9af", lw=0.6)
@@ -62,7 +64,6 @@ def families():
         (Gaussian(), "Gaussian(width=1, lag=0)"),
         (Gamma(), "Gamma(shape=3, scale=1)"),
         (DoubleGamma(), "DoubleGamma()"),
-        (BachSCR(), "BachSCR()"),
         (BatemanSCR(), "BatemanSCR(rise=0.7, decay=3)"),
         (
             SampledKernel(np.array([0.0, 1.0, 3.0, 5.0, 8.0]), np.array([0.0, 0.5, 1.0, 0.3, 0.0])),
@@ -73,17 +74,8 @@ def families():
         ax = axes.flat[i]
         curve(ax, kernel, color=COLORS[(i - 1) % len(COLORS)])
         ax.set_title(title)
-        if isinstance(kernel, (BachSCR, BatemanSCR)):
+        if isinstance(kernel, (BatemanSCR)):
             ax.set_xlim(-1, 35)
-    axes.flat[-1].axis("off")
-    axes.flat[-1].text(
-        0.05,
-        0.75,
-        "Same normalization,\ndifferent shapes.\n\nSCR support extends to 90 s.\nSampled curve is fixed.\nIdentity is an analytic impulse.",
-        va="top",
-        fontsize=11,
-        linespacing=1.6,
-    )
     save(fig, "kernel-families")
 
 
@@ -93,8 +85,8 @@ def drive(t):
 
 def convolution():
     t = np.linspace(-5, 65, 1401)
-    kernels = [Gaussian(width=1, lag=2), Gamma(), DoubleGamma(), BachSCR(), BatemanSCR()]
-    labels = ["Gaussian(width=1, lag=2)", "Gamma()", "DoubleGamma()", "BachSCR()", "BatemanSCR()"]
+    kernels = [Gaussian(width=1, lag=2), Gamma(), DoubleGamma(), BatemanSCR()]
+    labels = ["Gaussian(width=1, lag=2)", "Gamma()", "DoubleGamma()", "BatemanSCR()"]
     fig, axes = plt.subplots(
         6, 1, figsize=(8.4, 10), sharex=True, sharey=True, layout="constrained"
     )

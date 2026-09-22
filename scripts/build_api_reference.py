@@ -124,6 +124,13 @@ for init in (PACKAGE / "__init__.py", PACKAGE / "bayesian/__init__.py"):
         CATALOG[name] = (node, path, namespace)
 
 
+# Bach remains documented when present in the checked-out API, but its queued
+# removal must not prevent this reference generator from running afterward.
+PAGES["responses"][1][:] = [
+    name for name in PAGES["responses"][1] if name != "BachSCR" or name in CATALOG
+]
+
+
 def arguments(node):
     args = node.args
     positional = args.posonlyargs + args.args
@@ -192,6 +199,10 @@ def render(key, title, names):
         node, path, namespace = CATALOG[name]
         source = f"https://github.com/ljchang/multimodalsrm/blob/main/{path.relative_to(ROOT)}#L{node.lineno}"
         out.extend([f"## {name}\n", f"`from {namespace} import {name}` · [Source]({source})\n"])
+        if name == "BachSCR":
+            out.append(
+                "Legacy response: see [pending removal and migration](../upcoming-changes.md). This entry appears only while the checked-out source exports BachSCR.\n"
+            )
         if isinstance(node, ast.FunctionDef):
             out.extend([signature(name, arguments(node)), doc(node)])
             continue
