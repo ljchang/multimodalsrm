@@ -1,6 +1,6 @@
 # Upcoming API changes and optimizations
 
-This is a **September 22, 2026 review snapshot**, not a release announcement. The main documentation baseline is commit `67adca6` (after PR #31). Pending PRs can still change. The generated reference always describes the source in the checkout, rather than treating a proposal as an installed option.
+This is a **September 22, 2026 review snapshot**, not a release announcement. The main documentation baseline is commit `b538c86` (including the learned-response grouping in PR #34). Pending PRs can still change. The generated reference always describes the source in the checkout, rather than treating a proposal as an installed option.
 
 ## Changes that affect configuration
 
@@ -9,7 +9,7 @@ This is a **September 22, 2026 review snapshot**, not a release announcement. Th
 | [Remove BachSCR, #32](https://github.com/ljchang/multimodalsrm/pull/32) | Pending | Use Bateman for new SCR workflows. Preserve old environments or refit; do not rename an existing fit's kernel. |
 | [R-based MAP initialization, #18](https://github.com/ljchang/multimodalsrm/pull/18) | Pending | Account for the proposed `SearchConfig.r_init=True` default when comparing new fits with historical starts. |
 | [Fixed-response grouped state-space, #31](https://github.com/ljchang/multimodalsrm/pull/31) | Merged into this baseline | No new argument: eligible fixed-response state-space calculations group automatically. |
-| [Learned-response grouped state-space, original #30](https://github.com/ljchang/multimodalsrm/pull/30) | Original stacked PR closed; implementation present in the reviewed #32 ancestry, not this main baseline | No proposed public selector; the change extends automatic grouping to supported learned responses. Follow the replacement/integration PR before assuming it is available. |
+| [Learned-response grouped state-space, #34](https://github.com/ljchang/multimodalsrm/pull/34) | Merged into this baseline; replaces the closed stacked #30 | No new public selector: automatic grouping now also covers supported learned responses. |
 | [Empirical performance report, #21](https://github.com/ljchang/multimodalsrm/pull/21) | Pending documentation | Treat the reported experiments as bounded evidence, not a new public inference API. |
 
 ## Bach removal is a breaking change
@@ -44,11 +44,11 @@ These lines are shown as pending configuration, not runnable examples for the cu
 | Grouped GP covariance algebra | `linear_algebra="grouped"` | The modeled covariance likelihood, reduced over repeated modality/time functionals |
 | Grouped state-space filtering/smoothing | Automatic inside eligible `linear_algebra="state_space"` calculations | Scalar residual contributions, variances, likelihood normalization and cross-factor moments |
 
-The merged fixed-response optimization groups **exactly matching** modality/time nodes when the noise prior's support is strictly positive. It does not bin near-coincident timestamps, merge different modalities, or introduce a new model prior. Priors admitting zero variance retain scalar updates. State-space posterior sampling remains unsupported.
+The merged fixed- and learned-response optimizations group **exactly matching** modality/time nodes when the noise prior's support is strictly positive. It does not bin near-coincident timestamps, merge different modalities, or introduce a new model prior. Priors admitting zero variance retain scalar updates. State-space posterior sampling remains unsupported.
 
-The reviewed learned-response implementation extends this to supported widths, scales, ratios, Bateman constants and lags. Node membership stays fixed while parameter-dependent event times are shifted and sorted, including ties/crossings. It introduces no new public constructor argument. Existing response admission and approximation tolerances still apply.
+The merged learned-response implementation extends this to supported widths, scales, ratios, Bateman constants and lags. Node membership stays fixed while parameter-dependent event times are shifted and sorted, including ties/crossings. It introduces no new public constructor argument. Existing response admission and approximation tolerances still apply.
 
-See the [current fixed-response implementation guide](grouped-state-space.md) for its scoped benchmarks. Synthetic speedups and prototype empirical results should not be quoted as general runtime guarantees. In particular, the blocked Gibbs prototype discussed in PR #21 does **not** add an `inference="gibbs"` choice to the supported API.
+See the [current grouped state-space implementation guide](grouped-state-space.md) for its scoped benchmarks. Synthetic speedups and prototype empirical results should not be quoted as general runtime guarantees. In particular, the blocked Gibbs prototype discussed in PR #21 does **not** add an `inference="gibbs"` choice to the supported API.
 
 ## Maintaining this page when the queue lands
 

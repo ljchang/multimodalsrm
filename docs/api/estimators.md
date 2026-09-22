@@ -162,9 +162,9 @@ Both paths retain the original scalar-observation capacity guard.
 
 `linear_algebra="state_space"` uses exact Matérn-3/2 Kalman inference
 with stationary initialization and native observation times. It groups
-filtering and smoothing updates at exact modality/time nodes when all
-responses are fixed and the noise prior has strictly positive support.
-Learned responses or noise priors admitting zero retain scalar updates.
+filtering and smoothing updates at exact modality/time nodes for fixed or
+learned responses when the noise prior has strictly positive support.
+Noise priors admitting zero retain scalar updates.
 MAP supports Identity, Gaussian, or integer-shape Gamma/DoubleGamma responses
 and independent observation noise. Widths/scales, undershoot ratios, and
 lags may be learned; Gamma shapes remain fixed. Gaussian responses use

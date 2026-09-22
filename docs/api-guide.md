@@ -84,7 +84,7 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `run_baseline_sd=None` | Optional fixed per-modality Gaussian run-offset prior SDs. These are marginalized observation offsets, not private latent trajectories. Outside the full posterior workflow. |
 | `noise_timescales=None` | Optional fixed per-modality OU residual timescales for dense/grouped MAP, without run baselines. Distinct from the shared latent timescale and response width. |
 
-Fixed-response state-space filtering and smoothing automatically group exactly matching modality/time observations when noise support is strictly positive. This is separate from selecting `linear_algebra="grouped"`; no new switch is needed. See [grouped state-space computation](grouped-state-space.md) and the [queued learned-response extension](upcoming-changes.md).
+Fixed- and learned-response state-space filtering and smoothing automatically group exactly matching modality/time observations when noise support is strictly positive. This is separate from selecting `linear_algebra="grouped"`; no new switch is needed. See [grouped state-space computation](grouped-state-space.md) and the [integration status](upcoming-changes.md).
 
 ### Search and sampling
 
