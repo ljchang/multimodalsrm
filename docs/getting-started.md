@@ -57,6 +57,45 @@ from multimodalsrm.bayesian import BayesianMultimodalSRM, BayesianPriors
 
 The GP quickstart performs MAP fitting and archive replay. It does not run posterior sampling. Read [capabilities](capabilities.md) before selecting a sampling or computational backend.
 
+GP MAP searches can optionally start from a bounded R-MSRM fit with
+`SearchConfig(r_init=True)`, including the MAP search that precedes posterior
+sampling. One CPU R-MSRM fit supplies loadings, offsets, residual noise variances
+and learned response parameters for the first GP restart. The remaining
+prior-based restarts are unchanged. This changes starting values only; GP priors,
+native timestamps and convergence checks stay the same.
+
+It is **off by default**: the measured benefit is scale-dependent and did not
+transfer to a real recording, so it is a per-analysis decision rather than a
+general recommendation. To enable it:
+
+```python
+from multimodalsrm.bayesian import SearchConfig
+
+model = BayesianMultimodalSRM(
+    priors=priors,
+    inference="map",
+    search=SearchConfig(r_init=True),
+)
+```
+
+The preliminary R fit uses one hybrid start, at most 40 alternating iterations
+and 20 iterations per kernel optimization. Its grid spacing is half the smaller
+of the shortest median native sampling interval and initial GP timescale,
+coarsened if necessary to approximately 10,000 cells across runs. This grid is
+used only for initialization. Feature scales, masks, all training runs and the
+single-factor positive anchor are accounted for when translating to GP units;
+starting values are clipped to interior prior quantiles. Only Gaussian response
+parameters are optimized in the preliminary R fit: other response families are
+held at their configured initial values to avoid expensive finite differences.
+The GP still learns all requested response parameters. The R fit need not
+converge. Its status and total initialization time (including GP score validation) are recorded in
+`restart_diagnostics_[0]["initialization"]`. If it fails numerically, the search
+warns and retains the previous data-based start. Conditional participant
+calibration and posterior updates retain their existing initialization.
+
+See the [initialization timing comparison](performance/r-map-initialization.md)
+for a reproducible benchmark and the limits of the measured benefit.
+
 ## NVIDIA GPUs on Linux
 
 GP-MSRM runs on CUDA in float64 without code changes. Install the pinned JAX CUDA plugin with the `bayesian-cuda` extra:

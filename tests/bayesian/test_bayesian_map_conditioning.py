@@ -81,7 +81,8 @@ def test_conditioned_search_preserves_density_starts_budget_and_parallel_results
     )
 
     p, _, _ = fixture(algebra="grouped", gaussian=learned)
-    config = SearchConfig(starts=2, maxiter=60, conditioning="diagonal")
+    # Exercise the historical prior/data design independently of R seeding.
+    config = SearchConfig(starts=2, maxiter=60, conditioning="diagonal", r_init=False)
     best, serial = search(p, config, 721)
     other, parallel = search(p, replace(config, n_jobs=2), 721)
     for initial, left, right in zip(initial_points(p, 2, 721), serial, parallel):

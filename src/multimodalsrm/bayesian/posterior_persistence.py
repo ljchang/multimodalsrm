@@ -498,7 +498,10 @@ def restore(saved, *, updated=False):
             raise ValueError("invalid posterior raw coordinate or axis identity")
         if saved["training_data_sha256"] != _training_digest(saved["training"]):
             raise ValueError("posterior native training data digest differs")
-        model = BayesianMultimodalSRM(**_copy_readonly(saved["constructor"]))
+        from .persistence import _restore_search_default
+
+        constructor = _restore_search_default(_copy_readonly(saved["constructor"]), saved["fit"])
+        model = BayesianMultimodalSRM(**constructor)
         if model.inference != "posterior":
             raise ValueError("posterior archive requires posterior constructor")
         model._config()

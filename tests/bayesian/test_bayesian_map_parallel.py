@@ -121,7 +121,9 @@ def test_failed_start_retained_and_equal_objectives_select_first_start(monkeypat
     p, _, _ = fixture(algebra="grouped")
     points = np.stack([p.initial, p.initial, np.full_like(p.initial, np.nan)])
     monkeypatch.setattr(fitting, "initial_points", lambda *args: points.copy())
-    best, records = fitting.search(p, fitting.SearchConfig(starts=3, maxiter=3, n_jobs=2), 2)
+    best, records = fitting.search(
+        p, fitting.SearchConfig(starts=3, maxiter=3, n_jobs=2, r_init=False), 2
+    )
     assert [r["start"] for r in records] == [0, 1, 2]
     assert best["start"] == 0
     assert records[0]["objective"] == records[1]["objective"]

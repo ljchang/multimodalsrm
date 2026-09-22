@@ -70,6 +70,7 @@
       "tests/bayesian/test_bayesian_prediction.py",
       "tests/bayesian/test_bayesian_problem.py",
       "tests/bayesian/test_bayesian_quadrature_accuracy.py",
+      "tests/bayesian/test_bayesian_r_initialization.py",
       "tests/bayesian/test_bayesian_reference.py",
       "tests/bayesian/test_bayesian_refinement.py",
       "tests/bayesian/test_bayesian_residual_diagnostics.py",

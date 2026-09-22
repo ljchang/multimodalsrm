@@ -48,6 +48,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `RuntimeWarning` once per process when the visible BLAS pool exceeds half the
   physical cores. No thread limits are changed and no numerical behavior changes.
 
+- **Optional R-MSRM warm start for the first GP MAP restart.**
+  `SearchConfig(r_init=True)` seeds the first full-training restart from a bounded
+  CPU R-MSRM fit, which supplies loadings, offsets, residual noise variances and
+  Gaussian response estimates. It is **off by default**: GP priors, native
+  timestamps, remaining prior-quantile restarts and convergence checks are
+  unchanged, and a numerical failure retains the historical start with a warning and
+  a recorded reason. The measured benefit is scale-dependent — small synthetic cases
+  show fewer iterations but no reduction in total time, and an evaluation on a real
+  recording did not reproduce the larger synthetic gain — so enabling it is a
+  per-analysis decision. Archives missing the setting restore it as false without
+  rewriting saved fit evidence.
+
 ### Changed
 
 - **Posterior mixing diagnostics are computed in batched NumPy over every quantity
