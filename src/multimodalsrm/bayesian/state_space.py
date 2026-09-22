@@ -112,6 +112,10 @@ def update(mean, covariance, A, Q, H, y, variance):
 
 def nll(problem, x, run):
     """Marginal likelihood without a dense observation covariance or jitter."""
+    if getattr(problem, "grouped_state_space", False):
+        from .state_space_grouped import nll as grouped_nll
+
+        return grouped_nll(problem, x, run)
     jax, jnp, _, _ = runtime()
     outputs = None
     if problem.parameterized_responses:
@@ -179,12 +183,67 @@ def _smoother_gain(covariance, predicted, transition, semidefinite):
     )
 
 
+def _smooth_backward(last, history, A, *, semidefinite, dynamic=False):
+    """Common RTS recursion for scalar and grouped observation updates."""
+    jax, jnp, _, _ = runtime()
+    dimension = len(last[0])
+    means, covariances, predicted_means, predicted_covariances = history
+    if dynamic:
+        from .state_space_delays import tied_smoother_update
+
+        tied_update = tied_smoother_update()
+
+    def backward(carry, operands):
+        next_mean, next_covariance = carry
+        mean, covariance, pm, pc, transition = operands
+
+        def advance(_):
+            gain = _smoother_gain(covariance, pc, transition, semidefinite)
+            sm = mean + gain @ (next_mean - pm)
+            sc = covariance + gain @ (next_covariance - pc) @ gain.T
+            return sm, (sc + sc.T) * 0.5
+
+        # At equal times both events share exactly the same state. Copying
+        # its smoothed distribution also supports noiseless observations,
+        # whose filtered covariance can be singular (so no solve is valid).
+        result = jax.lax.cond(
+            jnp.all(transition == jnp.eye(dimension)),
+            lambda _: (
+                tied_update(mean, covariance, pm, pc, transition, *carry) if dynamic else carry
+            ),
+            advance,
+            None,
+        )
+        return result, result
+
+    _, (sm, sc) = jax.lax.scan(
+        backward,
+        last,
+        (
+            means[:-1],
+            covariances[:-1],
+            predicted_means[1:],
+            predicted_covariances[1:],
+            A[1:],
+        ),
+        reverse=True,
+    )
+    return (
+        jnp.concatenate((sm, last[0][None])),
+        jnp.concatenate((sc, last[1][None])),
+    )
+
+
 def smoother(problem, run, times, query_modality=-1):
     """Prepare a differentiable fixed-query RTS smoother returning factor moments.
 
     Queries are zero-loading events: they introduce no observations or temporal
     discretization. Stationarity permits queries before the first observation.
     """
+    if getattr(problem, "grouped_state_space", False):
+        from .state_space_grouped import smoother as grouped_smoother
+
+        return grouped_smoother(problem, run, times, query_modality)
     jax, jnp, _, _ = runtime()
     model = problem.response_state_space
     if not problem.dynamic_state_space:
@@ -196,10 +255,6 @@ def smoother(problem, run, times, query_modality=-1):
         )
     dimension = model.dimension * problem.features
     row = jnp.asarray(model.outputs[query_modality])
-    if problem.dynamic_state_space:
-        from .state_space_delays import tied_smoother_update
-
-        tied_update = tied_smoother_update()
 
     def one(x):
         outputs = None
@@ -254,45 +309,14 @@ def smoother(problem, run, times, query_modality=-1):
             (A, Q, H, y, variance),
         )
 
-        def backward(carry, operands):
-            next_mean, next_covariance = carry
-            mean, covariance, pm, pc, transition = operands
-
-            def advance(_):
-                gain = _smoother_gain(covariance, pc, transition, semidefinite)
-                sm = mean + gain @ (next_mean - pm)
-                sc = covariance + gain @ (next_covariance - pc) @ gain.T
-                return sm, (sc + sc.T) * 0.5
-
-            # At equal times both events share exactly the same state. Copying
-            # its smoothed distribution also supports noiseless observations,
-            # whose filtered covariance can be singular (so no solve is valid).
-            result = jax.lax.cond(
-                jnp.all(transition == jnp.eye(dimension)),
-                lambda _: (
-                    tied_update(mean, covariance, pm, pc, transition, *carry)
-                    if problem.dynamic_state_space
-                    else carry
-                ),
-                advance,
-                None,
-            )
-            return result, result
-
-        _, (sm, sc) = jax.lax.scan(
-            backward,
+        sm, sc = _smooth_backward(
             last,
-            (
-                means[:-1],
-                covariances[:-1],
-                predicted_means[1:],
-                predicted_covariances[1:],
-                A[1:],
-            ),
-            reverse=True,
+            (means, covariances, predicted_means, predicted_covariances),
+            A,
+            semidefinite=semidefinite,
+            dynamic=problem.dynamic_state_space,
         )
-        sm = jnp.concatenate((sm, last[0][None]))[query_indices]
-        sc = jnp.concatenate((sc, last[1][None]))[query_indices]
+        sm, sc = sm[query_indices], sc[query_indices]
         projection = row if outputs is None else outputs[query_modality]
         sm = sm.reshape(len(times), problem.features, model.dimension) @ projection
         sc = sc.reshape(
