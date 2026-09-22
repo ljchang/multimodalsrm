@@ -8,6 +8,7 @@
     "tests/bayesian/test_bayesian_bach_posterior.py::test_bach_posterior_preserves_map_likelihood_prior_and_parameter_selection[True-shape_lag]",
     "tests/bayesian/test_bayesian_bach_posterior.py::test_bach_requires_explicit_quadrature_and_identifiable_timing_selection",
     "tests/bayesian/test_bayesian_gp_timescale.py::test_density_and_lengthscale_gradient_match_independent_integrals",
-    "tests/bayesian/test_bayesian_warmup_checkpoint.py::test_checkpoint_and_resume_match_uninterrupted_sampling[single-sequential]"
+    "tests/bayesian/test_bayesian_warmup_checkpoint.py::test_checkpoint_and_resume_match_uninterrupted_sampling[single-sequential]",
+    "tests/bayesian/test_bateman_scr.py::test_gp_values_gradients_predictions_and_archive"
   ]
 }

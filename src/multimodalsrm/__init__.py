@@ -7,6 +7,7 @@ from .estimator import MultimodalSRM
 from .inspection import KernelEstimate
 from .kernels import (
     BachSCR,
+    BatemanSCR,
     DoubleGamma,
     Gamma,
     Gaussian,
@@ -38,6 +39,7 @@ __all__ = [
     "Gamma",
     "DoubleGamma",
     "BachSCR",
+    "BatemanSCR",
     "SampledKernel",
     "Response",
     "Normal",

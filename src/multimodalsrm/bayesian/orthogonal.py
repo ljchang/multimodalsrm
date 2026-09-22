@@ -22,7 +22,7 @@ def validate_orthogonal_target(space):
 
     All parameter coordinates must be active. Dense/grouped full-training or
     validated joint-update targets support Identity/Gaussian responses and
-    explicit Gamma/DoubleGamma/BachSCR quadrature with the same temporal law per factor.
+    explicit Gamma/DoubleGamma/BachSCR/BatemanSCR quadrature with the same temporal law per factor.
     """
     if type(space) is not ParameterSubspace or type(space.problem) is not BayesianProblem:
         raise ValueError("Haar refresh requires concrete ParameterSubspace/BayesianProblem")

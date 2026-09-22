@@ -11,7 +11,15 @@ from zipfile import BadZipFile
 import numpy as np
 
 from ..data import TimeSeries, readonly_array
-from ..kernels import BachSCR, DoubleGamma, Gamma, Gaussian, Identity, Response
+from ..kernels import (
+    BachSCR,
+    BatemanSCR,
+    DoubleGamma,
+    Gamma,
+    Gaussian,
+    Identity,
+    Response,
+)
 from .fitting import SamplerConfig, SearchConfig
 from .priors import BayesianPriors, Prior
 from .spectral import SpectralConfig
@@ -26,6 +34,7 @@ CLASSES = {
         Gamma,
         DoubleGamma,
         BachSCR,
+        BatemanSCR,
         Response,
         Prior,
         BayesianPriors,

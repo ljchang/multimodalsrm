@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`BatemanSCR` as the shared skin-conductance response for R and GP workflows.**
+  Exposes positive rise/decay time constants and lag, with vectorized R cell
+  integration, complex-step derivatives, and a compact two-state realization for
+  differentiable state-space MAP. Retains the toolbox's 90-second finite support and
+  continuous L2 normalization, and handles equal and nearly equal time constants
+  without singular partial fractions. Dense and grouped GP require explicit response
+  quadrature; state-space MAP checks a uniform bound for the truncated tail.
+  `BachSCR` keeps its formula, parameters, defaults and archive identifier, and
+  archives are never silently converted: switching an existing analysis requires an
+  explicit response change and a refit.
 - **A `bayesian-cuda` extra, and one-time advice when a visible NVIDIA card goes
   unused.** The extra installs the pinned JAX CUDA plugin on Linux x86\_64 and
   resolves to the CPU runtime elsewhere. A fit process warns once when an NVIDIA

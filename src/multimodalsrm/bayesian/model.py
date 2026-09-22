@@ -40,7 +40,7 @@ class BayesianMultimodalSRM(BaseEstimator):
     supplied. Raw optimizer parameters remain unchanged. For MAP coordinates,
     use loadings ``W_raw @ configuration_['factor_orientation']['rotation']``.
     All factors share modality filters and GP timescale. Multifactor posterior
-    supports dense/grouped Identity/Gaussian responses, plus Gamma/DoubleGamma/BachSCR
+    supports dense/grouped Identity/Gaussian responses, plus Gamma/DoubleGamma/BachSCR/BatemanSCR
     with explicit response quadrature, with white noise and
     explicit training anchors. ``reported_parameter_draws()`` applies a separate
     positive-diagonal QR to each draw; raw draws and diagnostics are unchanged.
@@ -55,7 +55,7 @@ class BayesianMultimodalSRM(BaseEstimator):
     timescale in timestamp units. Pass a ``Prior`` with positive finite bounds
     to learn one shared timescale, keeping latent variance fixed at one. This
     supports dense/grouped MAP and posterior with Identity/Gaussian responses
-    or quadrature Gamma/DoubleGamma/BachSCR, independent noise and no run
+    or quadrature Gamma/DoubleGamma/BachSCR/BatemanSCR, independent noise and no run
     baselines. It is not a response width.
     Optional ``anchor=(subject, modality, feature)`` sets a positive loading
     for one factor; otherwise the first sorted eligible training feature is
@@ -85,7 +85,9 @@ class BayesianMultimodalSRM(BaseEstimator):
     rational banks before the larger Laguerre representation; either method
     can be requested explicitly. BachSCR supports fixed shapes and optional
     lag learning, with explicit error from restoring its 90-second cutoff.
-    The canonical slow tail requires a substantially larger tolerance than
+    BatemanSCR learns rise, decay and lag with two
+    response states and an explicit bound for the restored 90-second tail.
+    The canonical Bach slow tail requires a substantially larger tolerance than
     the default. SampledKernel remains unsupported.
     Prediction uses an RTS smoother; no dense observation covariance is built.
     The explicit max_observations guard still applies and can be raised.
@@ -98,7 +100,7 @@ class BayesianMultimodalSRM(BaseEstimator):
     Gaussian coefficients are marginalized exactly within that approximation.
 
     ``response_quadrature_order`` explicitly enables finite response-functional
-    quadrature for Gamma, DoubleGamma and BachSCR (and Gaussian/Identity).
+    quadrature for Gamma, DoubleGamma, BachSCR, BatemanSCR (and Gaussian/Identity).
     Orders 8..1024 are per integration panel. This path supports dense/grouped
     MAP and posterior sampling, including continuous shape estimation. BachSCR
     requires fixing t0 when learning lag. The latent process
@@ -841,7 +843,7 @@ class BayesianMultimodalSRM(BaseEstimator):
         path are sampled jointly in that parameter draw's fitted reporting
         coordinates. No MAP search, MCMC or preprocessing is performed.
 
-        Supports dense/grouped Identity/Gaussian and quadrature Gamma/DoubleGamma/BachSCR
+        Supports dense/grouped Identity/Gaussian and quadrature Gamma/DoubleGamma/BachSCR/BatemanSCR
         posteriors with independent observation noise. ``max_draws`` balances retained draws
         across chains, as in ``infer_latent``. ``random_state`` seeds NumPy's
         local generator; the model's sampling seed and state are unchanged.
