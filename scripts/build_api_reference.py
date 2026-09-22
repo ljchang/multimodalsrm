@@ -209,7 +209,7 @@ def render(key, title, names):
         out.extend([f"## {name}\n", f"`from {namespace} import {name}` · [Source]({source})\n"])
         if name == "BachSCR":
             out.append(
-                "Legacy response: see [pending removal and migration](../upcoming-changes.md). This entry appears only while the checked-out source exports BachSCR.\n"
+                "Legacy response: see [pending removal and migration](../migration.md). This entry appears only while the checked-out source exports BachSCR.\n"
             )
         if isinstance(node, ast.FunctionDef):
             out.extend([signature(name, arguments(node)), doc(node)])

@@ -1,6 +1,6 @@
 # Installation
 
-Use Python 3.12 or later. Python 3.12 is the version currently exercised by package CI. Install version `0.1.0` from PyPI, or use a source checkout for development and the example scripts.
+Use Python 3.12 or later. Python 3.12 is the version currently exercised by package CI. Install version `0.2.0` from PyPI, or use a source checkout for development and the example scripts.
 
 ## Install the release
 
@@ -9,13 +9,13 @@ Create and activate a dedicated environment, then install the base model:
 ```sh
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install "multimodalsrm==0.1.0"
+python -m pip install "multimodalsrm==0.2.0"
 ```
 
 For GP-MSRM, add the Bayesian extra:
 
 ```sh
-python -m pip install "multimodalsrm[bayesian]==0.1.0"
+python -m pip install "multimodalsrm[bayesian]==0.2.0"
 ```
 
 On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`. The following examples require a source checkout because the scripts are not installed as commands.
@@ -25,7 +25,7 @@ On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`. The following
 ```sh
 git clone https://github.com/ljchang/multimodalsrm.git
 cd multimodalsrm
-git checkout v0.1.0
+git checkout v0.2.0
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
