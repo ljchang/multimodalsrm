@@ -23,7 +23,7 @@ Finite response families inherit these operations from the kernel base class:
 
 ## Response
 
-`from multimodalsrm import Response` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L340)
+`from multimodalsrm import Response` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L290)
 
 ```python
 Response(
@@ -105,7 +105,7 @@ Fixed union over bounded family extremes, independent of fit iterates.
 
 ## Identity
 
-`from multimodalsrm import Identity` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L97)
+`from multimodalsrm import Identity` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L95)
 
 ```python
 Identity()
@@ -119,7 +119,7 @@ Identity.evaluate(lags)
 
 ## Gaussian
 
-`from multimodalsrm import Gaussian` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L111)
+`from multimodalsrm import Gaussian` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L109)
 
 ```python
 Gaussian(width=1.0, lag=0.0)
@@ -137,7 +137,7 @@ Gaussian(width=1.0, lag=0.0)
 
 ## Gamma
 
-`from multimodalsrm import Gamma` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L129)
+`from multimodalsrm import Gamma` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L127)
 
 ```python
 Gamma(shape=3.0, scale=1.0, lag=0.0)
@@ -156,7 +156,7 @@ Gamma(shape=3.0, scale=1.0, lag=0.0)
 
 ## DoubleGamma
 
-`from multimodalsrm import DoubleGamma` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L153)
+`from multimodalsrm import DoubleGamma` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L151)
 
 ```python
 DoubleGamma(
@@ -183,50 +183,9 @@ DoubleGamma(
 
 `DoubleGamma.support` (property)
 
-## BachSCR
-
-`from multimodalsrm import BachSCR` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L237)
-
-Legacy response: see [pending removal and migration](../upcoming-changes.md). This entry appears only while the checked-out source exports BachSCR.
-
-```python
-BachSCR(
-    version="2010",
-    t0=3.0745,
-    sigma=0.7013,
-    lambda1=0.3176,
-    lambda2=0.0708,
-    lag=0.0,
-)
-```
-
-
-| Field | Type | Default |
-| --- | --- | --- |
-| `version` | `str` | `"2010"` |
-| `t0` | `float` | `3.0745` |
-| `sigma` | `float` | `0.7013` |
-| `lambda1` | `float` | `0.3176` |
-| `lambda2` | `float` | `0.0708` |
-| `lag` | `float` | `0.0` |
-
-Bach et al. (2010), canonical evoked SCR, without derivative bases.
-
-g(u)=exp(-(u-t0)^2/(2 sigma^2)) for u>=0; d(u)=exp(-lambda1*u)
-+exp(-lambda2*u) for u>=0; raw(t)=integral_0^t g(u)d(t-u)du.
-Closed-form integration gives a grid-independent continuous counterpart of
-PsPM pspm_bf_scrf_f.m's sampled convolution. Our L2 normalization deliberately
-replaces PsPM peak normalization. Reference: Bach DR et al., Int J
-Psychophysiol 75:349-356, doi:10.1016/j.ijpsycho.2010.01.005.
-Verified against https://raw.githubusercontent.com/bachlab/PsPM/develop/src/pspm_bf_scrf_f.m
-
-### BachSCR.support
-
-`BachSCR.support` (property)
-
 ## BatemanSCR
 
-`from multimodalsrm import BatemanSCR` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L201)
+`from multimodalsrm import BatemanSCR` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L199)
 
 ```python
 BatemanSCR(rise=0.7, decay=3.0, lag=0.0)
@@ -244,8 +203,8 @@ Causal SCR with two exponential stages and finite continuous L2 scale.
 `rise` and `decay` are positive time constants in seconds; `lag`
 shifts the onset. Equal constants are supported. Exchanging constants
 leaves the response unchanged: use separated bounds to identify labels.
-The response ends 90 seconds after lag, as does BachSCR. This is an
-alternative shape, not a conversion of Bach parameters or fitted models.
+The response ends 90 seconds after lag and uses continuous finite L2
+normalization.
 
 ### BatemanSCR.support
 
@@ -253,7 +212,7 @@ alternative shape, not a conversion of Bach parameters or fitted models.
 
 ## SampledKernel
 
-`from multimodalsrm import SampledKernel` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L285)
+`from multimodalsrm import SampledKernel` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L235)
 
 ```python
 SampledKernel(lags, values)
@@ -271,7 +230,7 @@ SampledKernel(lags, values)
 
 ## Normal
 
-`from multimodalsrm import Normal` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L314)
+`from multimodalsrm import Normal` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L264)
 
 ```python
 Normal(mean, sd)
@@ -285,7 +244,7 @@ Normal(mean, sd)
 
 ## KernelPrior
 
-`from multimodalsrm import KernelPrior` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L324)
+`from multimodalsrm import KernelPrior` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/kernels.py#L274)
 
 ```python
 KernelPrior(reference, strength)
