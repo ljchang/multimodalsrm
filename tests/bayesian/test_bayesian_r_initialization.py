@@ -28,7 +28,7 @@ from .test_bayesian_problem import problem_fixture
 
 @pytest.mark.parametrize("value", [None, 0, 1, "True", np.bool_(True)])
 def test_r_init_requires_boolean(value):
-    assert SearchConfig().r_init is True
+    assert SearchConfig().r_init is False
     with pytest.raises(ValueError, match="r_init"):
         SearchConfig(r_init=value)
 
@@ -146,7 +146,7 @@ def test_bach_initialization_fixes_only_preliminary_response_parameters():
 
 def test_search_changes_only_first_start_and_false_never_fits_r(monkeypatch):
     problem, _, _ = fixture(algebra="grouped", gaussian=False)
-    config = SearchConfig(starts=3, maxiter=2)
+    config = SearchConfig(starts=3, maxiter=2, r_init=True)
     historical = fitting.initial_points(problem, config.starts, 7)
     point = problem.initial.copy()
     calls = []
@@ -175,7 +175,7 @@ def test_failed_r_fit_keeps_historical_start_with_diagnostic(monkeypatch):
 
     monkeypatch.setattr(r_initialization.MultimodalSRM, "fit", fail)
     with pytest.warns(RuntimeWarning, match="using the data-based GP start"):
-        best, records = fitting.search(problem, SearchConfig(starts=1, maxiter=2), 9)
+        best, records = fitting.search(problem, SearchConfig(starts=1, maxiter=2, r_init=True), 9)
     assert best is not None
     assert_array_equal(records[0]["initial_parameters"], fitting.initial_points(problem, 1, 9)[0])
     assert records[0]["initialization"]["r_init"] == "fallback"
