@@ -1,29 +1,60 @@
 """Posterior mixing diagnostics and descriptive residual/donor checks."""
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from ..data import validate_times
+from .rank_diagnostics import FIELDS, rank_diagnostics
+
+
+@dataclass(frozen=True)
+class DiagnosticTable:
+    """Mixing diagnostics of named quantities, one NumPy array per field.
+
+    ``names`` labels the rows; ``columns`` stacks fields into a rows-by-fields
+    matrix; ``row`` and ``rows`` give per-quantity dictionaries. This is the
+    whole tabular contract the package uses, so no table library is needed.
+    """
+
+    names: tuple
+    ess_bulk: np.ndarray
+    ess_tail: np.ndarray
+    r_hat: np.ndarray
+    mcse_mean: np.ndarray
+    mcse_sd: np.ndarray
+
+    def __len__(self):
+        return len(self.names)
+
+    def columns(self, fields=FIELDS):
+        return np.column_stack([getattr(self, field) for field in fields])
+
+    def row(self, index):
+        return {field: float(getattr(self, field)[index]) for field in FIELDS}
+
+    def rows(self):
+        return (self.row(index) for index in range(len(self)))
 
 
 def diagnostic_summary(values, *, name="parameter"):
     """Keep chain/draw axes and the declared 5%/95% tail-ESS definition.
 
-    An explicit Dataset works with both ArviZ 0.x and 1.x. The latter's
-    default tail probabilities depend on its credible-interval setting;
-    upgrading diagnostics must not silently change our qualification gate.
+    Bulk rank ESS, 5%/95% tail ESS, rank-normalized split R-hat and the
+    mean/SD Monte Carlo errors follow ArviZ's definitions and are computed
+    for every quantity at once by :mod:`rank_diagnostics`; upgrading ArviZ
+    cannot silently change this qualification gate.
     """
-    import arviz as az
-    import xarray as xr
-
     values = np.asarray(values)
     if values.ndim not in (2, 3):
         raise ValueError("diagnostic values must have chain/draw[/quantity] shape")
-    dims = ("chain", "draw") + ((f"{name}_dim_0",) if values.ndim == 3 else ())
-    dataset = xr.Dataset({name: (dims, values)})
-    result = az.summary(dataset, kind="diagnostics", round_to="none")
-    tails = az.ess(dataset, method="tail", prob=(0.05, 0.95))
-    result["ess_tail"] = np.asarray(tails[name]).reshape(-1)
-    return result
+    if values.ndim == 2:
+        names = (name,)
+        fields = rank_diagnostics(values[..., None])
+    else:
+        names = tuple(f"{name}[{i}]" for i in range(values.shape[-1]))
+        fields = rank_diagnostics(values)
+    return DiagnosticTable(names, **fields)
 
 
 def _arrays(*arrays):
