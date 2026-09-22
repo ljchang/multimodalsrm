@@ -27,7 +27,7 @@ Fast PR CI builds the site inside its required quality job. Prose and site-confi
 
 The separate **Documentation** workflow rebuilds and deploys the site after a push to `main`. It can also be run manually on `main`. PRs and other branches cannot deploy. The deployment job alone receives Pages and OIDC write permissions, and GitHub's `github-pages` environment can add deployment protection rules.
 
-The intended address is `https://ljchang.github.io/multimodalsrm/`. A repository administrator must select **Settings → Pages → Build and deployment → Source: GitHub Actions** before the first deployment. Confirm the workflow and live URL after merging; a successful local build is not a deployment.
+The site is live at [ljchang.github.io/multimodalsrm](https://ljchang.github.io/multimodalsrm/). GitHub Pages uses **Settings → Pages → Build and deployment → Source: GitHub Actions**. Confirm the workflow and live URL after merging; a successful local build is not a deployment.
 
 ## Scope of this first site
 

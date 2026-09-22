@@ -6,7 +6,7 @@
 
 Shared response models for observations measured across people, modalities and native sampling times.
 
-**Development version: `0.1.0.dev0`.** This repository contains the extracted R-MSRM and GP-MSRM implementations. It has not been released on PyPI. Install from a checkout for development; a configured Trusted Publisher does not mean a release has occurred. Software checks, fit convergence, uncertainty calibration and empirical recovery are separate claims.
+**Version `0.1.0`.** This package contains the extracted R-MSRM and GP-MSRM implementations. Software checks, fit convergence, uncertainty calibration and empirical recovery are separate claims.
 
 ## Models
 
@@ -15,9 +15,21 @@ Shared response models for observations measured across people, modalities and n
 
 Both use named native-time observations, masks and missing streams. They preserve explicit information boundaries for held-out prediction. Learned FIR responses are deferred. Legacy neighborhood, graph, mixture and reference estimators are not exported by this package. See the [capability and backend matrix](docs/capabilities.md) before choosing a workflow.
 
-## Install from source
+## Install
 
-Python 3.12 or later is required. From a clone:
+Python 3.12 or later is required. Install the release from PyPI:
+
+```sh
+python -m pip install "multimodalsrm==0.1.0"
+# Optional Bayesian runtime:
+python -m pip install "multimodalsrm[bayesian]==0.1.0"
+```
+
+Enable float64 before using the Bayesian model (`JAX_ENABLE_X64=true`). See the [installation guide](https://ljchang.github.io/multimodalsrm/getting-started/) for environment setup.
+
+### Development and runnable examples
+
+The example scripts live in the source repository. From a clone:
 
 ```sh
 python3.12 -m venv .venv
@@ -33,7 +45,7 @@ python -m pip install -e '.[bayesian]'
 JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python examples/gp_map_quickstart.py
 ```
 
-The base install does not require JAX, NumPyro, ArviZ or plotting libraries. The Bayesian extra pins the runtime used by the source handoff; enabling float64 is required. These source-install commands do not depend on a PyPI release.
+The base install does not require JAX, NumPyro, ArviZ or plotting libraries. The Bayesian extra pins the runtime used by the source handoff; enabling float64 is required. Editable source installs follow the checkout; use the `v0.1.0` tag to match this release.
 
 ## Data and imports
 

@@ -1,6 +1,6 @@
 # Model integration and provenance
 
-The production implementation is extracted from [shared-response-models](https://github.com/ljchang/shared-response-models) at the frozen merged commit [`67128c7a562cab67499bdc0604357731a628aa9e`](https://github.com/ljchang/shared-response-models/tree/67128c7a562cab67499bdc0604357731a628aa9e). The source commit, transferred suites and integration state are recorded in [`model-integration.json`](https://github.com/ljchang/multimodalsrm/blob/main/model-integration.json). The package version remains `0.1.0.dev0`; extraction is not a release.
+The production implementation is extracted from [shared-response-models](https://github.com/ljchang/shared-response-models) at the frozen merged commit [`67128c7a562cab67499bdc0604357731a628aa9e`](https://github.com/ljchang/shared-response-models/tree/67128c7a562cab67499bdc0604357731a628aa9e). The source commit, transferred suites and integration state are recorded in [`model-integration.json`](https://github.com/ljchang/multimodalsrm/blob/main/model-integration.json). This handoff is the implementation basis for version `0.1.0`. The transfer evidence below is distinct from release CI and registry publication.
 
 ## Scope
 

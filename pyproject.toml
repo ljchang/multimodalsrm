@@ -37,7 +37,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/ljchang/multimodalsrm"
-Documentation = "https://github.com/ljchang/multimodalsrm/tree/main/docs"
+Documentation = "https://ljchang.github.io/multimodalsrm/"
 Repository = "https://github.com/ljchang/multimodalsrm"
 Issues = "https://github.com/ljchang/multimodalsrm/issues"
 Changelog = "https://github.com/ljchang/multimodalsrm/blob/main/CHANGELOG.md"

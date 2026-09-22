@@ -9,8 +9,8 @@ Use it to fit a common representation, infer latent responses on new recordings,
 [Get started](getting-started.md){ .md-button .md-button--primary }
 [How it works](concepts.md){ .md-button }
 
-!!! info "Development documentation"
-    These pages describe the development code on `main`. The package is currently `0.1.0.dev0` and has not been released on PyPI. Start with a source installation.
+!!! info "Version 0.1.0"
+    Install the package from PyPI. These pages follow `main`; use the `v0.1.0` source tag when matching an analysis to this release.
 
 ## Choose a model
 
@@ -26,7 +26,7 @@ Both model families accept native timestamps, masks, and missing streams. The de
 
 ## Learn the workflow
 
-1. [Install from source](getting-started.md) in a dedicated Python environment.
+1. [Install the package](getting-started.md) in a dedicated Python environment.
 2. [Prepare your data](data.md) with explicit participant, run, and modality names.
 3. [Run the synthetic tutorials](tutorials.md) for fitting and held-out prediction.
 4. Read the [capability and diagnostic guide](capabilities.md) before using advanced Bayesian workflows.

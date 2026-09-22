@@ -1,6 +1,6 @@
 # Migration from personalized-srm
 
-Use a separate environment for the new package and retain the frozen research environment for historical replay. This package is `multimodalsrm` version `0.1.0.dev0`, not a new release of the `personalized_srm` namespace.
+Use a separate environment for the new package and retain the frozen research environment for historical replay. This package is `multimodalsrm` version `0.1.0`, not a new release of the `personalized_srm` namespace.
 
 ## Imports
 
