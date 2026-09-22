@@ -97,7 +97,7 @@ Gibbs with the shift move, two chains on the CPU, 500 warmup and 5,000 sweeps th
 | Loading norms | 692 | 1,145 | 1,842 | 1.007 |
 | Offsets | 692 | 1,521 | 1,970 | 1.005 |
 
-Total sampling time 445 s. The NUTS run on this problem (two vectorized chains, diagonal metric, 100 warmup and 100 draws on the PRO 6000) was still running when this note was written and will be added; at 255 steps per iteration and 0.13 s per gradient it is expected to take several hours and to remain unconverged at that budget.
+Total sampling time 445 s. A NUTS run on this problem (two vectorized chains, diagonal metric, 100 warmup and 100 draws on the PRO 6000) was stopped after 2 h 6 min without producing a draw record, to free the card. At 255 steps per iteration, which every other NUTS run here and in the synthetic campaign showed, and 0.12 s per gradient, that budget extrapolates to about 5.5 h, and the reduced-problem result says it would not converge at that budget. The comparison on this problem is therefore Gibbs at 445 s with more than a thousand effective samples per quantity against a NUTS run that cannot deliver its first 200 iterations in two hours.
 
 ## What this changes in the recommended order
 
