@@ -124,10 +124,10 @@ def test_actual_r_fit_transfers_responses_and_is_reproducible(kind):
             assert lo < first[index] < hi
 
 
-def test_bach_initialization_fixes_only_preliminary_response_parameters():
-    from .test_bayesian_bach_posterior import prepared_bach
+def test_bateman_initialization_fixes_only_preliminary_response_parameters():
+    from .test_bayesian_bateman_posterior import prepared_bateman
 
-    _, problem, _, _ = prepared_bach(3, order=16)
+    _, problem, _, _ = prepared_bateman(3, order=16)
     response = problem.responses["signal"]
     free = response.free_parameters
     point, report = r_initialization.r_initial_point(problem, 1)
