@@ -1,6 +1,7 @@
 # MultimodalSRM
 
 [![CI](https://github.com/ljchang/multimodalsrm/actions/workflows/ci.yml/badge.svg)](https://github.com/ljchang/multimodalsrm/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/docs-online-teal)](https://ljchang.github.io/multimodalsrm/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Shared response models for observations measured across people, modalities and native sampling times.
@@ -49,6 +50,7 @@ Use consistent timestamp units across streams. Separate runs have separate laten
 
 ## Documentation and development
 
+- **[Read the documentation](https://ljchang.github.io/multimodalsrm/)** — installation, data preparation, model concepts, and tutorials.
 - [Documentation overview](docs/index.md), [installation](docs/getting-started.md), and [model concepts](docs/concepts.md)
 - [Tutorials](docs/tutorials.md) and [capabilities](docs/capabilities.md)
 - [Preview and contribute to the Zensical site](docs/documentation.md)
