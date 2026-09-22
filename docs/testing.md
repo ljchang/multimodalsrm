@@ -10,7 +10,7 @@ Routine reviews use the fast `ci.yml` workflow. The complete `full-tests.yml` wo
 
 Documentation-only means changes entirely within `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `zensical.toml`, `requirements-docs.txt`, or recognized prose/image files under `docs/`. Unknown paths, executable documentation, mixed changes and unavailable history receive code checks. The workflow always reports **Required checks**; only documentation profiles may skip its model jobs. New commits cancel superseded fast runs.
 
-The Bayesian smoke manifest is `tests/smoke-tests.json`. It exercises likelihood/prior contracts, factorization, response filters, learned GP timescales and a short sampler checkpoint/resume check. It is deliberately limited. For numerical changes, run the affected tests and request the complete suite before merging when broader coverage is needed. Passing fast CI does not imply the full suite passed.
+The Bayesian smoke manifest is `tests/smoke-tests.json`. It exercises likelihood/prior contracts, factorization, posterior mixing diagnostics, response filters, learned GP timescales and a short sampler checkpoint/resume check. It is deliberately limited. For numerical changes, run the affected tests and request the complete suite before merging when broader coverage is needed. Passing fast CI does not imply the full suite passed.
 
 ## Complete suite
 

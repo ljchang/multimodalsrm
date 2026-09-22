@@ -8,22 +8,25 @@ from ..data import validate_times
 def diagnostic_summary(values, *, name="parameter"):
     """Keep chain/draw axes and the declared 5%/95% tail-ESS definition.
 
-    An explicit Dataset works with both ArviZ 0.x and 1.x. The latter's
-    default tail probabilities depend on its credible-interval setting;
-    upgrading diagnostics must not silently change our qualification gate.
+    Bulk rank ESS, 5%/95% tail ESS, rank-normalized split R-hat and the
+    mean/SD Monte Carlo errors follow ArviZ's definitions and are computed
+    for every quantity at once by :mod:`rank_diagnostics`; upgrading ArviZ
+    cannot silently change this qualification gate.
     """
-    import arviz as az
-    import xarray as xr
+    import pandas as pd
+
+    from .rank_diagnostics import FIELDS, rank_diagnostics
 
     values = np.asarray(values)
     if values.ndim not in (2, 3):
         raise ValueError("diagnostic values must have chain/draw[/quantity] shape")
-    dims = ("chain", "draw") + ((f"{name}_dim_0",) if values.ndim == 3 else ())
-    dataset = xr.Dataset({name: (dims, values)})
-    result = az.summary(dataset, kind="diagnostics", round_to="none")
-    tails = az.ess(dataset, method="tail", prob=(0.05, 0.95))
-    result["ess_tail"] = np.asarray(tails[name]).reshape(-1)
-    return result
+    if values.ndim == 2:
+        index = [name]
+        fields = rank_diagnostics(values[..., None])
+    else:
+        index = [f"{name}[{i}]" for i in range(values.shape[-1])]
+        fields = rank_diagnostics(values)
+    return pd.DataFrame({field: fields[field] for field in FIELDS}, index=index)
 
 
 def _arrays(*arrays):

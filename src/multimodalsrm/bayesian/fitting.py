@@ -13,6 +13,7 @@ from .blocks import ParameterSubspace
 from .diagnostics import diagnostic_summary
 from .execution import execution_info
 from .problem import _group_priors
+from .rank_diagnostics import bfmi as energy_bfmi
 from .timing import PhaseTimings
 
 
@@ -584,7 +585,6 @@ def sample(
         execution_info(config)
         jax, jnp, _, _ = runtime()
         try:
-            import arviz as az
             from numpyro.infer import MCMC, NUTS
         except ImportError as exc:
             raise ImportError("posterior diagnostics require multimodalsrm[bayesian]") from exc
@@ -706,7 +706,7 @@ def sample(
             [xs[..., list(space.active_indices)], loglik[..., None]], axis=-1
         )
         summary = diagnostic_summary(quantities)
-        bfmi = np.asarray(az.bfmi(extra["energy"]))
+        bfmi = energy_bfmi(extra["energy"])
     diagnostic = dict(
         execution=execution,
         metric=metric,
