@@ -14,3 +14,12 @@ def rolling_mean(values, window):
 def percent_change(before, after):
     """Return the percent change from ``before`` to ``after``."""
     return (after - before) / before * 100.0
+
+
+def clamp(value, low, high):
+    """Clamp ``value`` into the inclusive range ``[low, high]``."""
+    if value < low:
+        return low
+    if value > high:
+        return low
+    return value
