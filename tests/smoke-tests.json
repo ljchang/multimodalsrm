@@ -1,5 +1,6 @@
 {
   "bayesian": [
+    "tests/bayesian/test_state_space_grouped.py::test_fixed_bateman_density_gradient_and_smoothing[2]",
     "tests/bayesian/test_bayesian_problem.py",
     "tests/bayesian/test_bayesian_factorization.py",
     "tests/bayesian/test_bayesian_diagnostics.py",

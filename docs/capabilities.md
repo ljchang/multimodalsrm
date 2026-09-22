@@ -19,6 +19,15 @@ Full posterior responses are analytic Identity/Gaussian or Gamma/DoubleGamma/Bac
 
 State-space MAP uses native-time Matérn-3/2 Kalman inference and an RTS smoother. Gaussian responses use rational or Laguerre approximation; Gamma shapes remain fixed while supported scales and lags may be estimated. BachSCR permits lag estimation with fixed shape, and restoring its truncated tail can require a larger error tolerance. BatemanSCR learns rise/decay time constants and lag in two response states, with a bound for the restored 90-second tail. These backend choices do not change MAP into posterior inference. See the [SCR response guide](scr-responses.md) for configuration and migration.
 
+With all responses fixed and a strictly positive noise prior, `state_space`
+automatically groups identical modality/time measurements for both filtering
+and smoothing. This retains each measurement's noise, residual and likelihood
+normalization, all participant contributions, feature masks and separate run
+priors. Timestamps are matched exactly; close times are never binned. Learned
+responses and noise priors whose support includes zero retain scalar updates.
+The [grouped filtering guide](grouped-state-space.md) describes the numerical
+method, configuration and performance checks.
+
 A learned `length_scale` uses a bounded physical `Prior` with finite, strictly positive bounds. One timescale is shared across factors and runs; loadings set amplitude while GP variance stays one. Learning the timescale changes the inference target and requires new convergence/identification checks. MAP options outside the full posterior scope, such as fixed run-baseline priors, must not be assumed to carry over to joint posterior updates.
 
 ## Responses and workflow semantics

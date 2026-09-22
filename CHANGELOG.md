@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Grouped fixed-response state-space filtering and smoothing.** Observations that
+  share an exact `(modality, native timestamp)` are collapsed into single nodes for
+  filtering and RTS smoothing, rather than repeating a Kalman update and storing a
+  transition per observed scalar. In a synthetic fixed-Bateman case 8,002 scalar
+  events become 257 nodes and complete fit time falls from 19.6 s to 8.0 s, with both
+  fits converging to the same objective. Grouping engages automatically inside
+  `linear_algebra="state_space"` when responses are fixed and noise support is
+  strictly positive; learned responses and priors admitting zero variance keep scalar
+  updates. Timestamps are compared exactly, with no binning or added jitter, and
+  archive schemas and historical fit evidence are preserved.
 - **`BatemanSCR` as the shared skin-conductance response for R and GP workflows.**
   Exposes positive rise/decay time constants and lag, with vectorized R cell
   integration, complex-step derivatives, and a compact two-state realization for

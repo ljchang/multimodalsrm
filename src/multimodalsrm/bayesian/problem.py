@@ -228,6 +228,11 @@ class BayesianProblem:
         self.baseline_designs = {}
         self.noise_systems = {}
         self.state_space_systems = {}
+        self.grouped_state_space = False
+        if linear_algebra == "state_space":
+            from .state_space_grouped import eligible
+
+            self.grouped_state_space = eligible(self)
         key_indices = {key: i for i, key in enumerate(self.keys)}
         group_indices = {key: i for i, key in enumerate(self.groups)}
         modality_indices = {key: i for i, key in enumerate(self.modalities)}
@@ -242,8 +247,15 @@ class BayesianProblem:
             if linear_algebra == "state_space" and not self.dynamic_state_space:
                 from .state_space import StateSpaceSystem
 
+                times, modalities = system.times, self._packed[run][2]
+                if self.grouped_state_space:
+                    from .grouped import GroupedSystem
+
+                    nodes = GroupedSystem.prepare(times, modalities, covariance_lookup=False)
+                    self.grouped_systems[run] = nodes
+                    times, modalities = nodes.times, nodes.modalities
                 self.state_space_systems[run] = StateSpaceSystem.prepare(
-                    system.times - self.response_state_space.lags[self._packed[run][2]],
+                    times - self.response_state_space.lags[modalities],
                     self.response_state_space,
                     self.features,
                 )
