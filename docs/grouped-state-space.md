@@ -27,8 +27,34 @@ The noise prior describes observation **variance** in supplied data units; the
 numbers above are illustrative. Grouping applies to all supported responses, including Identity, Gaussian,
 Gamma, DoubleGamma, BachSCR and BatemanSCR. Parameter restrictions are unchanged:
 Gamma shapes and Bach shape parameters remain fixed; supported widths, scales,
-ratios, Bateman rise/decay and response lags may be learned. Gaussian approximations and finite-response
-tail qualifications retain their existing covariance error bounds.
+ratios, Bateman rise/decay and response lags may be learned. Gaussian approximations
+and finite-response tail qualifications retain their existing covariance error bounds.
+
+For example, to learn the SCR rise, decay and lag in the model above, supply
+bounds and a prior for each free response parameter:
+
+```python
+model.set_params(
+    responses={
+        "reference": Response(Identity(), estimate=False, pooling="shared"),
+        "scr": Response(
+            BatemanSCR(0.7, 2.0, 0.1),
+            pooling="shared",
+            bounds={"rise": (0.4, 1.2), "decay": (1.5, 3.0), "lag": (-0.5, 0.5)},
+        ),
+    },
+    priors=BayesianPriors(
+        noise=Prior.lognormal(np.log(0.1), 0.7),
+        filters={
+            "scr": {
+                "rise": Prior.normal(0.7, 0.4),
+                "decay": Prior.normal(2.0, 0.4),
+                "lag": Prior.normal(0.1, 0.4),
+            }
+        },
+    ),
+)
+```
 
 ## Numerical contract
 
@@ -70,8 +96,8 @@ State-space posterior sampling and learned GP timescales remain outside the
 current backend's supported scope.
 
 Fitted archive formats and saved configuration/diagnostic evidence are unchanged.
-Historical fixed- and learned-response archives can use grouped prediction after loading;
-floating-point results may differ slightly because measurement arithmetic is
+Historical fixed- and learned-response archives can use grouped prediction after
+loading; floating-point results may differ slightly because measurement arithmetic is
 regrouped. Tests compare such replay against scalar predictions and verify
 that the original fit evidence survives loading and resaving.
 
@@ -131,3 +157,26 @@ include cold setup and compilation. These are comparisons with the previous
 scalar state-space implementation; they do not establish superiority over
 dense grouped GP on every workload or measure GPU speed. See the
 [individual results and environment](grouped-state-space-results.json).
+
+### Learned-response CPU comparison
+
+Six additional complete fits used the same setup, with either the Bateman lag
+or all three Bateman parameters learned. Use `--response bateman --parameters lag`
+or `--response bateman --parameters all` with each backend to reproduce them.
+All six passed the `1e-3` physical projected-gradient threshold; paired endpoint
+objectives agreed within `3.5e-12`.
+
+| Learned Bateman parameters | Times per stream after the initial gap | Scalar fit | Grouped fit | Fit ratio | Gradient ratio | Smoother ratio |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Lag | 32 | 28.29 s | 12.55 s | 2.25× | 20.00× | 14.26× |
+| Rise, decay, lag | 32 | 47.17 s | 14.93 s | 3.16× | 18.80× | 14.18× |
+| Rise, decay, lag | 128 | 134.64 s | 20.59 s | 6.54× | 18.53× | 18.14× |
+
+The larger case evaluated transitions at 256 nodes instead of 7,971 scalar
+events, reducing the materialized transition arrays by about 31×. This counts
+those arrays, not peak process memory. At identical physical probes, maximum
+absolute differences across these cases were `3.0e-11` in objective, `2.8e-10`
+in gradients, `1.4e-13` in smoother means and `2.9e-15` in factor covariances.
+The same timing qualifications above apply; these are single-seed synthetic
+CPU comparisons, not response-recovery or hardware-general speed guarantees.
+See the [learned-response results and environment](grouped-learned-state-space-results.json).
