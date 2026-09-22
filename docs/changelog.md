@@ -59,6 +59,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   all leave the `bayesian` extra, and ArviZ joins the `test` extra as the
   reference implementation.
 
+### Removed
+
+- **Breaking: `BachSCR` is removed.** Use `BatemanSCR` for skin-conductance
+  workflows. `BachSCR` is no longer importable or accepted by R or GP fitting, and
+  its separate rational approximation, quadrature formula, parameter constraints and
+  serialization registration are gone. GP archives containing Bach records now fail
+  before model reconstruction with migration guidance: reproduce them in their
+  original environment, or configure `BatemanSCR` and refit from the original
+  observations. No fitted parameters or archives are converted automatically.
+  Remaining response identifiers and archive schemas are unchanged.
+
 ## [0.1.0] — 2026-09-22
 
 First package release of the extracted models.
