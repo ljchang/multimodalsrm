@@ -6,8 +6,9 @@ authors:
   - family-names: Chang
     given-names: Luke J.
 repository-code: https://github.com/ljchang/multimodalsrm
-url: https://github.com/ljchang/multimodalsrm
+url: https://ljchang.github.io/multimodalsrm/
+version: 0.1.0
 license: MIT
 abstract: >-
-Distribution infrastructure for regularized and Gaussian-process shared response
-models with native-time multimodal observations. Model integration is pending.
+  Regularized and Gaussian-process shared response models for observations
+  across participants, modalities, and native sampling times.
