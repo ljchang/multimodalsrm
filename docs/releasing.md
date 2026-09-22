@@ -20,10 +20,28 @@ Create the matching GitHub environments. The workflow uses OIDC with `id-token: 
 ## Release candidate
 
 1. Complete the [model handoff](model-integration.md), required suites, clean installed-artifact checks and documentation.
-2. Set the single version in `src/multimodalsrm/_version.py`, for example `0.1.0rc1`, and update the changelog. The version must not be a development or local build.
+2. Set the single version in `src/multimodalsrm/_version.py`, for example `0.1.0rc1`, and [close out the changelog](#changelog). The version must not be a development or local build.
 3. Commit reviewed changes, let fast PR CI pass and create the matching Git tag, for example `v0.1.0rc1`. You can also run **Full test suite** manually on a branch before tagging; it does not publish.
 4. Manually run **Release** with that tag. Manual runs publish only to TestPyPI after resolving the tag to one commit and running `full-tests.yml`: the complete Linux/macOS model matrix and installed wheel/sdist checks. Fast PR CI never replaces this release gate.
 5. Install the exact candidate from TestPyPI in a clean environment and exercise its workflows. Resolve dependencies from PyPI separately; avoid allowing TestPyPI to supply arbitrary runtime dependencies. Record the version, artifact hashes and results.
+
+## Changelog
+
+`CHANGELOG.md` at the repository root follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Merged work accumulates under `## [Unreleased]`, so it never claims to have shipped in a version that is already published.
+
+To close it out for a release:
+
+1. Rename `## [Unreleased]` to `## [<version>] — <YYYY-MM-DD>` and open a fresh, empty `## [Unreleased]` above it.
+2. Update the link definitions at the bottom of the file: point `[Unreleased]` at `compare/v<version>...HEAD` and add a `[<version>]` entry for the release tag.
+3. Regenerate the documentation page:
+
+    ```bash
+    python scripts/sync_changelog.py
+    ```
+
+4. Commit both `CHANGELOG.md` and `docs/changelog.md`.
+
+`docs/changelog.md` is generated, never edited by hand. `tests/infrastructure/test_changelog.py` fails if it drifts from the root file, if a released section lacks a date, or if `[Unreleased]` is missing, so a forgotten sync fails fast PR CI rather than publishing a stale page.
 
 ## Production
 

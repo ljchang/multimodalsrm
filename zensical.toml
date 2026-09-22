@@ -27,6 +27,7 @@ nav = [
     { "Releases" = "releasing.md" },
     { "Integration and provenance" = "model-integration.md" },
   ] },
+  { "Changelog" = "changelog.md" },
 ]
 
 [project.theme]
