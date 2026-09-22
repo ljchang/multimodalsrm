@@ -164,6 +164,7 @@ For each decision, record tested workload limits, unsupported responses, failed 
 
 - [Package model handoff](../../model-integration.md) and [release process](../../releasing.md).
 - [Prior Apple MPS feasibility findings and scalar evidence](../../performance/2026-09-19-apple-mps-feasibility.md), including the corrected optimized CPU baseline and limits of the historical tests.
+- [Linux CUDA GPU opportunities](../../performance/2026-09-21-linux-cuda-gpu-opportunities.md): September 21, 2026 synthetic measurements on the workstation's RTX 3090, partial RTX PRO 6000 rows, CPU thread findings, and the state-space memory prerequisite. These inform Stage C candidate selection but are not the release-baseline measurements this plan requires.
 - Historical development reports: `shared-response-models/docs/empirical/cpu-optimization-v3.md`, `gp-cpu-optimization-v4.md`, `docs/GP_STATE_SPACE.md`, `docs/GP_POSTERIOR_WORKFLOW.md`, and `docs/GP_WARMUP_CHECKPOINTS.md`. Read the released equivalents when available; earlier timings are context, not Linux results.
 - [JAX CUDA installation](https://docs.jax.dev/en/latest/installation.html) and [associative scan](https://docs.jax.dev/en/latest/_autosummary/jax.lax.associative_scan.html).
 - [NumPyro MCMC execution modes](https://num.pyro.ai/en/latest/mcmc.html).
