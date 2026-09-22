@@ -7,7 +7,8 @@ import numpy as np
 from scipy.special import gammainc, gammaln
 from scipy.stats import gamma as gamma_distribution
 
-from ..kernels import DoubleGamma, Gamma, Gaussian, Identity
+from .. import _bateman
+from ..kernels import BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
 from ._backend import runtime
 from .state_space_gaussian import GAUSSIAN_ORDERS, gaussian_template
 from .state_space_responses import ResponseStateSpace
@@ -47,6 +48,7 @@ def _parameter_box(response):
     kernel = response.initial_kernel()
     allowed = {
         Identity: set(),
+        BatemanSCR: {"rise", "decay", "lag"},
         Gaussian: {"width", "lag"},
         Gamma: {"scale", "lag"},
         DoubleGamma: {"peak_scale", "undershoot_scale", "undershoot_ratio", "lag"},
@@ -84,6 +86,9 @@ def _gamma_bounds(kernel, box):
     """Conservative L1 mass/tail bounds using a lower finite L2 norm over the box."""
     if type(kernel) is Identity:
         return 1.0, 0.0
+
+    if type(kernel) is BatemanSCR:
+        return _bateman.bounds(box)
 
     def component(shape, scale):
         q = gamma_distribution.ppf(1 - 1e-8, shape)

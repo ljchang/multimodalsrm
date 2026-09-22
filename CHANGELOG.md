@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add BatemanSCR as the common SCR response option for R and GP workflows, including differentiable state-space MAP, finite normalization, and explicit tail bounds. Preserve BachSCR parameters and archive behavior; include a shared R/GP example and numerical qualification tests.
+
 ## 0.1.0
 
 - Extract R-MSRM and GP-MSRM production modules from the frozen source handoff, retaining model objectives, response conventions, priors and numerical behavior.

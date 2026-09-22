@@ -15,6 +15,8 @@ Shared response models for observations measured across people, modalities and n
 
 Both use named native-time observations, masks and missing streams. They preserve explicit information boundaries for held-out prediction. Learned FIR responses are deferred. Legacy neighborhood, graph, mixture and reference estimators are not exported by this package. See the [capability and backend matrix](docs/capabilities.md) before choosing a workflow.
 
+The development checkout adds `Response(BatemanSCR(...))` for skin-conductance streams across R and supported GP workflows. See the [SCR guide](docs/scr-responses.md) and [shared R/GP example](examples/scr_quickstart.py). Existing Bach models and archives remain reproducible.
+
 ## Install
 
 Python 3.12 or later is required. Install the release from PyPI:

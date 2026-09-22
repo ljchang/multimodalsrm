@@ -16,6 +16,7 @@ from scipy.integrate import quad
 from scipy.special import ndtr
 from scipy.stats import gamma as gamma_distribution
 
+from . import _bateman
 from .data import readonly_array, validate_times
 
 
@@ -194,6 +195,42 @@ class DoubleGamma(Kernel):
         ) - self.undershoot_ratio * gamma_distribution.pdf(
             x - self.lag, self.undershoot_shape, scale=self.undershoot_scale
         )
+
+
+@dataclass(frozen=True)
+class BatemanSCR(Kernel):
+    """Causal SCR with two exponential stages and finite continuous L2 scale.
+
+    ``rise`` and ``decay`` are positive time constants in seconds; ``lag``
+    shifts the onset. Equal constants are supported. Exchanging constants
+    leaves the response unchanged: use separated bounds to identify labels.
+    The response ends 90 seconds after lag, as does BachSCR. This is an
+    alternative shape, not a conversion of Bach parameters or fitted models.
+    """
+
+    rise: float = 0.7
+    decay: float = 3.0
+    lag: float = 0.0
+    positive_parameters = ("rise", "decay")
+    reference = "Benedek & Kaernbach (2010), doi:10.1016/j.jneumeth.2010.04.028"
+    truncation = "90 seconds after lag; finite continuous L2 normalization"
+
+    def __post_init__(self):
+        self._validate()
+
+    @property
+    def support(self):
+        return (self.lag, self.lag + _bateman.SCR_DURATION)
+
+    @cached_property
+    def _energy(self):
+        norm = float(_bateman.energy(self.rise, self.decay))
+        if not np.isfinite(norm) or norm <= 0:
+            raise ValueError("SCR kernel must have positive finite continuous energy")
+        return norm
+
+    def _raw(self, x):
+        return _bateman.raw(np.maximum(x - self.lag, 0), self.rise, self.decay)
 
 
 @dataclass(frozen=True)

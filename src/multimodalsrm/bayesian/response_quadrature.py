@@ -9,10 +9,11 @@ from functools import lru_cache
 
 import numpy as np
 
-from ..kernels import BachSCR, DoubleGamma, Gamma, Gaussian, Identity
+from .. import _bateman
+from ..kernels import BachSCR, BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
 from ._backend import runtime
 
-FAMILIES = (Identity, Gaussian, Gamma, DoubleGamma, BachSCR)
+FAMILIES = (Identity, Gaussian, Gamma, DoubleGamma, BachSCR, BatemanSCR)
 
 
 def validate_order(order):
@@ -182,6 +183,9 @@ class ResponseQuadrature:
                 if type(kernel) is Gamma
                 else component("peak_", u) - p["undershoot_ratio"] * component("undershoot_", u)
             )
+        elif type(kernel) is BatemanSCR:
+            u, q = map(jnp.asarray, self.scr_rule)
+            raw = _bateman.raw(u, p["rise"], p["decay"], jnp)
         else:
             u, q = map(jnp.asarray, self.scr_rule)
             log_components = []

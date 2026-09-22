@@ -5,7 +5,7 @@ import copy
 import numpy as np
 from scipy.optimize import minimize
 
-from .kernels import Gaussian
+from .kernels import BatemanSCR, Gaussian
 
 
 def group_kernels(kernels, responses):
@@ -106,8 +106,17 @@ class KernelObjective:
         self.responses, self.prepared = responses, prepared
         self.full_objective = full_objective
         self.baseline = float(full_objective(kernels)) - kernel_penalty(kernels, responses)
+        self.gradient_method = (
+            "complex_step"
+            if any(
+                responses[m].free_parameters and type(k) is BatemanSCR
+                for mods in kernels.values()
+                for m, k in mods.items()
+            )
+            else "analytic"
+        )
         self.analytic_gradient = all(
-            not responses[m].free_parameters or type(k) is Gaussian
+            not responses[m].free_parameters or type(k) in (Gaussian, BatemanSCR)
             for mods in kernels.values()
             for m, k in mods.items()
         )
@@ -225,7 +234,9 @@ def optimize_kernels(kernels, responses, objective, max_iter):
         message=str(result.message),
         objective_before=float(before),
         objective_after=float(verified_after),
-        gradient_method="analytic" if analytic else "finite_difference",
+        gradient_method=getattr(objective, "gradient_method", "analytic")
+        if analytic
+        else "finite_difference",
         function_evaluations=int(result.nfev),
         boundary_parameters=[
             str(keys[i])

@@ -23,6 +23,16 @@ The [GP example](https://github.com/ljchang/multimodalsrm/blob/main/examples/gp_
 
 The script prints MAP diagnostics. Its conditional Gaussian prediction uncertainty excludes parameter-posterior uncertainty; no MCMC is run. It works in supplied observation units without a learned external standardizer. The Bayesian runtime must enable float64 before fitting. These small examples check usage and replay, not physiological recovery or interval coverage.
 
+## Skin conductance: one response across R and GP
+
+```sh
+python examples/scr_quickstart.py
+JAX_ENABLE_X64=true python examples/scr_quickstart.py --gp grouped
+JAX_ENABLE_X64=true python examples/scr_quickstart.py --gp state_space
+```
+
+The [SCR example](https://github.com/ljchang/multimodalsrm/blob/main/examples/scr_quickstart.py) uses `BatemanSCR` in a shared response configuration for R and GP MAP. It checks target-excluded predictions and GP archive replay using synthetic recordings. See the [SCR guide](scr-responses.md) for time-constant bounds, priors, finite-support handling and migration from Bach.
+
 ## Extending beyond the examples
 
 Consult the [capability matrix](capabilities.md) for full posterior training, response quadrature, a learned shared GP timescale, joint donor updates, posterior participant calibration and joint latent trajectories. These methods need an appropriate sampling budget and per-fit diagnostic assessment; they are deliberately outside the short MAP demonstration. The [migration guide](migration.md) distinguishes fitted archives from source-bound warmup checkpoints and R pickle/joblib artifacts.

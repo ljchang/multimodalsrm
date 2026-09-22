@@ -19,6 +19,7 @@ nav = [
   { "Models" = [
     { "How the models work" = "concepts.md" },
     { "Capabilities and diagnostics" = "capabilities.md" },
+    { "Skin-conductance responses" = "scr-responses.md" },
     { "Migration and saved models" = "migration.md" },
   ] },
   { "Development" = [

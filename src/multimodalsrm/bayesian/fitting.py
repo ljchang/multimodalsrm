@@ -62,7 +62,7 @@ class SamplerConfig:
 
     ``orientation_refresh='haar'`` refreshes common rotations and reflections
     after retained transitions. Warmup and the default ``'none'`` are unchanged.
-    Supports dense/grouped Identity/Gaussian or quadrature Gamma/DoubleGamma/BachSCR
+    Supports dense/grouped Identity/Gaussian or quadrature Gamma/DoubleGamma/BachSCR/BatemanSCR
     targets with all parameters active and isotropic unbounded Gaussian
     loading priors.
     """
