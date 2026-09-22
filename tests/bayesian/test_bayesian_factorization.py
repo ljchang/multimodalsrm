@@ -188,3 +188,41 @@ def test_large_likelihood_and_both_curvature_orders_match_dense(failed_symmetric
         assert calls, "The failed-SPD fallback was not exercised"
     factorization.symmetric_solve.cache_clear()
     gaussian_score.cache_clear()
+
+
+def test_blas_oversubscription_thresholds_are_half_the_physical_cores():
+    from multimodalsrm.bayesian.factorization import blas_oversubscription
+
+    assert blas_oversubscription(blas_threads=1, physical_cores=64) is None
+    assert blas_oversubscription(blas_threads=32, physical_cores=64) is None
+    message = blas_oversubscription(blas_threads=33, physical_cores=64)
+    assert "33 BLAS threads on 64 physical cores" in message
+    assert "OPENBLAS_NUM_THREADS" in message
+    # A single core still tolerates one thread; two threads oversubscribe it.
+    assert blas_oversubscription(blas_threads=1, physical_cores=1) is None
+    assert blas_oversubscription(blas_threads=2, physical_cores=1) is not None
+
+
+def test_cpu_callback_warns_once_about_blas_oversubscription(monkeypatch):
+    import warnings
+
+    from multimodalsrm.bayesian import factorization
+
+    monkeypatch.setattr(factorization, "_blas_threads", lambda: 64)
+    monkeypatch.setattr(factorization, "_physical_cores", lambda: 64)
+    monkeypatch.setattr(factorization, "_thread_warning_issued", False)
+    matrix, rhs = np.eye(3) * 2.0, np.ones(3)
+    with pytest.warns(RuntimeWarning, match="64 BLAS threads on 64 physical cores"):
+        inverse, solution, logdet = factorization._cpu_symmetric_solve(matrix, rhs)
+    assert_allclose(inverse, np.eye(3) / 2.0)
+    assert_allclose(solution, np.full(3, 0.5))
+    assert_allclose(logdet, 3 * np.log(2.0))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        factorization._cpu_symmetric_solve(matrix, rhs)
+    # Within the limit, a fresh process would not warn at all.
+    monkeypatch.setattr(factorization, "_blas_threads", lambda: 16)
+    monkeypatch.setattr(factorization, "_thread_warning_issued", False)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        factorization._cpu_symmetric_solve(matrix, rhs)
