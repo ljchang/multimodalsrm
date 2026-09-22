@@ -61,6 +61,8 @@ Use consistent timestamp units across streams. Separate runs have separate laten
 - [Post-release Linux CPU/GPU evaluation plan](docs/superpowers/plans/2026-09-21-post-release-linux-performance-evaluation.md)
 - [Prior Apple MPS feasibility findings](docs/performance/2026-09-19-apple-mps-feasibility.md)
 - [Linux CUDA GPU opportunities for R, GP-MAP and GP posterior](docs/performance/2026-09-21-linux-cuda-gpu-opportunities.md)
+- [Algorithmic GP speedups: grouped state-space, MAP and posterior reformulations](docs/performance/2026-09-21-gp-algorithmic-opportunities.md)
+- [GP speedup experiments: MAP warm start, grouped state-space and blocked Gibbs](docs/performance/2026-09-21-gp-speedup-experiments.md)
 
 Routine PR checks use documentation-only checks or Linux core regressions and Bayesian smoke tests, depending on the changed files. The full Linux/macOS suites and wheel/source-distribution checks run on request and before every release. See the [test policy](docs/testing.md) and current CI run for coverage and evidence. Passing CI does not certify scientific validity or authorize a new release.
 
