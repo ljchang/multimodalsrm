@@ -3,6 +3,7 @@
     "tests/bayesian/test_bayesian_problem.py",
     "tests/bayesian/test_bayesian_factorization.py",
     "tests/bayesian/test_bayesian_diagnostics.py",
+    "tests/bayesian/test_bayesian_environment.py",
     "tests/bayesian/test_bayesian_gamma_posterior.py::test_posterior_admits_same_gamma_likelihood_and_prior_as_map",
     "tests/bayesian/test_bayesian_bach_posterior.py::test_bach_posterior_preserves_map_likelihood_prior_and_parameter_selection[True-shape_lag]",
     "tests/bayesian/test_bayesian_bach_posterior.py::test_bach_requires_explicit_quadrature_and_identifiable_timing_selection",

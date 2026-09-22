@@ -12,6 +12,7 @@ from sklearn.utils.validation import check_is_fitted
 
 from ..data import readonly_array
 from .blocks import validate_blocks
+from .environment import check_environment_once
 from .fitting import SamplerConfig, SearchConfig, sample, search
 from .gp_hyperparameters import (
     LENGTH_SCALE,
@@ -321,6 +322,7 @@ class BayesianMultimodalSRM(BaseEstimator):
                 "warmup checkpoints require full dense/grouped posterior training "
                 "with independent noise and no baselines"
             )
+        check_environment_once()
         from .observation_adapter import BayesianObservationAdapter
 
         length_scale, length_scale_prior = length_scale_settings(self.length_scale)
