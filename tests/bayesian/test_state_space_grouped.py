@@ -166,12 +166,12 @@ def test_smoother_joint_factor_covariance_and_derivatives_match_dense(monkeypatc
         assert_allclose(gradient[index], finite, atol=2e-7, rtol=2e-6)
 
 
-def test_learned_responses_and_zero_noise_support_keep_scalar_path():
+def test_learned_responses_group_and_zero_noise_support_keeps_scalar_path():
     from .test_bayesian_problem import problem_fixture
     from .test_bayesian_state_space import state_problem
 
     dense, _, _ = problem_fixture(gaussian=True)
-    assert not state_problem(dense).grouped_state_space
+    assert state_problem(dense).grouped_state_space
     dense, _, _ = problem_fixture()
     dense.priors = BayesianPriors(noise=Prior.uniform(0.0, 1.0))
     assert not state_problem(dense).grouped_state_space

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Grouped state-space filtering and smoothing extended to learned responses.**
+  Node grouping at exact `(modality, native timestamp)` pairs now also covers learned
+  responses under strictly positive noise priors, including changing event order and
+  coincident times. Noiseless support retains scalar updates.
 - **Grouped fixed-response state-space filtering and smoothing.** Observations that
   share an exact `(modality, native timestamp)` are collapsed into single nodes for
   filtering and RTS smoothing, rather than repeating a Kalman update and storing a

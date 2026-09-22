@@ -1,4 +1,4 @@
-"""Compare complete fixed-response MAP fits and warm filtering/smoothing on CPU.
+"""Compare complete MAP fits and warm filtering/smoothing on CPU.
 
 Run each backend in a fresh process with identical thread settings, for example:
 JAX_ENABLE_X64=true OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
@@ -32,6 +32,16 @@ def dataset(args):
         "ref": Response(Identity(), estimate=False, pooling="shared"),
         "signal": Response(kernel, estimate=False, pooling="shared"),
     }
+    if args.parameters != "fixed":
+        responses["signal"] = (
+            Response.lag_only(kernel, pooling="shared", bounds={"lag": (-0.5, 0.5)})
+            if args.parameters == "lag"
+            else Response(
+                kernel,
+                pooling="shared",
+                bounds={"rise": (0.4, 1.2), "decay": (1.5, 3.0), "lag": (-0.5, 0.5)},
+            )
+        )
     times = np.r_[0.0, 94 + np.arange(args.times) * 1.2]
     data = {}
     for subject in ("a", "b"):
@@ -69,15 +79,26 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--backend", choices=("grouped", "scalar"), default="grouped")
     parser.add_argument("--response", choices=("identity", "bateman"), default="identity")
+    parser.add_argument("--parameters", choices=("fixed", "lag", "all"), default="fixed")
     parser.add_argument("--times", type=int, default=32)
     parser.add_argument("--channels", type=int, default=16)
     parser.add_argument("--seed", type=int, default=71)
     args = parser.parse_args()
+    if args.parameters != "fixed" and args.response != "bateman":
+        parser.error("learned parameters require --response bateman")
     data, responses = dataset(args)
     model = BayesianMultimodalSRM(
         features=2,
         responses=responses,
-        priors=BayesianPriors(noise=Prior.lognormal(np.log(0.0625), 0.7), offset_sd=0.3),
+        priors=BayesianPriors(
+            noise=Prior.lognormal(np.log(0.0625), 0.7),
+            offset_sd=0.3,
+            filters={
+                m: {p: Prior.normal(r.kernel.parameters[p], 0.4) for p in r.free_parameters}
+                for m, r in responses.items()
+                if r.free_parameters
+            },
+        ),
         inference="map",
         linear_algebra="state_space",
         length_scale=3.0,
@@ -110,7 +131,23 @@ def main():
     moments = jax.jit(smooth)(point)
     record = model.map_diagnostics_
     first = record.get("pre_refinement", record)
-    events = p.state_space_systems["train"]
+    if p.dynamic_state_space:
+        if p.grouped_state_space:
+            from multimodalsrm.bayesian.state_space_grouped import event_system
+
+            events, _ = event_system(p, point, "train")
+        elif p.parameterized_responses:
+            from multimodalsrm.bayesian.state_space_parameters import parameter_event_system
+
+            state = p.response_state_space.realize(point, p.indices)
+            shifted = p.systems["train"].times - state[3][p._packed["train"][2]]
+            events = parameter_event_system(p.response_state_space, state, shifted, p.features)
+        else:
+            from multimodalsrm.bayesian.state_space_delays import observation_system
+
+            events = observation_system(p, point, "train")
+    else:
+        events = p.state_space_systems["train"]
     print(
         json.dumps(
             dict(
