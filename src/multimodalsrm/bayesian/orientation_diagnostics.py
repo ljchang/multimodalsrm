@@ -177,7 +177,7 @@ def _diagnostic_records(values, names):
                 }
             )
             continue
-        diagnostic = table.iloc[table_index]
+        diagnostic = table.row(table_index)
         table_index += 1
         numbers = {
             key: float(diagnostic[key]) if np.isfinite(diagnostic[key]) else None

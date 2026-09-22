@@ -27,12 +27,15 @@ def test_diagnostics_preserve_legacy_tail_probabilities_and_coordinate_order():
         ],
     ]
     result = diagnostic_summary(values)
-    assert list(result.index) == ["parameter[0]", "parameter[1]"]
-    columns = ["mcse_mean", "mcse_sd", "ess_bulk", "ess_tail", "r_hat"]
-    assert_allclose(result[columns], expected, rtol=1e-12, atol=1e-12)
+    assert result.names == ("parameter[0]", "parameter[1]")
+    columns = ("mcse_mean", "mcse_sd", "ess_bulk", "ess_tail", "r_hat")
+    assert_allclose(result.columns(columns), expected, rtol=1e-12, atol=1e-12)
     scalar = diagnostic_summary(values[..., 1], name="scalar")
-    assert list(scalar.index) == ["scalar"]
-    assert_allclose(scalar[columns], [expected[1]], rtol=1e-12, atol=1e-12)
+    assert scalar.names == ("scalar",) and len(scalar) == 1
+    assert_allclose(scalar.columns(columns), [expected[1]], rtol=1e-12, atol=1e-12)
+    row = scalar.row(0)
+    assert set(row) == {"ess_bulk", "ess_tail", "r_hat", "mcse_mean", "mcse_sd"}
+    assert_allclose([row[c] for c in columns], expected[1], rtol=1e-12, atol=1e-12)
 
 
 def test_diagnostics_detect_chains_trapped_at_different_locations():
@@ -40,9 +43,9 @@ def test_diagnostics_detect_chains_trapped_at_different_locations():
 
     values = np.random.default_rng(31).normal(size=(4, 400))
     values += np.arange(4)[:, None] * 5
-    result = diagnostic_summary(values).iloc[0]
-    assert result.r_hat > 1.1
-    assert result.ess_bulk < 100
+    result = diagnostic_summary(values).row(0)
+    assert result["r_hat"] > 1.1
+    assert result["ess_bulk"] < 100
 
 
 def _ar1(rng, chains, draws, count, phi):
@@ -119,10 +122,9 @@ def test_batched_diagnostics_reject_bad_shapes_and_short_chains():
     short = rank_diagnostics(np.random.default_rng(1).normal(size=(4, 3, 2)))
     assert all(np.isnan(short[field]).all() for field in FIELDS)
     values = np.random.default_rng(2).normal(size=(4, 60, 3))
-    columns = list(FIELDS)
     assert_allclose(
-        diagnostic_summary(values[..., 2], name="one")[columns].to_numpy()[0],
-        diagnostic_summary(values)[columns].to_numpy()[2],
+        diagnostic_summary(values[..., 2], name="one").columns()[0],
+        diagnostic_summary(values).columns()[2],
     )
 
 

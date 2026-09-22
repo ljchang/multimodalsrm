@@ -1,8 +1,40 @@
 """Posterior mixing diagnostics and descriptive residual/donor checks."""
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from ..data import validate_times
+from .rank_diagnostics import FIELDS, rank_diagnostics
+
+
+@dataclass(frozen=True)
+class DiagnosticTable:
+    """Mixing diagnostics of named quantities, one NumPy array per field.
+
+    ``names`` labels the rows; ``columns`` stacks fields into a rows-by-fields
+    matrix; ``row`` and ``rows`` give per-quantity dictionaries. This is the
+    whole tabular contract the package uses, so no table library is needed.
+    """
+
+    names: tuple
+    ess_bulk: np.ndarray
+    ess_tail: np.ndarray
+    r_hat: np.ndarray
+    mcse_mean: np.ndarray
+    mcse_sd: np.ndarray
+
+    def __len__(self):
+        return len(self.names)
+
+    def columns(self, fields=FIELDS):
+        return np.column_stack([getattr(self, field) for field in fields])
+
+    def row(self, index):
+        return {field: float(getattr(self, field)[index]) for field in FIELDS}
+
+    def rows(self):
+        return (self.row(index) for index in range(len(self)))
 
 
 def diagnostic_summary(values, *, name="parameter"):
@@ -13,20 +45,16 @@ def diagnostic_summary(values, *, name="parameter"):
     for every quantity at once by :mod:`rank_diagnostics`; upgrading ArviZ
     cannot silently change this qualification gate.
     """
-    import pandas as pd
-
-    from .rank_diagnostics import FIELDS, rank_diagnostics
-
     values = np.asarray(values)
     if values.ndim not in (2, 3):
         raise ValueError("diagnostic values must have chain/draw[/quantity] shape")
     if values.ndim == 2:
-        index = [name]
+        names = (name,)
         fields = rank_diagnostics(values[..., None])
     else:
-        index = [f"{name}[{i}]" for i in range(values.shape[-1])]
+        names = tuple(f"{name}[{i}]" for i in range(values.shape[-1]))
         fields = rank_diagnostics(values)
-    return pd.DataFrame({field: fields[field] for field in FIELDS}, index=index)
+    return DiagnosticTable(names, **fields)
 
 
 def _arrays(*arrays):

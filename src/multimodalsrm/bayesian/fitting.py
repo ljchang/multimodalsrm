@@ -733,11 +733,9 @@ def sample(
         parameters=[
             dict(
                 name=list(name),
-                **{k: float(row[k]) for k in ("r_hat", "ess_bulk", "ess_tail")},
+                **{k: row[k] for k in ("r_hat", "ess_bulk", "ess_tail")},
             )
-            for name, (_, row) in zip(
-                [*space.active_parameters, ("log_likelihood",)], summary.iterrows()
-            )
+            for name, row in zip([*space.active_parameters, ("log_likelihood",)], summary.rows())
         ],
         elapsed_seconds=time.perf_counter() - started,
         calibration_established=False,
@@ -754,7 +752,7 @@ def sample(
         diagnostic["warmup_checkpoint"] = warmup_checkpoint.metadata()
     diagnostic["passes"] = bool(
         config.chains >= 2
-        and np.isfinite(summary[["r_hat", "ess_bulk", "ess_tail"]]).all().all()
+        and np.isfinite(summary.columns(("r_hat", "ess_bulk", "ess_tail"))).all()
         and np.isfinite(bfmi).all()
         and diagnostic["divergences"] == 0
         and diagnostic["max_rank_rhat"] <= 1.01
