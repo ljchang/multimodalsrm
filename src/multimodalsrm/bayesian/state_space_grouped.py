@@ -11,6 +11,12 @@ import numpy as np
 from ._backend import runtime
 
 
+def eligible(problem):
+    """The first grouped path keeps learned clocks and zero-noise support scalar."""
+    prior = problem.priors.noise
+    return not problem.dynamic_state_space and (prior.family == "lognormal" or prior.lower > 0)
+
+
 def statistics(problem, x, run):
     """Recompute parameter-dependent sufficient statistics, excluding masked data."""
     from .multifactor import block_statistics
