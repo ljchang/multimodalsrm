@@ -1,12 +1,31 @@
 # Installation
 
-Use Python 3.12 or later. Python 3.12 is the version currently exercised by package CI. Until the first PyPI release, install from the public repository.
+Use Python 3.12 or later. Python 3.12 is the version currently exercised by package CI. Install version `0.1.0` from PyPI, or use a source checkout for development and the example scripts.
 
-## R-MSRM
+## Install the release
+
+Create and activate a dedicated environment, then install the base model:
+
+```sh
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install "multimodalsrm==0.1.0"
+```
+
+For GP-MSRM, add the Bayesian extra:
+
+```sh
+python -m pip install "multimodalsrm[bayesian]==0.1.0"
+```
+
+On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`. The following examples require a source checkout because the scripts are not installed as commands.
+
+## Source checkout and R-MSRM example
 
 ```sh
 git clone https://github.com/ljchang/multimodalsrm.git
 cd multimodalsrm
+git checkout v0.1.0
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
@@ -21,7 +40,7 @@ The base package provides the regularized model and shared data/response types:
 from multimodalsrm import MultimodalSRM, TimeSeries, Identity, Gaussian, Response
 ```
 
-## GP-MSRM
+## GP-MSRM example
 
 Install the optional Bayesian dependencies into the same environment:
 
