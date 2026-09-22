@@ -21,11 +21,11 @@ Schemas 1 and 2 represent MAP group and MAP participant states; schema 3 represe
 
 Keep original archives unchanged. Archives can contain native observations and posterior draws, so store them with the research data rather than committing them to the package. Saving requires a new destination. Preserve any training standardizer with `save_model(..., standardizer=scaler)` and use the restored standardizer consistently. The [MAP quickstart](https://github.com/ljchang/multimodalsrm/blob/main/examples/gp_map_quickstart.py) performs a synthetic save/load comparison.
 
-New GP searches default to `SearchConfig(r_init=True)`, using a bounded R fit
-to initialize the first MAP restart. Archives created before this option retain
-`r_init=False` when loaded, including models with an implicit search configuration.
-Their saved fit evidence is preserved. Set `r_init=False` explicitly when
-comparing a new fit with historical initialization.
+`SearchConfig(r_init=True)` is a new opt-in option that uses a bounded R fit to
+initialize the first MAP restart. It is **not** the default: new searches keep the
+historical data-based first start, so an existing workflow is unaffected. Archives
+created before this option retain `r_init=False` when loaded, including models with
+an implicit search configuration, and their saved fit evidence is preserved.
 
 ## R pickle/joblib models
 

@@ -1,9 +1,17 @@
 # R initialization for GP MAP
 
 `SearchConfig(r_init=True)` initializes the first GP MAP restart with a bounded
-CPU R-MSRM fit. The [configuration guide](../getting-started.md) describes its
-budgets, parameter translation, diagnostics and fallback. This preliminary fit
-is separate from NUTS warmup and does not replace sampler adaptation.
+CPU R-MSRM fit. It is opt-in and off by default. The
+[configuration guide](../getting-started.md) describes its budgets, parameter
+translation, diagnostics and fallback. This preliminary fit is separate from NUTS
+warmup and does not replace sampler adaptation.
+
+The measurements below are small synthetic cases. They show fewer iterations but
+no reduction in total time, and the
+empirical evaluation on a real five-participant recording did not reproduce the
+larger synthetic gain: it found as many iterations, a different lag basin, and two
+lags resting at their bounds. Treat enabling this as a per-analysis
+decision rather than a general recommendation.
 
 ## Synthetic comparison
 

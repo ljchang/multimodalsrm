@@ -32,7 +32,9 @@ class SearchConfig:
     multifactor dense/grouped fits with independent noise; the default is none.
     ``r_init=True`` seeds the first full-training MAP restart from a bounded
     CPU R-MSRM fit. Other prior-quantile starts and the GP target are unchanged.
-    Set it to False to use the historical data-based first start.
+    It is opt-in: the default is the historical data-based first start. The
+    measured benefit is scale-dependent and has not been shown to transfer to
+    empirical recordings, so enabling it is a per-analysis decision.
     """
 
     starts: int = 16
@@ -44,7 +46,7 @@ class SearchConfig:
     polish_max_parameters: int = 256
     n_jobs: int = 1
     conditioning: str = "none"
-    r_init: bool = True
+    r_init: bool = False
 
     def __post_init__(self):
         if type(self.r_init) is not bool:

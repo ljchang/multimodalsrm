@@ -57,12 +57,16 @@ from multimodalsrm.bayesian import BayesianMultimodalSRM, BayesianPriors
 
 The GP quickstart performs MAP fitting and archive replay. It does not run posterior sampling. Read [capabilities](capabilities.md) before selecting a sampling or computational backend.
 
-GP MAP searches use `SearchConfig(r_init=True)` by default, including the MAP
-search that precedes posterior sampling. One CPU R-MSRM fit supplies loadings,
-offsets, residual noise variances and learned response parameters for the first
-GP restart. The remaining prior-based restarts are unchanged. This changes
-starting values only; GP priors, native timestamps and convergence checks stay
-the same. To use the previous initialization:
+GP MAP searches can optionally start from a bounded R-MSRM fit with
+`SearchConfig(r_init=True)`, including the MAP search that precedes posterior
+sampling. One CPU R-MSRM fit supplies loadings, offsets, residual noise variances
+and learned response parameters for the first GP restart. The remaining
+prior-based restarts are unchanged. This changes starting values only; GP priors,
+native timestamps and convergence checks stay the same.
+
+It is **off by default**: the measured benefit is scale-dependent and did not
+transfer to a real recording, so it is a per-analysis decision rather than a
+general recommendation. To enable it:
 
 ```python
 from multimodalsrm.bayesian import SearchConfig
@@ -70,7 +74,7 @@ from multimodalsrm.bayesian import SearchConfig
 model = BayesianMultimodalSRM(
     priors=priors,
     inference="map",
-    search=SearchConfig(r_init=False),
+    search=SearchConfig(r_init=True),
 )
 ```
 
