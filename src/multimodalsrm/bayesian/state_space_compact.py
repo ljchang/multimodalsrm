@@ -6,9 +6,8 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 from .. import _bateman
-from ..kernels import BachSCR, BatemanSCR, Gamma, Gaussian, Identity
+from ..kernels import BatemanSCR, Gamma, Gaussian, Identity
 from ._backend import runtime
-from .state_space_bach import bach_template
 from .state_space_gaussian_rational import _paired_indices, rational_template
 from .state_space_parameters import (
     ParametricResponseStateSpace,
@@ -29,81 +28,46 @@ from .state_space_rational import (
 class CompactResponseStateSpace(ParametricResponseStateSpace):
     compact_banks: tuple = ()
     generator_norm_bound: float = 0.0
-    bach_templates: tuple = ()
 
     @classmethod
     def prepare(cls, responses, length_scale, tolerance, *, gaussian_method="auto"):
-        initial = []
-        for response in responses.values():
-            kernel = response.initial_kernel()
-            if type(kernel) is not BachSCR:
-                initial.append(_parameter_box(response))
-                continue
-            if set(response.free_parameters) - {"lag"}:
-                raise ValueError(
-                    "state_space BachSCR requires fixed t0, sigma, lambda1 and lambda2; only additional lag may be learned"
-                )
-            box = {
-                p: response.parameter_bounds()[p] if p in response.free_parameters else (v, v)
-                for p, v in kernel.parameters.items()
-            }
-            if any(not np.isfinite(bounds).all() for bounds in box.values()):
-                raise ValueError("state_space BachSCR lag bounds must be finite")
-            initial.append((kernel, box))
-        has_bach = any(type(k) is BachSCR for k, _ in initial)
+        initial = [_parameter_box(response) for response in responses.values()]
         has_bateman = any(type(k) is BatemanSCR for k, _ in initial)
         if (
-            (has_bach or has_bateman)
+            has_bateman
             and gaussian_method == "laguerre"
             and any(type(k) is Gaussian for k, _ in initial)
         ):
-            raise ValueError(
-                ("mixed BachSCR/Gaussian" if has_bach else "mixed SCR/Gaussian")
-                + " requires auto or rational Gaussian representation"
-            )
+            raise ValueError("mixed SCR/Gaussian requires auto or rational Gaussian representation")
         for order in (20, 24):
             templates = [
-                rational_template(order)
-                if type(k) is Gaussian
-                else bach_template(k, order)
-                if type(k) is BachSCR
-                else None
-                for k, _ in initial
+                rational_template(order) if type(k) is Gaussian else None for k, _ in initial
             ]
             details = {}
             for (name, _), (kernel, box), template in zip(responses.items(), initial, templates):
                 if template is None:
                     mass, error = _gamma_bounds(kernel, box)
-                elif type(kernel) is Gaussian:
+                else:
                     mass, error = np.sqrt(box["width"][1]) * np.array(
                         [template.mass_bound, template.l1_error_bound]
                     )
-                else:
-                    mass, error = template.mass_bound, template.l1_error_bound
                 details[name] = dict(
                     family=type(kernel).__name__,
                     absolute_mass_bound=float(mass),
                     response_l1_error_bound=float(error),
                 )
                 if template is not None:
-                    details[name][
-                        "bach_template" if type(kernel) is BachSCR else "gaussian_template"
-                    ] = template.metadata()
+                    details[name]["gaussian_template"] = template.metadata()
             masses = np.array([d["absolute_mass_bound"] for d in details.values()] + [1.0])
             errors = np.array([d["response_l1_error_bound"] for d in details.values()] + [0.0])
             bound = float(np.max(np.outer(errors, masses) + np.outer(masses, errors)))
             if bound <= tolerance:
                 break
         else:
-            if gaussian_method == "auto" and not (has_bach or has_bateman):
+            if gaussian_method == "auto" and not has_bateman:
                 return ParametricResponseStateSpace.prepare(responses, length_scale, tolerance)
             raise ValueError(
                 f"compact response bound {bound:.3g} exceeds covariance_tolerance={tolerance:.3g} over parameter bounds"
-                + (
-                    "; BachSCR restores the 90-second tail: use dense/grouped or explicitly request a larger tolerance"
-                    if has_bach
-                    else ""
-                )
             )
 
         specs, banks, keys, variables = [], [], {}, []
@@ -117,8 +81,6 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
                 if type(kernel) is Identity
                 else [("bateman", "rise", 2)]
                 if type(kernel) is BatemanSCR
-                else [("bach", "sigma", template.order + 2)]
-                if type(kernel) is BachSCR
                 else [("gaussian", "width", template.order)]
                 if template
                 else [("gamma", "scale", int(kernel.shape))]
@@ -139,12 +101,6 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
                         template.order if template else None,
                     )
                 )
-                if kind == "bach":
-                    key = (
-                        kind,
-                        tuple((p, v) for p, v in kernel.parameters.items() if p != "lag"),
-                        template.order,
-                    )
                 if kind == "bateman":
                     key = (
                         (kind, name)
@@ -177,21 +133,12 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
                 norms2.extend([1 / lo**2] * size)
                 drives2.extend([2 / lo] * size)
             else:
-                if kind == "bach":
-                    # Bach templates already contain physical Gaussian poles.
-                    lo = hi = 1.0
                 for pair in _paired_indices(template.poles):
                     pole = template.poles[pair[0]]
                     a, radius = -pole.real / lo, abs(pole) / lo
                     decay.append(-pole.real / hi)
                     norms2.append(a * a if len(pair) == 1 else 2 * radius**2 + 4 * a * a)
                     drives2.append((2 if len(pair) == 1 else 4) * a)
-                if kind == "bach":
-                    for parameter in ("lambda1", "lambda2"):
-                        a = boxes[i][parameter][0]
-                        decay.append(a)
-                        norms2.append(a * a)
-                        drives2.append(2 * a)
         # Each off-diagonal cascade block is -b_i b_j.T. Bound its Frobenius
         # norm over the entire parameter box, including conjugate-pole blocks.
         M = np.sqrt(sum(norms2) + (sum(drives2) ** 2 - sum(q * q for q in drives2)) / 2)
@@ -214,9 +161,6 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
             parameter_boxes=tuple(boxes),
             gaussian_templates=tuple(
                 t if type(k) is Gaussian else None for (k, _), t in zip(initial, templates)
-            ),
-            bach_templates=tuple(
-                t if type(k) is BachSCR else None for (k, _), t in zip(initial, templates)
             ),
         )
         F, b, C, lags = map(np.asarray, model.realize(np.empty(0), {}))
@@ -277,10 +221,8 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
             else:
                 readout = jnp.zeros(size)
                 for pair in _paired_indices(template.poles):
-                    pole = template.poles[pair[0]] / (scale if kind == "gaussian" else 1.0)
-                    residue = template.residues[pair[0]] / (
-                        jnp.sqrt(scale) if kind == "gaussian" else 1.0
-                    )
+                    pole = template.poles[pair[0]] / scale
+                    residue = template.residues[pair[0]] / jnp.sqrt(scale)
                     if len(pair) == 1:
                         A = jnp.array([[pole.real]])
                         drive, output = jnp.ones(1), jnp.array([residue.real])
@@ -297,15 +239,6 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
                     F = F.at[start:end, :2].set(drive[:, None] * latent)
                     readout = readout.at[start - bank_start : end - bank_start].set(output)
                     start = end
-                if kind == "bach":
-                    gaussian_end = start
-                    for parameter in ("lambda1", "lambda2"):
-                        a = values[i][parameter]
-                        F = F.at[start, start].set(-a)
-                        F = F.at[start, bank_start:gaussian_end].set(readout[: template.order])
-                        blocks.append(real_pole_block(a))
-                        start += 1
-                    readout = jnp.zeros(size).at[-2:].set(1 / template.finite_normalizer)
             slices.append(slice(bank_start, start))
             readouts.append(readout)
         C = jnp.zeros((len(self.specs) + 1, d)).at[-1, :2].set(latent)
@@ -317,9 +250,7 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
             )
             if type(kernel) is Identity:
                 C = C.at[i, :2].set(latent)
-            elif template:
-                C = C.at[i, slices[positions[0]]].set(readouts[positions[0]])
-            elif type(kernel) in (BachSCR, BatemanSCR):
+            elif template or type(kernel) is BatemanSCR:
                 C = C.at[i, slices[positions[0]]].set(readouts[positions[0]])
             else:
                 energy = finite_gamma_energy(kernel, p)
@@ -349,15 +280,6 @@ class CompactResponseStateSpace(ParametricResponseStateSpace):
             transition_decay_bound="uniform_complex_Schur_polynomial_exponential_bound",
             transition_generator_norm_bound=float(self.generator_norm_bound),
         )
-        if any(self.bach_templates):
-            result.pop("temporal_covariance_tail_bound", None)
-            result.update(
-                response_support="Identity_Gaussian_integer_Gamma_DoubleGamma_fixed_shape_BachSCR",
-                response_approximation="qualified_causal_Gaussian_rational_responses_and_explicit_Gamma_BachSCR_tail_bounds",
-                error_bound_qualification="analytic_inequalities_with_numerically_refined_response_residual_integrals",
-                bach_supported_learning="additional_lag_only_fixed_shape",
-                bach_finite_support_seconds=90.0,
-            )
         if any(type(k) is BatemanSCR for _, k, _ in self.specs):
             result.update(
                 response_support=result["response_support"] + "_BatemanSCR",

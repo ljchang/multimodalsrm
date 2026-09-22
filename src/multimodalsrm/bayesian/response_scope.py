@@ -1,21 +1,19 @@
 """Shared response admission and numerical-state checks for posterior workflows."""
 
-from ..kernels import BachSCR, BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
+from ..kernels import BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
 
 
 def validate_posterior_responses(responses, order):
     """Preserve analytic defaults; other admitted families need explicit quadrature."""
     families = [type(r.initial_kernel()) for r in (responses or {}).values()]
-    if any(
-        f not in (Identity, Gaussian, Gamma, DoubleGamma, BachSCR, BatemanSCR) for f in families
-    ):
+    if any(f not in (Identity, Gaussian, Gamma, DoubleGamma, BatemanSCR) for f in families):
         raise ValueError(
-            "posterior responses support Identity/Gaussian/Gamma/DoubleGamma/BachSCR/BatemanSCR; "
+            "posterior responses support Identity/Gaussian/Gamma/DoubleGamma/BatemanSCR; "
             "sampled responses remain unsupported"
         )
-    if order is None and any(f in (Gamma, DoubleGamma, BachSCR, BatemanSCR) for f in families):
+    if order is None and any(f in (Gamma, DoubleGamma, BatemanSCR) for f in families):
         raise ValueError(
-            "Gamma/DoubleGamma/BachSCR/BatemanSCR posterior responses require explicit "
+            "Gamma/DoubleGamma/BatemanSCR posterior responses require explicit "
             "response_quadrature_order"
         )
     if order is not None:

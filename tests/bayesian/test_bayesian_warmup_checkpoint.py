@@ -12,12 +12,12 @@ from numpy.testing import assert_array_equal
 
 from multimodalsrm.bayesian import SamplerConfig, SearchConfig
 
-from .test_bayesian_bach_posterior import bach_fixture
+from .test_bayesian_bateman_posterior import bateman_fixture
 from .test_bayesian_model import make_model
 
 
-def fixture(kind="bach", method="sequential"):
-    model, data = bach_fixture(3, order=16) if kind == "bach" else make_model("posterior")
+def fixture(kind="bateman", method="sequential"):
+    model, data = bateman_fixture(3, order=16) if kind == "bateman" else make_model("posterior")
     model.search = SearchConfig(starts=1, maxiter=3, refine_maxiter=0)
     model.sampler = SamplerConfig(
         chains=2 if kind != "single" else 1,
@@ -26,7 +26,7 @@ def fixture(kind="bach", method="sequential"):
         max_tree_depth=2,
         mass_matrix="dense" if kind == "gaussian" else "diagonal",
         chain_method=method,
-        orientation_refresh="haar" if kind == "bach" else "none",
+        orientation_refresh="haar" if kind == "bateman" else "none",
     )
     return model, data
 
@@ -34,8 +34,8 @@ def fixture(kind="bach", method="sequential"):
 @pytest.mark.parametrize(
     "kind,method",
     [
-        ("bach", "sequential"),
-        ("bach", "vectorized"),
+        ("bateman", "sequential"),
+        ("bateman", "vectorized"),
         ("gaussian", "sequential"),
         ("single", "sequential"),
     ],

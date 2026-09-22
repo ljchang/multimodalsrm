@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_allclose
 from scipy.integrate import quad
 
-from multimodalsrm import BachSCR, DoubleGamma, Gamma, Identity, Response
+from multimodalsrm import DoubleGamma, Gamma, Identity, Response
 
 
 def realization(kernels, **kwargs):
@@ -95,12 +95,11 @@ def test_stationary_transitions_compose_and_handle_tiny_and_huge_intervals():
 @pytest.mark.parametrize(
     "kernel, reason",
     [
-        (BachSCR(), "BachSCR.*90-second"),
         (Gamma(2.5), "state_space"),
         (Gamma(100), "state_space"),
     ],
 )
-def test_unsupported_shapes_and_unqualified_bach_fail_explicitly(kernel, reason):
+def test_unsupported_shapes_fail_explicitly(kernel, reason):
     with pytest.raises(ValueError, match=reason):
         realization({"response": kernel})
 

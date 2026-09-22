@@ -5,7 +5,7 @@ from scipy.sparse import isspmatrix_csr
 
 from multimodalsrm.data import TimeSeries, normalize_data
 from multimodalsrm.kernels import (
-    BachSCR,
+    BatemanSCR,
     DoubleGamma,
     Gamma,
     Gaussian,
@@ -101,7 +101,7 @@ def test_impulse_timing_and_fixed_envelope():
         Gaussian(),
         Gamma(),
         DoubleGamma(),
-        BachSCR(),
+        BatemanSCR(),
         SampledKernel([0, 1, 2], [0, 1, 0]),
     ],
 )
@@ -119,26 +119,6 @@ def test_continuous_energy_and_metadata(kernel):
     )
 
 
-def test_bach_matches_independent_convolution():
-    k = BachSCR()
-
-    def raw(t):
-        return quad(
-            lambda u: (
-                np.exp(-((u - 3.0745) ** 2) / (2 * 0.7013**2))
-                * (np.exp(-0.3176 * (t - u)) + np.exp(-0.0708 * (t - u)))
-            ),
-            0,
-            t,
-        )[0]
-
-    vals = np.array([raw(t) for t in [1, 3, 6, 15]])
-    actual = k.evaluate([1, 3, 6, 15])
-    np.testing.assert_allclose(actual / actual[2], vals / vals[2], rtol=1e-8)
-    assert k.support == (0.0, 90.0)
-    assert "2010" in k.metadata["reference"]
-
-
 def test_response_validation_fixed_and_transforms():
     r = Response(Gaussian(), fixed={"lag": 0.5}, prior=KernelPrior({"width": 1}, 2))
     assert r.initial_kernel().parameters["lag"] == 0.5
@@ -153,7 +133,7 @@ def test_response_validation_fixed_and_transforms():
         lambda: Gaussian(width=0),
         lambda: Gamma(shape=-1),
         lambda: DoubleGamma(undershoot_ratio=-1),
-        lambda: BachSCR(version="2009"),
+        lambda: BatemanSCR(rise=0),
         lambda: Response(Gaussian(), pooling="bad"),
         lambda: Response(Gaussian(), fixed={"foo": 1}),
         lambda: SampledKernel([0, 1], [0, 0]),

@@ -37,4 +37,17 @@ New package checkpoints can be created with `fit(..., warmup_checkpoint=path)` a
 
 ## Skin-conductance responses
 
-`BatemanSCR` is the common response option for new SCR workflows. Existing `BachSCR` configurations and archives preserve their original behavior. Switching requires new response bounds/priors and refitting; old shape parameters and lag estimates are not converted automatically. See the [SCR guide](scr-responses.md).
+The development version standardizes SCR workflows on `BatemanSCR` and removes
+`BachSCR`. This is a breaking change to imports, fitting and Bach archive replay.
+GP archives containing Bach records fail with migration guidance; they are not
+converted to Bateman. The archive schema and remaining kernel identifiers stay
+unchanged.
+
+Reproduce old Bach analyses in their original environment. Release **0.1.0**
+supports Bach, and development commit
+[`8eeb84fcc8d2c6a37f36ce748a13e6c3782e0ce8`](https://github.com/ljchang/multimodalsrm/commit/8eeb84fcc8d2c6a37f36ce748a13e6c3782e0ce8)
+is the snapshot immediately before removal. This also applies to R pickle/joblib
+models and warmup checkpoints. For current workflows, configure Bateman response
+bounds and GP priors and refit from original observations. Shape parameters,
+loadings and lag estimates are not automatically transferable. See the
+[SCR guide](scr-responses.md).

@@ -7,7 +7,7 @@ import pytest
 from sklearn.exceptions import ConvergenceWarning
 
 from multimodalsrm import (
-    BachSCR,
+    BatemanSCR,
     Gaussian,
     Identity,
     MultimodalSRM,
@@ -42,14 +42,14 @@ def _lag_dispersion(kernels):
 
 def test_lag_only_real_optimizer_keeps_every_shape_parameter_fixed():
     """Omitting a non-lag fixed value would let the real optimizer move it."""
-    template = BachSCR(t0=3.2, sigma=0.8, lambda1=0.35, lambda2=0.08)
+    template = BatemanSCR(rise=0.8, decay=3.2)
     response = Response.lag_only(template, pooling="none", bounds={"lag": (-2.0, 2.0)})
     fitted = _quadratic_fit(response, {"s1": -1.0, "s2": 0.5, "s3": 1.5})
 
     assert response.free_parameters == ("lag",)
     for subject, target in {"s1": -1.0, "s2": 0.5, "s3": 1.5}.items():
         assert fitted[subject]["brain"].lag == pytest.approx(target, abs=2e-5)
-        for name in ("t0", "sigma", "lambda1", "lambda2"):
+        for name in ("rise", "decay"):
             assert getattr(fitted[subject]["brain"], name) == pytest.approx(
                 getattr(template, name), abs=1e-15
             )
@@ -90,23 +90,6 @@ def test_lag_only_bounds_prior_metadata_and_rejections():
         Response.lag_only(Identity())
     with pytest.raises(ValueError, match="lag parameter"):
         Response.lag_only(SampledKernel([0, 1], [1, -1]))
-
-
-def test_general_bach_warning_and_metadata_use_effective_free_parameters():
-    """Warning on family alone would incorrectly flag a fixed-t0 response."""
-    with pytest.warns(UserWarning, match="t0.*lag"):
-        general = Response(BachSCR())
-    assert general.metadata["timing_confounds"]
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        fixed_t0 = Response(BachSCR(), fixed={"t0": 3.0745})
-        fixed_lag = Response(BachSCR(), fixed={"lag": 0.0})
-        inactive = Response(BachSCR(), estimate=False)
-        baseline = Response.lag_only(BachSCR())
-    assert not [w for w in caught if issubclass(w.category, UserWarning)]
-    for response in (fixed_t0, fixed_lag, inactive, baseline):
-        assert response.metadata["timing_confounds"] == []
 
 
 def test_multirun_fit_has_one_lag_per_subject_and_modality():
