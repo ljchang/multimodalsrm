@@ -20,6 +20,7 @@ SearchConfig(
     polish_max_parameters=256,
     n_jobs=1,
     conditioning="none",
+    r_init=False,
 )
 ```
 
@@ -35,6 +36,7 @@ SearchConfig(
 | `polish_max_parameters` | `int` | `256` |
 | `n_jobs` | `int` | `1` |
 | `conditioning` | `str` | `"none"` |
+| `r_init` | `bool` | `False` |
 
 MAP budgets; n_jobs runs independent restarts in shared-memory threads.
 
@@ -42,10 +44,15 @@ The default is serial. Set BLAS/XLA thread settings before starting Python;
 search never changes process-global thread limits. Refinement is serial.
 Optional diagonal conditioning uses staged physical coordinates for full
 multifactor dense/grouped fits with independent noise; the default is none.
+`r_init=True` seeds the first full-training MAP restart from a bounded
+CPU R-MSRM fit. Other prior-quantile starts and the GP target are unchanged.
+It is opt-in: the default is the historical data-based first start. The
+measured benefit is scale-dependent and has not been shown to transfer to
+empirical recordings, so enabling it is a per-analysis decision.
 
 ## SamplerConfig
 
-`from multimodalsrm.bayesian import SamplerConfig` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/fitting.py#L61)
+`from multimodalsrm.bayesian import SamplerConfig` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/fitting.py#L69)
 
 ```python
 SamplerConfig(
