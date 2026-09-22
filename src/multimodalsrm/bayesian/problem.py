@@ -228,11 +228,11 @@ class BayesianProblem:
         self.baseline_designs = {}
         self.noise_systems = {}
         self.state_space_systems = {}
-        self.grouped_state_space = (
-            linear_algebra == "state_space"
-            and not self.dynamic_state_space
-            and (priors.noise.family == "lognormal" or priors.noise.lower > 0)
-        )
+        self.grouped_state_space = False
+        if linear_algebra == "state_space":
+            from .state_space_grouped import eligible
+
+            self.grouped_state_space = eligible(self)
         key_indices = {key: i for i, key in enumerate(self.keys)}
         group_indices = {key: i for i, key in enumerate(self.groups)}
         modality_indices = {key: i for i, key in enumerate(self.modalities)}

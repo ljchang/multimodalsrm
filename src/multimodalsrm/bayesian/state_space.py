@@ -2,7 +2,8 @@
 
 The state of each factor is (value, derivative / rate), rate=sqrt(3)/length.
 This normalization makes its stationary covariance the 2x2 identity. Runs
-are independent; repeated timestamps remain separate noisy measurements.
+are independent; repeated measurements retain their individual noise. Fixed
+responses with strictly positive noise use exact modality/time node updates.
 """
 
 import math

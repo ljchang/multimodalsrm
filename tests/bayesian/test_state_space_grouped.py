@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_equal
 
-from multimodalsrm import Identity, Response, TimeSeries
+from multimodalsrm import BatemanSCR, Identity, Response, TimeSeries
 from multimodalsrm.bayesian import BayesianMultimodalSRM, BayesianPriors, Prior
 from multimodalsrm.bayesian._backend import runtime
 from multimodalsrm.bayesian.persistence import _prepare
@@ -175,3 +175,73 @@ def test_learned_responses_and_zero_noise_support_keep_scalar_path():
     dense, _, _ = problem_fixture()
     dense.priors = BayesianPriors(noise=Prior.uniform(0.0, 1.0))
     assert not state_problem(dense).grouped_state_space
+
+
+def bateman_problem(algebra="state_space", features=2):
+    from .test_bateman_scr import fixture
+
+    model, _, _, data = fixture()
+    model.set_params(
+        features=features,
+        responses={
+            "ref": Response(Identity(), estimate=False, pooling="shared"),
+            "scr": Response(BatemanSCR(0.7, 2.0, 0.1), estimate=False, pooling="shared"),
+        },
+        priors=BayesianPriors(noise=Prior.lognormal(-1.0, 0.5)),
+        linear_algebra=algebra,
+        response_quadrature_order=96 if algebra != "state_space" else None,
+    )
+    for runs in data.values():
+        runs["second"] = {
+            m: TimeSeries(ts.values * 0.7, ts.times + 150.0) for m, ts in runs["train"].items()
+        }
+    _, problem = _prepare(model, data)
+    x = problem.initial.copy()
+    rng = np.random.default_rng(442)
+    for i, name in enumerate(problem.names):
+        if name[0] == "loading":
+            x[i] = rng.uniform(0.3, 1.2)
+        elif name[0] == "noise":
+            x[i] = 0.3
+    return model, problem, x, data
+
+
+@pytest.mark.parametrize("features", [1, 2])
+def test_fixed_bateman_density_gradient_and_smoothing(features):
+    from multimodalsrm.bayesian.prediction import project
+
+    _, state, x, _ = bateman_problem(features=features)
+    _, dense, _, _ = bateman_problem("dense", features)
+    assert state.grouped_state_space
+    assert state.response_state_space.dimension == 4
+    expected = dense.value_gradient(x)
+    actual = state.value_gradient(x)
+    assert_allclose(actual[0], expected[0], atol=3e-6, rtol=1e-8)
+    assert_allclose(actual[1], expected[1], atol=3e-5, rtol=3e-6)
+    query = np.array([0.0, 95.1, 102.2, 102.2, 112.3, 119.0])
+    for key in (None, ("a", "scr", 0)):
+        a = project(state, x[None], "train", query, key=key, include_noise=True)
+        b = project(dense, x[None], "train", query, key=key, include_noise=True)
+        assert_allclose(a, b, atol=3e-6, rtol=3e-6)
+
+
+def test_scalar_bateman_archive_replays_with_grouped_smoother(tmp_path, monkeypatch):
+    from multimodalsrm.bayesian import SearchConfig, state_space_grouped
+    from multimodalsrm.bayesian.workflow import load_model, save_model
+
+    model, _, _, data = bateman_problem(features=1)
+    model.set_params(search=SearchConfig(starts=1, maxiter=500, refine_maxiter=100))
+    with monkeypatch.context() as patch:
+        patch.setattr(state_space_grouped, "eligible", lambda problem: False)
+        model.fit(data)
+        assert model.map_diagnostics_["meets_gradient_tolerance"]
+        expected = model.infer_latent(times=[95.0, 103.0, 110.0])["train"]
+        save_model(tmp_path / "scalar", model)
+    restored, _ = load_model(tmp_path / "scalar")
+    assert restored.problem_.grouped_state_space
+    assert restored.configuration_ == model.configuration_
+    assert restored.map_diagnostics_ == model.map_diagnostics_
+    actual = restored.infer_latent(times=[95.0, 103.0, 110.0])["train"]
+    assert_allclose(actual.values, expected.values, atol=1e-9, rtol=1e-9)
+    assert_allclose(actual.variance, expected.variance, atol=1e-9, rtol=1e-9)
+    save_model(tmp_path / "resaved", restored)
