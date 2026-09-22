@@ -15,18 +15,18 @@ MultimodalSRM(
     *,
     latent_dt,
     responses=None,
-    latent_pooling='shared',
+    latent_pooling="shared",
     latent_strength=1.0,
     modality_weights=None,
     loading_ridge=0.001,
-    loading_penalty_scaling='pair',
+    loading_penalty_scaling="pair",
     latent_ridge=0.0001,
     temporal_strength=0.01,
     max_iter=100,
     tol=1e-05,
     n_init=1,
     n_jobs=1,
-    init='random',
+    init="random",
     random_state=None,
     gap_threshold=None,
     kernel_max_iter=50,
@@ -66,7 +66,7 @@ MultimodalSRM.infer_latent(data, *, times=None)
 ### MultimodalSRM.predict
 
 ```python
-MultimodalSRM.predict(data, *, targets, source='within', times=None)
+MultimodalSRM.predict(data, *, targets, source="within", times=None)
 ```
 
 ### MultimodalSRM.calibrate
@@ -78,7 +78,7 @@ MultimodalSRM.calibrate(data, **kwargs)
 ### MultimodalSRM.kernel
 
 ```python
-MultimodalSRM.kernel(modality, subject=None, level='subject', times=None)
+MultimodalSRM.kernel(modality, subject=None, level="subject", times=None)
 ```
 
 ### MultimodalSRM.plot_kernels
@@ -101,19 +101,19 @@ BayesianMultimodalSRM(
     reference_modality=None,
     responses=None,
     length_scale=3.0,
-    inference='posterior',
+    inference="posterior",
     search=None,
     sampler=None,
     sample_blocks=None,
     random_state=0,
     max_observations=800,
     covariance_tolerance=1e-07,
-    linear_algebra='dense',
+    linear_algebra="dense",
     spectral=None,
     run_baseline_sd=None,
     noise_timescales=None,
     response_quadrature_order=None,
-    state_space_gaussian='auto',
+    state_space_gaussian="auto",
 )
 ```
 
@@ -234,8 +234,8 @@ BayesianMultimodalSRM.condition(
     donors,
     *,
     targets,
-    donor_layout='runs',
-    mode='joint',
+    donor_layout="runs",
+    mode="joint",
     progress=None,
 )
 ```
@@ -299,8 +299,8 @@ BayesianMultimodalSRM.transform(
     *,
     times,
     modalities=None,
-    data_layout='runs',
-    readout='gp',
+    data_layout="runs",
+    readout="gp",
 )
 ```
 

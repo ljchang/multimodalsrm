@@ -73,18 +73,22 @@ A kernel constructor chooses a shape and its initial values. `Response` chooses 
 from multimodalsrm import Gaussian, Response
 
 # Fix the entire curve.
-fixed = Response(Gaussian(width=1.0, lag=2.0),
-                 estimate=False, pooling="shared")
+fixed = Response(Gaussian(width=1.0, lag=2.0), estimate=False, pooling="shared")
 
 # Learn only the lag, starting at 2 seconds.
 lag_only = Response(
-    Gaussian(width=1.0, lag=2.0), estimate=True, pooling="shared",
-    fixed={"width": 1.0}, bounds={"lag": (0.0, 5.0)},
+    Gaussian(width=1.0, lag=2.0),
+    estimate=True,
+    pooling="shared",
+    fixed={"width": 1.0},
+    bounds={"lag": (0.0, 5.0)},
 )
 
 # Learn width and lag together within an explicit scientific search range.
 shape_and_lag = Response(
-    Gaussian(width=1.0, lag=2.0), estimate=True, pooling="shared",
+    Gaussian(width=1.0, lag=2.0),
+    estimate=True,
+    pooling="shared",
     bounds={"width": (0.3, 2.0), "lag": (0.0, 5.0)},
 )
 print(lag_only.free_parameters)  # ('lag',)

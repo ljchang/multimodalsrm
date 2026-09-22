@@ -82,8 +82,8 @@ select_model(
     data,
     *,
     targets,
-    source='both',
-    metric='r2',
+    source="both",
+    metric="r2",
     cv=None,
     affinity=None,
     evaluation_weights=None,
@@ -111,8 +111,8 @@ nested_cross_validate(
     data,
     *,
     targets,
-    source='both',
-    metric='r2',
+    source="both",
+    metric="r2",
     sources=('within', 'across', 'both'),
     outer_cv=None,
     inner_cv=None,
@@ -149,7 +149,7 @@ ISC, not correlation over features at each time (pattern ISC).
 `from multimodalsrm import time_segment_matching` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/alignment.py#L165)
 
 ```python
-time_segment_matching(series, *, window_size, centering='global')
+time_segment_matching(series, *, window_size, centering="global")
 ```
 
 Match each participant's time windows to the other participants' mean.

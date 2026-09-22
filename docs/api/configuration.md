@@ -19,7 +19,7 @@ SearchConfig(
     refine_maxiter=0,
     polish_max_parameters=256,
     n_jobs=1,
-    conditioning='none',
+    conditioning="none",
 )
 ```
 
@@ -34,7 +34,7 @@ SearchConfig(
 | `refine_maxiter` | `int` | `0` |
 | `polish_max_parameters` | `int` | `256` |
 | `n_jobs` | `int` | `1` |
-| `conditioning` | `str` | `'none'` |
+| `conditioning` | `str` | `"none"` |
 
 MAP budgets; n_jobs runs independent restarts in shared-memory threads.
 
@@ -54,12 +54,12 @@ SamplerConfig(
     draws=1200,
     target_accept=0.99,
     max_tree_depth=10,
-    chain_method='sequential',
+    chain_method="sequential",
     start_objective_window=5.0,
     start_jitter=0.08,
-    mass_matrix='dense',
+    mass_matrix="dense",
     max_dense_parameters=1024,
-    orientation_refresh='none',
+    orientation_refresh="none",
 )
 ```
 
@@ -71,12 +71,12 @@ SamplerConfig(
 | `draws` | `int` | `1200` |
 | `target_accept` | `float` | `0.99` |
 | `max_tree_depth` | `int` | `10` |
-| `chain_method` | `str` | `'sequential'` |
+| `chain_method` | `str` | `"sequential"` |
 | `start_objective_window` | `float` | `5.0` |
 | `start_jitter` | `float` | `0.08` |
-| `mass_matrix` | `str` | `'dense'` |
+| `mass_matrix` | `str` | `"dense"` |
 | `max_dense_parameters` | `int` | `1024` |
-| `orientation_refresh` | `str` | `'none'` |
+| `orientation_refresh` | `str` | `"none"` |
 
 NUTS settings; optional Haar refresh supports full multifactor targets.
 
@@ -150,12 +150,12 @@ BayesianProblem(
     anchor=None,
     reference_modality=None,
     systems=None,
-    linear_algebra='dense',
+    linear_algebra="dense",
     spectral=None,
     run_baseline_sd=None,
     noise_timescales=None,
     response_quadrature_order=None,
-    state_space_gaussian='auto',
+    state_space_gaussian="auto",
     conventions_from=None,
     length_scale_prior=None,
 )

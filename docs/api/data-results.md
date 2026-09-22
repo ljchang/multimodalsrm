@@ -219,8 +219,8 @@ ParticipantCalibration.transform(
     *,
     times,
     modalities=None,
-    data_layout='runs',
-    readout='gp',
+    data_layout="runs",
+    readout="gp",
 )
 ```
 

@@ -88,7 +88,7 @@ def convolution():
     kernels = [Gaussian(width=1, lag=2), Gamma(), DoubleGamma(), BatemanSCR()]
     labels = ["Gaussian(width=1, lag=2)", "Gamma()", "DoubleGamma()", "BatemanSCR()"]
     fig, axes = plt.subplots(
-        6, 1, figsize=(8.4, 10), sharex=True, sharey=True, layout="constrained"
+        len(kernels) + 1, 1, figsize=(8.4, 10), sharex=True, sharey=True, layout="constrained"
     )
     axes[0].plot(t, drive(t), color="#263e4b")
     axes[0].set_title("Shared synthetic drive = Identity output", loc="left")

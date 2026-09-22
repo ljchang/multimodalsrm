@@ -28,7 +28,7 @@ Finite response families inherit these operations from the kernel base class:
 ```python
 Response(
     kernel,
-    pooling='partial',
+    pooling="partial",
     estimate=True,
     fixed=None,
     bounds=None,
@@ -42,7 +42,7 @@ Response(
 | Field | Type | Default |
 | --- | --- | --- |
 | `kernel` | `Kernel` | `required` |
-| `pooling` | `str` | `'partial'` |
+| `pooling` | `str` | `"partial"` |
 | `estimate` | `bool` | `True` |
 | `fixed` | `dict &#124; None` | `None` |
 | `bounds` | `dict &#124; None` | `None` |
@@ -63,7 +63,7 @@ response. `pooling="shared"` shares a modality's response across people.
 Response.lag_only(
     kernel,
     *,
-    pooling='partial',
+    pooling="partial",
     bounds=None,
     pooling_strength=1.0,
     lag_prior=None,
@@ -191,7 +191,7 @@ Legacy response: see [pending removal and migration](../upcoming-changes.md). Th
 
 ```python
 BachSCR(
-    version='2010',
+    version="2010",
     t0=3.0745,
     sigma=0.7013,
     lambda1=0.3176,
@@ -203,7 +203,7 @@ BachSCR(
 
 | Field | Type | Default |
 | --- | --- | --- |
-| `version` | `str` | `'2010'` |
+| `version` | `str` | `"2010"` |
 | `t0` | `float` | `3.0745` |
 | `sigma` | `float` | `0.7013` |
 | `lambda1` | `float` | `0.3176` |

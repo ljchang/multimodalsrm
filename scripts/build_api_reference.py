@@ -6,6 +6,7 @@ supported combinations live in the hand-written choices and kernel guides.
 
 import argparse
 import ast
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -131,6 +132,13 @@ PAGES["responses"][1][:] = [
 ]
 
 
+def expression(node):
+    """Use standard double quotes for string defaults in Python code fences."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return json.dumps(node.value, ensure_ascii=False)
+    return ast.unparse(node)
+
+
 def arguments(node):
     args = node.args
     positional = args.posonlyargs + args.args
@@ -138,7 +146,7 @@ def arguments(node):
     parts = []
     for i, (arg, default) in enumerate(zip(positional, defaults)):
         if arg.arg not in ("self", "cls"):
-            parts.append(arg.arg + ("=" + ast.unparse(default) if default is not None else ""))
+            parts.append(arg.arg + ("=" + expression(default) if default is not None else ""))
         if args.posonlyargs and i + 1 == len(args.posonlyargs):
             parts.append("/")
     if args.vararg:
@@ -146,7 +154,7 @@ def arguments(node):
     elif args.kwonlyargs:
         parts.append("*")
     for arg, default in zip(args.kwonlyargs, args.kw_defaults):
-        parts.append(arg.arg + ("=" + ast.unparse(default) if default is not None else ""))
+        parts.append(arg.arg + ("=" + expression(default) if default is not None else ""))
     if args.kwarg:
         parts.append("**" + args.kwarg.arg)
     return parts
@@ -182,7 +190,7 @@ def default(field):
         for keyword in value.keywords:
             if keyword.arg == "default_factory":
                 return ast.unparse(keyword.value) + "() (new per instance)"
-    return ast.unparse(value)
+    return expression(value)
 
 
 def doc(node):

@@ -28,10 +28,14 @@ Start here when you know what you want to estimate but are unsure which argument
 from multimodalsrm import TimeSeries
 
 # Each values array has shape (time, feature); times are strictly increasing.
-data = {"participant-01": {"run-01": {
-    "fmri": TimeSeries(values=fmri_values, times=fmri_times, mask=fmri_mask),
-    "rating": TimeSeries(values=rating_values, times=rating_times),
-}}}
+data = {
+    "participant-01": {
+        "run-01": {
+            "fmri": TimeSeries(values=fmri_values, times=fmri_times, mask=fmri_mask),
+            "rating": TimeSeries(values=rating_values, times=rating_times),
+        }
+    }
+}
 ```
 
 The names and arrays above are illustrative. Use one consistent time unit, normally seconds. Modalities keep their native sampling times. A mask is Boolean, has the same shape as `values`, and marks observed entries with `True`. Omit fully missing streams. Feature counts may differ between participant–modality pairs but must stay fixed across runs for a given pair. See [data preparation](data.md).
@@ -113,16 +117,22 @@ responses = {
     "rating": Response(Identity(), estimate=False, pooling="shared"),
     "fmri": Response(
         Gaussian(width=1.0, lag=2.0),
-        pooling="shared", estimate=True, fixed={"width": 1.0},
+        pooling="shared",
+        estimate=True,
+        fixed={"width": 1.0},
         bounds={"lag": (0.0, 5.0)},
     ),
 }
 model = BayesianMultimodalSRM(
-    features=1, inference="map", linear_algebra="grouped",
-    responses=responses, length_scale=3.0,
+    features=1,
+    inference="map",
+    linear_algebra="grouped",
+    responses=responses,
+    length_scale=3.0,
     priors=BayesianPriors(
         noise=Prior.lognormal(-2.0, 0.7),
-        loading_sd=1.0, offset_sd=1.0,
+        loading_sd=1.0,
+        offset_sd=1.0,
         filters={"fmri": {"lag": Prior.normal(2.0, 1.0)}},
     ),
 )
