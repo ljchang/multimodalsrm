@@ -29,10 +29,19 @@ STATE_KEYS = {
 def _search_for_validation(config):
     """Compare legacy search provenance without rewriting the saved record."""
     expected = asdict(SearchConfig())
-    optional = {"polish_max_parameters", "n_jobs", "conditioning"}
+    expected["r_init"] = False  # Historical fits never ran the R initializer.
+    optional = {"polish_max_parameters", "n_jobs", "conditioning", "r_init"}
     if isinstance(config, dict) and set(expected) - optional <= set(config) <= set(expected):
         return {**expected, **config}
     return config
+
+
+def _restore_search_default(constructor, fit):
+    """Make an implicit pre-R-init search explicit without rewriting fit evidence."""
+    search = fit.get("configuration", {}).get("search", {})
+    if constructor.get("search") is None and isinstance(search, dict) and "r_init" not in search:
+        constructor["search"] = SearchConfig(r_init=False)
+    return constructor
 
 
 def _sampler_for_validation(config):
@@ -349,7 +358,7 @@ def _restore_model(state):
     try:
         if not isinstance(state, dict) or set(state) != STATE_KEYS:
             raise ValueError("invalid fitted-model state fields")
-        constructor = copy.deepcopy(state["constructor"])
+        constructor = _restore_search_default(copy.deepcopy(state["constructor"]), state["fit"])
         if "state_space_gaussian" not in constructor:
             descriptor = state.get("fit", {}).get("configuration", {}).get("state_space", {})
             if descriptor.get("response_approximation") == (

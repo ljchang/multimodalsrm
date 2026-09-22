@@ -30,6 +30,9 @@ class SearchConfig:
     search never changes process-global thread limits. Refinement is serial.
     Optional diagonal conditioning uses staged physical coordinates for full
     multifactor dense/grouped fits with independent noise; the default is none.
+    ``r_init=True`` seeds the first full-training MAP restart from a bounded
+    CPU R-MSRM fit. Other prior-quantile starts and the GP target are unchanged.
+    Set it to False to use the historical data-based first start.
     """
 
     starts: int = 16
@@ -41,8 +44,11 @@ class SearchConfig:
     polish_max_parameters: int = 256
     n_jobs: int = 1
     conditioning: str = "none"
+    r_init: bool = True
 
     def __post_init__(self):
+        if type(self.r_init) is not bool:
+            raise ValueError("r_init must be boolean")
         if self.conditioning not in ("none", "diagonal"):
             raise ValueError("conditioning must be none or diagonal")
         _positive_integer(self.starts, "starts")
@@ -402,6 +408,8 @@ def search(problem, config, seed, *, progress=None):
         check_cancelled()
         started = time.perf_counter()
         record = dict(start=index, initial_parameters=x0.tolist())
+        if index == 0 and initialization is not None:
+            record["initialization"] = deepcopy(initialization)
         checkpoint("started", record)
         try:
             if config.conditioning == "diagonal":
@@ -451,6 +459,13 @@ def search(problem, config, seed, *, progress=None):
         return record
 
     points = initial_points(problem, config.starts, seed)
+    initialization = None
+    if config.r_init:
+        from .r_initialization import r_initial_point
+
+        point, initialization = r_initial_point(problem, seed)
+        if point is not None:
+            points[0] = point
     workers = min(config.n_jobs, len(points))
     if workers > 1:
         # Trace/compile once before dispatch; no traced values cross threads.

@@ -154,7 +154,12 @@ def decode(value, arrays, used):
         # missing or unknown fields remain errors. Keep provenance unchanged.
         if cls is SearchConfig and isinstance(record_fields, dict):
             expected = {f.name for f in fields(cls)}
-            defaults = {"polish_max_parameters": 256, "n_jobs": 1, "conditioning": "none"}
+            defaults = {
+                "polish_max_parameters": 256,
+                "n_jobs": 1,
+                "conditioning": "none",
+                "r_init": False,
+            }
             if expected - defaults.keys() <= record_fields.keys() <= expected:
                 record_fields = {**defaults, **record_fields}
         if cls is SamplerConfig and isinstance(record_fields, dict):
