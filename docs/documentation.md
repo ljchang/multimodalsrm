@@ -31,4 +31,24 @@ The site is live at [ljchang.github.io/multimodalsrm](https://ljchang.github.io/
 
 ## Scope of this first site
 
-The first version organizes installation, data preparation, a conceptual model comparison, existing runnable tutorials, capabilities, and contributor guidance. Complete API documentation, longer posterior tutorials, and versioned release documentation remain future work. The site follows `main`; it does not currently offer a version selector.
+The first version organizes installation, data preparation, a conceptual model comparison, existing runnable tutorials, capabilities, and contributor guidance. The site now includes a source-generated API inventory, a settings guide, illustrated temporal kernels, and model mathematics adapted from the white papers. Longer posterior tutorials and versioned release documentation remain future work. The site follows `main`; it does not currently offer a version selector.
+
+## Maintain the API and figures
+
+Regenerate committed reference pages after changing a public signature or docstring:
+
+```sh
+python scripts/build_api_reference.py
+python scripts/build_api_reference.py --check
+```
+
+The generator uses only the Python standard library and reads source without importing the model or JAX. It checks all exports in both public namespaces. Hand-written setting explanations in `docs/api-guide.md` still need review when behavior changes.
+
+Regenerate the kernel illustrations in an environment with the package and plotting extra:
+
+```sh
+python -m pip install -e '.[plots]'
+python scripts/build_kernel_figures.py
+```
+
+Generated SVGs are committed, so ordinary docs builds do not need numerical dependencies. Equations use [Zensical's MathJax integration](https://zensical.org/docs/authoring/math/) with a pinned MathJax browser runtime from a CDN. See [figure provenance](figure-provenance.md) for the reused white-paper diagrams.

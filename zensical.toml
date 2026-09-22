@@ -9,6 +9,7 @@ edit_uri = "edit/main/docs/"
 docs_dir = "docs"
 site_dir = "site"
 strict = true
+extra_javascript = ["javascripts/mathjax.js", "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"]
 nav = [
   { "Home" = "index.md" },
   { "Get started" = [
@@ -18,9 +19,20 @@ nav = [
   ] },
   { "Models" = [
     { "How the models work" = "concepts.md" },
+    { "Temporal kernels, visually" = "temporal-kernels.md" },
+    { "Model mathematics" = "model-mathematics.md" },
     { "Capabilities and diagnostics" = "capabilities.md" },
     { "Skin-conductance responses" = "scr-responses.md" },
     { "Migration and saved models" = "migration.md" },
+  ] },
+  { "API reference" = [
+    { "Choose your settings" = "api-guide.md" },
+    { "Upcoming API changes" = "upcoming-changes.md" },
+    { "Estimators" = "api/estimators.md" },
+    { "Responses and priors" = "api/responses.md" },
+    { "Search and sampling" = "api/configuration.md" },
+    { "Data and results" = "api/data-results.md" },
+    { "Evaluation" = "api/evaluation.md" },
   ] },
   { "Development" = [
     { "Contribute to the docs" = "documentation.md" },
@@ -68,3 +80,4 @@ pymdownx.details = {}
 pymdownx.highlight.pygments_lang_class = true
 pymdownx.inlinehilite = {}
 pymdownx.superfences = {}
+pymdownx.arithmatex.generic = true
