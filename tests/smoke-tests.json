@@ -1,6 +1,7 @@
 {
   "bayesian": [
     "tests/bayesian/test_state_space_grouped.py::test_fixed_bateman_density_gradient_and_smoothing[2]",
+    "tests/bayesian/test_state_space_grouped_learned.py::test_learned_nodes_preserve_density_gradient_and_exact_clocks[False]",
     "tests/bayesian/test_bayesian_problem.py",
     "tests/bayesian/test_bayesian_factorization.py",
     "tests/bayesian/test_bayesian_diagnostics.py",
