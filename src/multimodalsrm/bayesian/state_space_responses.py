@@ -12,7 +12,7 @@ import numpy as np
 from scipy.linalg import expm, solve_sylvester
 from scipy.stats import gamma as gamma_distribution
 
-from ..kernels import BachSCR, DoubleGamma, Gamma, Gaussian, Identity
+from ..kernels import BachSCR, BatemanSCR, DoubleGamma, Gamma, Gaussian, Identity
 
 
 def _components(kernel):
@@ -56,7 +56,7 @@ class ResponseStateSpace:
     def prepare(cls, responses, length_scale, tolerance, *, gaussian_method="auto"):
         if gaussian_method not in ("auto", "laguerre", "rational"):
             raise ValueError("state_space_gaussian must be auto, laguerre or rational")
-        if any(type(r.initial_kernel()) is BachSCR for r in responses.values()) or (
+        if any(type(r.initial_kernel()) in (BachSCR, BatemanSCR) for r in responses.values()) or (
             gaussian_method != "laguerre"
             and any(type(r.initial_kernel()) is Gaussian for r in responses.values())
         ):

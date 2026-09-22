@@ -1,8 +1,9 @@
 """Sparse native-time convolution of piecewise-linear latent trajectories.
 
 Gaussian filters use exact zeroth and first moments within each latent cell.
-Other filters use three-point Gauss-Legendre integration within each cell
-(and each custom-kernel segment) carries physical seconds explicitly. There is
+Bateman filters use vectorized eight-point quadrature with time-constant
+resolution. Other filters use three-point Gauss-Legendre integration within
+each cell and each custom-kernel segment. Integration uses physical seconds. There is
 no padding: unsupported rows are zero and their validity is False.
 """
 
@@ -13,6 +14,7 @@ from scipy.special import ndtr
 from .data import validate_times
 from .kernels import (
     BachSCR,
+    BatemanSCR,
     DoubleGamma,
     Gamma,
     Gaussian,
@@ -130,10 +132,26 @@ def gaussian_operator_derivatives(grid, times, kernel, support=None):
     return _gaussian_operator(grid, times, kernel, valid, derivatives=True)
 
 
+def response_operator_derivatives(grid, times, kernel, support=None):
+    """Gaussian analytic or Bateman complex-step response derivatives."""
+    if type(kernel) is Gaussian:
+        return gaussian_operator_derivatives(grid, times, kernel, support)
+    if type(kernel) is BatemanSCR:
+        from .bateman_operators import bateman_operator
+
+        grid, times, valid = _operator_inputs(grid, times, kernel, support)
+        return bateman_operator(grid, times, kernel, valid, derivatives=True)
+    raise ValueError("response derivatives require Gaussian or BatemanSCR")
+
+
 def observation_operator(grid, times, kernel, support=None):
     grid, times, valid = _operator_inputs(grid, times, kernel, support)
     if isinstance(kernel, Gaussian):
         return _gaussian_operator(grid, times, kernel, valid)
+    if type(kernel) is BatemanSCR:
+        from .bateman_operators import bateman_operator
+
+        return bateman_operator(grid, times, kernel, valid)
     lo, hi = kernel.support
     rows, cols, values = [], [], []
     nodes, weights = np.polynomial.legendre.leggauss(3)

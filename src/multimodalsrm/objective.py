@@ -12,7 +12,7 @@ from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
 from .grouping import latent_groups
-from .operators import gaussian_operator_derivatives, observation_operator
+from .operators import observation_operator, response_operator_derivatives
 
 
 def _validate_loading_penalty_scaling(value):
@@ -60,7 +60,7 @@ class PreparedBlocks:
         if cached is None or (derivatives and cached[1] is None):
             args = (self.grids[block.run], block.times, kernel, self.supports[block.modality])
             if derivatives:
-                h, gradients, _ = gaussian_operator_derivatives(*args)
+                h, gradients, _ = response_operator_derivatives(*args)
             else:
                 h, _ = observation_operator(*args)
                 gradients = None

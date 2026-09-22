@@ -6,6 +6,7 @@
   "test_suites": {
     "core": [
       "tests/core/test_alignment_centering.py",
+      "tests/core/test_bateman_scr.py",
       "tests/core/test_gaussian_operator_exact.py",
       "tests/core/test_multimodal_alignment.py",
       "tests/core/test_multimodal_calibration.py",
@@ -29,6 +30,7 @@
       "tests/core/test_observation_preparation.py"
     ],
     "bayesian": [
+      "tests/bayesian/test_bateman_scr.py",
       "tests/bayesian/test_bayesian_analytic_score.py",
       "tests/bayesian/test_bayesian_bach_posterior.py",
       "tests/bayesian/test_bayesian_blocks.py",

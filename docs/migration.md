@@ -34,3 +34,7 @@ Warmup checkpoints are different from fitted GP archives. They restore the compl
 Compatibility checks hash every Python source file under the model package tree, as well as recording numerical runtime, devices, PRNG configuration and target identity. The namespace extraction changes that source tree even when mathematical behavior is preserved. **An existing research-repository warmup checkpoint must resume in its original frozen source and runtime environment.** Do not edit checkpoint identities, remove hashes or assume fitted-archive compatibility implies warmup compatibility.
 
 New package checkpoints can be created with `fit(..., warmup_checkpoint=path)` and resumed with the identical configuration, data, explicit integer seed, runtime and source using `resume_warmup=True`. This API covers full dense/grouped posterior training with independent noise and no run baselines; it does not cover posterior updates, conditional parameter targets or state-space inference. Checkpoints require new destinations and never overwrite existing ones. Retain the source/environment for each long run.
+
+## Skin-conductance responses
+
+`BatemanSCR` is the common response option for new SCR workflows. Existing `BachSCR` configurations and archives preserve their original behavior. Switching requires new response bounds/priors and refitting; old shape parameters and lag estimates are not converted automatically. See the [SCR guide](scr-responses.md).
