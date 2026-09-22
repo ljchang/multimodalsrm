@@ -4,6 +4,7 @@
     "tests/bayesian/test_state_space_grouped_learned.py::test_learned_nodes_preserve_density_gradient_and_exact_clocks[False]",
     "tests/bayesian/test_bayesian_problem.py",
     "tests/bayesian/test_bayesian_factorization.py",
+    "tests/bayesian/test_bayesian_r_initialization.py::test_actual_r_fit_transfers_responses_and_is_reproducible[scalar_irregular]",
     "tests/bayesian/test_bayesian_diagnostics.py",
     "tests/bayesian/test_bayesian_environment.py",
     "tests/bayesian/test_bayesian_gamma_posterior.py::test_posterior_admits_same_gamma_likelihood_and_prior_as_map",

@@ -182,6 +182,15 @@ def test_failed_r_fit_keeps_historical_start_with_diagnostic(monkeypatch):
     assert "synthetic singular fit" in records[0]["initialization"]["reason"]
 
 
+def test_finite_objective_with_invalid_gradient_falls_back(monkeypatch):
+    problem, _, _ = problem_fixture()
+    monkeypatch.setattr(problem, "value_gradient", lambda point: (0.0, np.full_like(point, np.nan)))
+    with pytest.warns(RuntimeWarning, match="nonfinite GP objective or gradient"):
+        point, report = r_initialization.r_initial_point(problem, 1)
+    assert point is None
+    assert report["r_init"] == "fallback"
+
+
 @pytest.mark.parametrize("target", ["conditional", "updated"])
 def test_nontraining_targets_do_not_fit_r(target, monkeypatch):
     problem, _, _ = problem_fixture()

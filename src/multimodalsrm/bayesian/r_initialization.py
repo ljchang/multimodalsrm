@@ -137,8 +137,11 @@ def r_initial_point(problem, seed):
             fitted.fit(problem.adapter._training_data)
         point = _translate(problem, fitted)
         report.update(iterations=int(fitted.n_iter_), converged=bool(fitted.converged_))
-        if not np.isfinite(float(problem.objective(point))):
-            raise ValueError("R initialization has nonfinite GP objective")
+        # Reuse the compiled physical score needed by final MAP diagnostics.
+        # Eager objective evaluation would separately compile many primitives.
+        value, gradient = problem.value_gradient(point)
+        if not np.isfinite(value) or not np.isfinite(gradient).all():
+            raise ValueError("R initialization has nonfinite GP objective or gradient")
     except (ValueError, ArithmeticError, np.linalg.LinAlgError, RuntimeError) as exc:
         point = None
         report.update(method="data", r_init="fallback", reason=f"{type(exc).__name__}: {exc}")

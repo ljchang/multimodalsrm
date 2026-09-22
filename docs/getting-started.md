@@ -84,10 +84,13 @@ starting values are clipped to interior prior quantiles. Only Gaussian response
 parameters are optimized in the preliminary R fit: other response families are
 held at their configured initial values to avoid expensive finite differences.
 The GP still learns all requested response parameters. The R fit need not
-converge. Its status and elapsed time are recorded in
+converge. Its status and total initialization time (including GP score validation) are recorded in
 `restart_diagnostics_[0]["initialization"]`. If it fails numerically, the search
 warns and retains the previous data-based start. Conditional participant
 calibration and posterior updates retain their existing initialization.
+
+See the [initialization timing comparison](performance/r-map-initialization.md)
+for a reproducible benchmark and the limits of the measured benefit.
 
 ## NVIDIA GPUs on Linux
 
