@@ -1,6 +1,6 @@
 # Grouped state-space filtering and smoothing
 
-Select `linear_algebra="state_space"` with fixed response parameters and a
+Select `linear_algebra="state_space"` with fixed or learned response parameters and a
 strictly positive noise prior to use grouped observation updates automatically.
 This is a computational improvement to the same MAP target. `linear_algebra="grouped"`
 continues to select the existing dense covariance over unique functionals.
@@ -24,8 +24,10 @@ model = BayesianMultimodalSRM(
 ```
 
 The noise prior describes observation **variance** in supplied data units; the
-numbers above are illustrative. Grouping applies to supported fixed responses,
-including Identity and BatemanSCR. Gaussian approximations and finite-response
+numbers above are illustrative. Grouping applies to all supported responses, including Identity, Gaussian,
+Gamma, DoubleGamma, BachSCR and BatemanSCR. Parameter restrictions are unchanged:
+Gamma shapes and Bach shape parameters remain fixed; supported widths, scales,
+ratios, Bateman rise/decay and response lags may be learned. Gaussian approximations and finite-response
 tail qualifications retain their existing covariance error bounds.
 
 ## Numerical contract
@@ -54,9 +56,13 @@ training and frozen new-run predictions.
 
 ## Scope and compatibility
 
-All response parameters, including delays, must be fixed for this first grouped
-implementation. Learned response parameters retain the scalar implementation,
-including its existing gradients at changing event order and coincident times.
+For learned responses, node membership remains fixed at native modality/time
+pairs. Each parameter evaluation realizes the current response, shifts node and
+query clocks, and sorts the resulting events. Different modalities remain
+separate nodes even when their shifted clocks coincide. Gaussian widths also
+change internal clock shifts; these are included in the same calculation.
+Exact-time transition derivatives and the existing differentiable RTS tie
+update preserve sensitivities when event order changes or queries meet nodes.
 A lognormal noise prior or a prior with a strictly positive lower bound admits
 grouping. Priors including zero use scalar updates for the entire fit, even at
 positive current parameter values, so noiseless evaluations remain supported.
@@ -64,7 +70,7 @@ State-space posterior sampling and learned GP timescales remain outside the
 current backend's supported scope.
 
 Fitted archive formats and saved configuration/diagnostic evidence are unchanged.
-Historical fixed-response archives can use grouped prediction after loading;
+Historical fixed- and learned-response archives can use grouped prediction after loading;
 floating-point results may differ slightly because measurement arithmetic is
 regrouped. Tests compare such replay against scalar predictions and verify
 that the original fit evidence survives loading and resaving.

@@ -133,6 +133,10 @@ def test_smoother_lag_derivatives_at_parameter_dependent_ties(noiseless, rotated
     jax, jnp, _, _ = runtime()
     model, problem, x, data = fixture()
     if noiseless:
+        from dataclasses import replace
+
+        b = api()
+        model.set_params(priors=replace(model.priors, noise=b.Prior.uniform(0.0, 1.0)))
         # One exact measurement per timestamp; duplicate noiseless features
         # would make this an inconsistent/singular observation model.
         parameters = dict(zip(problem.names, x))

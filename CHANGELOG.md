@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Group fixed-response state-space filtering and smoothing at exact modality/time nodes for strictly positive noise priors, preserving scalar updates for learned responses and noiseless support.
+- Group fixed and learned-response state-space filtering and smoothing at exact modality/time nodes for strictly positive noise priors, including changing event order and coincident times; preserve scalar updates for noiseless support.
 - Add BatemanSCR as the common SCR response option for R and GP workflows, including differentiable state-space MAP, finite normalization, and explicit tail bounds. Preserve BachSCR parameters and archive behavior; include a shared R/GP example and numerical qualification tests.
 
 ## 0.1.0

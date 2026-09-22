@@ -96,6 +96,7 @@
       "tests/bayesian/test_state_space_gaussian.py",
       "tests/bayesian/test_state_space_gaussian_method.py",
       "tests/bayesian/test_state_space_grouped.py",
+      "tests/bayesian/test_state_space_grouped_learned.py",
       "tests/bayesian/test_state_space_optional_conventions.py",
       "tests/bayesian/test_state_space_parameter_workflows.py",
       "tests/bayesian/test_state_space_parameters.py",

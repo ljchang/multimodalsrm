@@ -1,4 +1,4 @@
-"""Exact fixed-response node updates with positive observation noise.
+"""Exact response node updates with positive observation noise.
 
 Group only identical (modality, native timestamp) observations. The likelihood
 keeps every residual and normalization term. Information matrices may be rank
@@ -12,9 +12,39 @@ from ._backend import runtime
 
 
 def eligible(problem):
-    """The first grouped path keeps learned clocks and zero-noise support scalar."""
+    """Group fixed or learned responses when the noise prior excludes zero."""
     prior = problem.priors.noise
-    return not problem.dynamic_state_space and (prior.family == "lognormal" or prior.lower > 0)
+    return prior.family == "lognormal" or prior.lower > 0
+
+
+def event_system(problem, x, run, times=None, query_modality=-1):
+    """Realize responses and sort shifted nodes, optionally including queries.
+
+    Node membership uses native modality/time pairs and never depends on x.
+    Learned lags can reorder nodes or tie different modalities without merging
+    them. Transition derivatives at zero elapsed time remain those of the
+    existing scalar backend.
+    """
+    from .state_space_delays import event_system as delay_events
+    from .state_space_parameters import parameter_event_system
+
+    _, jnp, _, _ = runtime()
+    model = problem.response_state_space
+    nodes = problem.grouped_systems[run]
+    if problem.parameterized_responses:
+        state = model.realize(x, problem.indices)
+        outputs, lags = state[2:]
+    else:
+        outputs = jnp.asarray(model.outputs)
+        lags = jnp.concatenate((problem.arrays(x)[4], jnp.zeros(1)))
+    shifted = jnp.asarray(nodes.times) - lags[nodes.modalities]
+    if times is not None:
+        shifted = jnp.concatenate((shifted, jnp.asarray(times) - lags[query_modality]))
+    if problem.parameterized_responses:
+        events = parameter_event_system(model, state, shifted, problem.features)
+    else:
+        events = delay_events(shifted, problem.delay_transition, problem.features)
+    return events, outputs
 
 
 def statistics(problem, x, run):
@@ -69,8 +99,12 @@ def nll(problem, x, run):
     """Filter at nodes and evaluate every original observation's residual."""
     jax, jnp, _, _ = runtime()
     nodes = problem.grouped_systems[run]
-    system = problem.state_space_systems[run]
     model = problem.response_state_space
+    if problem.dynamic_state_space:
+        system, outputs = event_system(problem, x, run)
+    else:
+        system = problem.state_space_systems[run]
+        outputs = jnp.asarray(model.outputs)
     precision, information, weights, residual, variance = statistics(problem, x, run)
     order = system.order
     dimension = model.dimension * problem.features
@@ -86,7 +120,7 @@ def nll(problem, x, run):
         (
             jnp.asarray(system.transition),
             jnp.asarray(system.process_covariance),
-            jnp.asarray(model.outputs[nodes.modalities][order]),
+            outputs[nodes.modalities][order],
             precision[order],
             information[order],
         ),
@@ -94,7 +128,7 @@ def nll(problem, x, run):
     # Each node's posterior mean conditions only on that node and earlier
     # observations. Together with its prior displacement cost this is exactly
     # the innovation quadratic, without subtracting large r.T R^-1 r terms.
-    means = means[np.argsort(order)]
+    means = means[jnp.argsort(order)]
     error = residual - jnp.sum(weights * means[nodes.observation_nodes], axis=1)
     return 0.5 * (final[2] + jnp.sum(error**2 / variance + jnp.log(variance) + np.log(2 * np.pi)))
 
@@ -107,28 +141,27 @@ def smoother(problem, run, times, query_modality):
     model = problem.response_state_space
     nodes = problem.grouped_systems[run]
     count = len(nodes.times)
-    events = StateSpaceSystem.prepare(
-        np.concatenate(
-            (nodes.times - model.lags[nodes.modalities], times - model.lags[query_modality])
-        ),
-        model,
-        problem.features,
-    )
-    order = events.order
-    query_indices = np.argsort(order)[count:]
-    A, Q = jnp.asarray(events.transition), jnp.asarray(events.process_covariance)
+    if not problem.dynamic_state_space:
+        events = StateSpaceSystem.prepare(
+            np.concatenate(
+                (nodes.times - model.lags[nodes.modalities], times - model.lags[query_modality])
+            ),
+            model,
+            problem.features,
+        )
     dimension = model.dimension * problem.features
-    rows = jnp.asarray(
-        np.concatenate(
-            (
-                model.outputs[nodes.modalities],
-                np.tile(model.outputs[query_modality], (len(times), 1)),
-            )
-        )[order]
-    )
-    observed = jnp.asarray(order < count)
 
     def one(x):
+        if problem.dynamic_state_space:
+            merged, outputs = event_system(problem, x, run, times, query_modality)
+        else:
+            merged, outputs = events, jnp.asarray(model.outputs)
+        order = merged.order
+        query_indices = jnp.argsort(order)[count:]
+        A, Q = jnp.asarray(merged.transition), jnp.asarray(merged.process_covariance)
+        row = outputs[query_modality]
+        rows = jnp.concatenate((outputs[nodes.modalities], jnp.tile(row, (len(times), 1))))[order]
+        observed = jnp.asarray(order < count)
         precision, information, _, _, _ = statistics(problem, x, run)
         precision = jnp.concatenate(
             (precision, jnp.zeros((len(times), problem.features, problem.features)))
@@ -159,8 +192,9 @@ def smoother(problem, run, times, query_modality):
             (jnp.zeros(dimension), jnp.eye(dimension)),
             (A, Q, rows, precision, information, observed),
         )
-        mean, covariance = _smooth_backward(last, history, A, semidefinite=False)
-        row = jnp.asarray(model.outputs[query_modality])
+        mean, covariance = _smooth_backward(
+            last, history, A, semidefinite=False, dynamic=problem.dynamic_state_space
+        )
         mean = mean[query_indices].reshape(len(times), problem.features, model.dimension) @ row
         covariance = covariance[query_indices].reshape(
             len(times), problem.features, model.dimension, problem.features, model.dimension

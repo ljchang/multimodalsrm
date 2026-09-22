@@ -244,7 +244,7 @@ class BayesianProblem:
                 np.array([group_indices[k[:2]] for k in system.keys]),
                 np.array([modality_indices[k[1]] for k in system.keys]),
             )
-            if linear_algebra == "state_space" and not self.dynamic_state_space:
+            if linear_algebra == "state_space":
                 from .state_space import StateSpaceSystem
 
                 times, modalities = system.times, self._packed[run][2]
@@ -254,11 +254,12 @@ class BayesianProblem:
                     nodes = GroupedSystem.prepare(times, modalities, covariance_lookup=False)
                     self.grouped_systems[run] = nodes
                     times, modalities = nodes.times, nodes.modalities
-                self.state_space_systems[run] = StateSpaceSystem.prepare(
-                    times - self.response_state_space.lags[modalities],
-                    self.response_state_space,
-                    self.features,
-                )
+                if not self.dynamic_state_space:
+                    self.state_space_systems[run] = StateSpaceSystem.prepare(
+                        times - self.response_state_space.lags[modalities],
+                        self.response_state_space,
+                        self.features,
+                    )
             if self.noise_timescales:
                 from .temporal_noise import NoiseSystem
 
