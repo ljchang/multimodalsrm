@@ -10,8 +10,8 @@ Use it to fit a common representation, infer latent responses on new recordings,
 [How it works](concepts.md){ .md-button }
 [API and choices](api-guide.md){ .md-button }
 
-!!! info "Version 0.1.0"
-    Install the package from PyPI. These pages follow `main`; use the `v0.1.0` source tag when matching an analysis to this release.
+!!! info "Version 0.2.0"
+    Install the package from PyPI. These pages follow `main`; use the `v0.2.0` source tag when matching an analysis to this release.
 
 ## Choose a model
 

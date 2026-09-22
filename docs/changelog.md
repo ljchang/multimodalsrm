@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-09-22
+
 ### Added
 
 - **Grouped state-space filtering and smoothing extended to learned responses.**
@@ -32,9 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   continuous L2 normalization, and handles equal and nearly equal time constants
   without singular partial fractions. Dense and grouped GP require explicit response
   quadrature; state-space MAP checks a uniform bound for the truncated tail.
-  `BachSCR` keeps its formula, parameters, defaults and archive identifier, and
-  archives are never silently converted: switching an existing analysis requires an
-  explicit response change and a refit.
+  It replaces `BachSCR` (see Removed); archives are never silently converted, so
+  switching an existing analysis requires an explicit response change and a refit.
 - **A `bayesian-cuda` extra, and one-time advice when a visible NVIDIA card goes
   unused.** The extra installs the pinned JAX CUDA plugin on Linux x86\_64 and
   resolves to the CPU runtime elsewhere. A fit process warns once when an NVIDIA
@@ -105,5 +106,6 @@ Test evidence belongs to the integration record and corresponding CI run; this
 changelog makes no calibration or recovery claim. Learned FIR responses remain
 deferred.
 
-[Unreleased]: https://github.com/ljchang/multimodalsrm/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ljchang/multimodalsrm/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ljchang/multimodalsrm/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ljchang/multimodalsrm/releases/tag/v0.1.0

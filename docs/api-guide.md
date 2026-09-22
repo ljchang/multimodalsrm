@@ -2,8 +2,8 @@
 
 Start here when you know what you want to estimate but are unsure which arguments to use. The linked reference pages list every public export, constructor default, and public method defined on those classes. These pages follow the checked-out source; the installed release may have fewer options.
 
-!!! info "Current settings and queued changes"
-    This reference follows the checked-out source. The [upcoming changes guide](upcoming-changes.md) covers the queued BachSCR removal and `SearchConfig.r_init` option. Bateman is used for new SCR examples; Bach is documented as a legacy API while it remains exported.
+!!! info "Changes in 0.2.0"
+    This reference follows the checked-out source. The [changelog](changelog.md) covers the 0.2.0 BachSCR removal and the opt-in `SearchConfig.r_init` option. Use `BatemanSCR` for SCR workflows.
 
 ## The choices at a glance
 
@@ -84,7 +84,7 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `run_baseline_sd=None` | Optional fixed per-modality Gaussian run-offset prior SDs. These are marginalized observation offsets, not private latent trajectories. Outside the full posterior workflow. |
 | `noise_timescales=None` | Optional fixed per-modality OU residual timescales for dense/grouped MAP, without run baselines. Distinct from the shared latent timescale and response width. |
 
-Fixed- and learned-response state-space filtering and smoothing automatically group exactly matching modality/time observations when noise support is strictly positive. This is separate from selecting `linear_algebra="grouped"`; no new switch is needed. See [grouped state-space computation](grouped-state-space.md) and the [integration status](upcoming-changes.md).
+Fixed- and learned-response state-space filtering and smoothing automatically group exactly matching modality/time observations when noise support is strictly positive. This is separate from selecting `linear_algebra="grouped"`; no new switch is needed. See [grouped state-space computation](grouped-state-space.md).
 
 ### Search and sampling
 
@@ -103,7 +103,7 @@ Fixed- and learned-response state-space filtering and smoothing automatically gr
 | `SamplerConfig` | `start_objective_window=5.0`, `start_jitter=0.08` | Selection/jitter of sampling starting points. |
 | `SamplerConfig` | `orientation_refresh="none"` or `"haar"` | Optional common rotation/reflection refresh for supported full multifactor targets with isotropic unbounded Gaussian loading priors. |
 
-The queued R initialization change adds `SearchConfig(r_init=True)` and uses `r_init=False` for historical starts. This field is **pending** in this documentation baseline; see [upcoming changes](upcoming-changes.md#r-initialization-changes-a-search-default).
+`SearchConfig(r_init=True)` opts in to seeding the first MAP restart from a bounded R-MSRM fit; the default `r_init=False` keeps the historical start. See the [GP-MSRM installation example](getting-started.md#gp-msrm-example).
 
 ### A GP MAP configuration with a learned Gaussian lag
 

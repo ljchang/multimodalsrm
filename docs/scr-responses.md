@@ -1,8 +1,8 @@
 # Skin-conductance responses
 
-`BatemanSCR` is the built-in response family for skin-conductance models. The same `Response` configuration works in R-MSRM, dense/grouped GP MAP and posterior inference, and state-space GP MAP. `BachSCR` has been removed from the development version; see the migration instructions below for historical analyses.
+`BatemanSCR` is the built-in response family for skin-conductance models. The same `Response` configuration works in R-MSRM, dense/grouped GP MAP and posterior inference, and state-space GP MAP. `BachSCR` was removed in 0.2.0; see the migration instructions below for historical analyses.
 
-This addition is available from the development checkout; it is not included in the published `0.1.0` release. Install the checkout as described in the [installation guide](getting-started.md).
+`BatemanSCR` is available from release `0.2.0`. See the [installation guide](getting-started.md).
 
 ## Configure a response
 
@@ -72,7 +72,7 @@ The observations are synthetic. The example checks fitting, valid prediction and
 
 Replace `Response(BachSCR(...), ...)` with an explicit `Response(BatemanSCR(...), ...)`, choose time-constant bounds and GP priors, and **refit the model**. There is no automatic conversion of Bach parameters, fitted loadings or lag estimates. Their reference shapes differ, so a difference in fitted `lag` alone cannot establish a change in physiological timing.
 
-The development version removes `BachSCR` from public imports, R/GP fitting,
+Release 0.2.0 removes `BachSCR` from public imports, R/GP fitting,
 response approximations and the archive type registry. Loading a GP archive
 containing a Bach record raises an explicit migration error before reconstructing
 or fitting a model. Historical R pickle/joblib models also require their original

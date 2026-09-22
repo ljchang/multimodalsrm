@@ -18,7 +18,7 @@ The horizontal axis of $h$ is **response lag** $u$, not observation time. Positi
 
 ## Available response families
 
-These are the response families used for new examples. `BachSCR` is moving to historical-only support; see [legacy Bach analyses](#legacy-bach-analyses) and the [queued removal](upcoming-changes.md).
+These are the supported response families. `BachSCR` was removed in 0.2.0; see [legacy Bach analyses](#legacy-bach-analyses).
 
 [![Response curves for six response families for new workflows, with explicit Identity impulse and a custom sampled example.](assets/figures/kernel-families.svg)](assets/figures/kernel-families.svg)
 
@@ -138,7 +138,7 @@ R-MSRM uses a latent derivative penalty controlled by `temporal_strength`; it do
 
 ## Legacy Bach analyses
 
-The current documentation baseline still exports `BachSCR`; [PR #32](https://github.com/ljchang/multimodalsrm/pull/32) removes that import and its inference paths. Use `BatemanSCR` for new SCR configurations. Bach and Bateman are different response families: replacing the class name does not convert fitted parameters or an existing archive. Preserve the original environment to reproduce a Bach fit, or refit Bateman from the original observations. The generated [API reference](api/responses.md) lists Bach only when it is actually exported by the source being documented.
+Version 0.2.0 removed `BachSCR` and its inference paths ([PR #32](https://github.com/ljchang/multimodalsrm/pull/32)). Use `BatemanSCR` for SCR configurations. Bach and Bateman are different response families: replacing the class name does not convert fitted parameters or an existing archive. Preserve the original environment to reproduce a Bach fit, or refit Bateman from the original observations.
 
 ## Finite support changes which data are usable
 

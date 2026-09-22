@@ -6,7 +6,7 @@
 
 Shared response models for observations measured across people, modalities and native sampling times.
 
-**Version `0.1.0`.** This package contains the extracted R-MSRM and GP-MSRM implementations. Software checks, fit convergence, uncertainty calibration and empirical recovery are separate claims.
+**Version `0.2.0`.** This package contains the extracted R-MSRM and GP-MSRM implementations. Software checks, fit convergence, uncertainty calibration and empirical recovery are separate claims.
 
 ## Models
 
@@ -15,16 +15,16 @@ Shared response models for observations measured across people, modalities and n
 
 Both use named native-time observations, masks and missing streams. They preserve explicit information boundaries for held-out prediction. Learned FIR responses are deferred. Legacy neighborhood, graph, mixture and reference estimators are not exported by this package. See the [capability and backend matrix](docs/capabilities.md) before choosing a workflow.
 
-The development checkout adds `Response(BatemanSCR(...))` for skin-conductance streams across R and supported GP workflows. See the [SCR guide](docs/scr-responses.md) and [shared R/GP example](examples/scr_quickstart.py). Existing Bach models and archives remain reproducible.
+`Response(BatemanSCR(...))` models skin-conductance streams across R and supported GP workflows. See the [SCR guide](docs/scr-responses.md) and [shared R/GP example](examples/scr_quickstart.py). Version 0.2.0 removed `BachSCR`; reproduce Bach models and archives in a 0.1.0 environment ([migration](docs/migration.md#skin-conductance-responses)).
 
 ## Install
 
 Python 3.12 or later is required. Install the release from PyPI:
 
 ```sh
-python -m pip install "multimodalsrm==0.1.0"
+python -m pip install "multimodalsrm==0.2.0"
 # Optional Bayesian runtime:
-python -m pip install "multimodalsrm[bayesian]==0.1.0"
+python -m pip install "multimodalsrm[bayesian]==0.2.0"
 ```
 
 Enable float64 before using the Bayesian model (`JAX_ENABLE_X64=true`). See the [installation guide](https://ljchang.github.io/multimodalsrm/getting-started/) for environment setup.
@@ -47,7 +47,7 @@ python -m pip install -e '.[bayesian]'
 JAX_ENABLE_X64=true JAX_PLATFORM_NAME=cpu python examples/gp_map_quickstart.py
 ```
 
-The base install does not require JAX, NumPyro, ArviZ or plotting libraries. The Bayesian extra pins the runtime used by the source handoff; enabling float64 is required. Editable source installs follow the checkout; use the `v0.1.0` tag to match this release.
+The base install does not require JAX, NumPyro, ArviZ or plotting libraries. The Bayesian extra pins the runtime used by the source handoff; enabling float64 is required. Editable source installs follow the checkout; use the `v0.2.0` tag to match this release.
 
 ## Data and imports
 

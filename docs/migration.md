@@ -1,6 +1,6 @@
 # Migration from personalized-srm
 
-Use a separate environment for the new package and retain the frozen research environment for historical replay. This package is `multimodalsrm` version `0.1.0`, not a new release of the `personalized_srm` namespace.
+Use a separate environment for the new package and retain the frozen research environment for historical replay. This package is `multimodalsrm`, not a new release of the `personalized_srm` namespace.
 
 ## Imports
 
@@ -43,7 +43,7 @@ New package checkpoints can be created with `fit(..., warmup_checkpoint=path)` a
 
 ## Skin-conductance responses
 
-The development version standardizes SCR workflows on `BatemanSCR` and removes
+Release 0.2.0 standardizes SCR workflows on `BatemanSCR` and removes
 `BachSCR`. This is a breaking change to imports, fitting and Bach archive replay.
 GP archives containing Bach records fail with migration guidance; they are not
 converted to Bateman. The archive schema and remaining kernel identifiers stay
