@@ -1,0 +1,156 @@
+{
+  "commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+  "modalities": [
+    "brain",
+    "face",
+    "rating",
+    "eda"
+  ],
+  "backend_check": {
+    "objective_abs_difference": 2.0859573623965844e-08,
+    "gradient_max_abs_difference": 4.297951594622873e-07,
+    "gradient_relative_l2": 3.441261898863797e-08
+  },
+  "synthetic_preparation": {
+    "parameters": 43,
+    "observations": 42,
+    "nodes": 12,
+    "state_dimension": 26
+  },
+  "full_preparation": {
+    "parameters": 2762,
+    "observations": 169708,
+    "nodes": 1172,
+    "state_dimension": 78,
+    "covariance_tolerance": 1e-06,
+    "covariance_error_bound": 2.2206083272621594e-07
+  },
+  "state_dimensions": [
+    {
+      "family": "gamma",
+      "shape": 2,
+      "states_per_factor": 24,
+      "bound": 3.2000000160792297e-07
+    },
+    {
+      "family": "gamma",
+      "shape": 3,
+      "states_per_factor": 26,
+      "bound": 2.2206083272621594e-07
+    },
+    {
+      "family": "gamma",
+      "shape": 6,
+      "states_per_factor": 32,
+      "bound": 2.2206083272621594e-07
+    },
+    {
+      "family": "gaussian",
+      "shape": 3,
+      "states_per_factor": 60,
+      "bound": 2.5607091101459365e-07
+    }
+  ],
+  "fit_status": "Small four-modality constrained MAP passes physical-gradient check from three starts; two reach the same best solution. Face/rating bounds remain active.",
+  "historical_six_modality": {
+    "commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+    "backend_check": {
+      "objective_abs_difference": 5.185185614209331e-09,
+      "gradient_max_abs_difference": 8.264284723225046e-08,
+      "gradient_relative_l2": 1.1320303226053185e-08
+    },
+    "full_preparation": {
+      "parameters": 2804,
+      "observations": 172292,
+      "nodes": 1818,
+      "state_dimension": 138,
+      "covariance_tolerance": 1e-06,
+      "covariance_error_bound": 2.2206083272621594e-07
+    },
+    "state_dimensions": [
+      {
+        "family": "gamma",
+        "shape": 2,
+        "states_per_factor": 44,
+        "bound": 3.2000000160792297e-07
+      },
+      {
+        "family": "gamma",
+        "shape": 3,
+        "states_per_factor": 46,
+        "bound": 2.2206083272621594e-07
+      },
+      {
+        "family": "gamma",
+        "shape": 6,
+        "states_per_factor": 52,
+        "bound": 2.2206083272621594e-07
+      },
+      {
+        "family": "gaussian",
+        "shape": 3,
+        "states_per_factor": 80,
+        "bound": 2.5607091101459365e-07
+      }
+    ],
+    "small_fit": {
+      "parameters": 188,
+      "observations": 7320,
+      "nodes": 519,
+      "fit_seconds": 141.9745638212189,
+      "iterations": 100,
+      "objective": 8243.425380830759,
+      "physical_projected_gradient": 22.971456675151188,
+      "meets_gradient_tolerance": false,
+      "message": "STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT"
+    }
+  },
+  "four_modality_map_baseline": {
+    "report": "2026-09-22-gp-map-baseline.md",
+    "results": "2026-09-22-gp-map-baseline-results.json",
+    "scope": {
+      "modalities": [
+        "brain",
+        "face",
+        "rating",
+        "eda"
+      ],
+      "subjects": [
+        "s001",
+        "s002"
+      ],
+      "brain_parcels": 5,
+      "window_seconds": 180,
+      "latent_factors": 1,
+      "parameters": 180,
+      "observations": 7108,
+      "nodes": 307,
+      "state_dimension": 26
+    },
+    "best_summary": {
+      "start": 2,
+      "objective": 8051.465161519361,
+      "iterations": 225,
+      "physical_projected_gradient": 4.625397571444978e-05,
+      "meets_gradient_tolerance": true,
+      "elapsed_seconds": 58.621581858955324,
+      "boundary_parameters": [
+        [
+          "filter",
+          "face",
+          "scale"
+        ],
+        [
+          "filter",
+          "rating",
+          "scale"
+        ],
+        [
+          "filter",
+          "rating",
+          "lag"
+        ]
+      ]
+    }
+  }
+}
