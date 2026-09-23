@@ -6,8 +6,16 @@ results without changing production inference defaults or supported Gaussian
 orders. Empirical observations, loadings, and caches are excluded. The reviewed
 movie-clock adapter requires the separately available historical local loader.
 
-Start with the [clock and calibration audit](2026-09-23-gp-clock-calibration.md)
-and the [repeat on the original movie clock](2026-09-23-gp-clock-preserved-fits.md).
+Start with the [temporal-noise refits and matched NVIDIA benchmarks](2026-09-23-gp-temporal-refits.md).
+The Gaussian grouped gradient is 3.32 times faster than state-space on the same
+RTX 3090 at the checked point. A separate complete gamma/OU MAP fit takes
+40.0 minutes on the tested CPU configuration, 3.6 minutes on the RTX PRO 6000,
+and 5.4 minutes on the RTX 3090, reaching the same objective. The report
+separates those timing results from the unsuccessful predictive comparison.
+
+The [clock and calibration audit](2026-09-23-gp-clock-calibration.md)
+and [repeat on the original movie clock](2026-09-23-gp-clock-preserved-fits.md)
+explain the input correction.
 The historical loader removed splice-marker rows and compressed the brain clock,
 creating shifts up to 16 seconds. Independent pause markers support original row
 times. The working preprocessing rule now retains the first 252 brain volumes,
@@ -18,13 +26,24 @@ Use `--loader scripts/clock_preserving_emo_data.py` for new empirical comparison
 Historical runners retain their recorded/default loader for reproducing older
 measurements; saved-fit diagnostics restore the loader from the fit metadata.
 
-The revised six-start comparison is complete. Five starts qualify; both selected
-fits pass independent objective, gradient, and prediction checks. Brain and
-ratings still lose to simple baselines. Longer latent timescales reduce brain
-error, and private temporal residuals help rating predictions, but these are
-fixed-parameter probes rather than refitted model rankings. The next step is a
-training-selected timescale profile with full correlated-noise refits, together
-with checks of response history around splice boundaries.
+The subsequent 36-start refit comparison is complete. It reserves all three
+block schedules from a common training set, profiles GP timescales 3/10/30
+seconds, and compares independent versus fixed OU noise for both response
+families. Twenty-eight starts qualify; all four training-selected models qualify
+and use the three-second timescale. Full prediction refinement and production
+API checks pass. Every model loses to the training mean for brain and face;
+OU refits improve ratings but worsen brain predictions substantially. Rating
+gains largely reflect private residual interpolation. Post-splice target flags
+do not account for all the predictive difficulties.
+
+These are additional blocked validations in the same previously explored
+cohort, not an independent test cohort. The original six-start comparison and
+its fixed-parameter probes remain available as earlier steps; their training
+masks and standardization differ from the new refits. The next model experiment
+should address private/shared variation, independent measurement noise, and
+response history. The cached research scorer also identifies a concrete
+production prediction optimization: reuse grouped covariance and factorizations
+across features.
 
 The earlier reports establish the computational baseline:
 
@@ -48,8 +67,8 @@ Bateman EDA responses, and compare gamma versus Gaussian face/rating responses.
 Pulse and respiration are excluded. Physical FWHM/peak coordinates, common
 eligible observations, training-only preprocessing, and independent numerical
 checks make the comparisons explicit. The three-factor, 100-parcel original
-fold is repeated with the revised loader; two further holdout schedules are
-prepared but remain unrun.
+fold was repeated with the revised loader; all three schedules have now been
+scored under the common reserved-block training mask.
 
 Earlier reports document how the final protocol was reached:
 

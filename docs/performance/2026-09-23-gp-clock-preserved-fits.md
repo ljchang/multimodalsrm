@@ -132,6 +132,12 @@ OU model has not been evaluated.
 
 ## Next experiment
 
+The [subsequent 36-start refit study](2026-09-23-gp-temporal-refits.md)
+completes the timescale/noise comparison described here and scores all three
+block schedules. It reserves their union from every new fit; those additional
+blocks were used in earlier training, so they are not an untouched test cohort.
+The paragraphs below record the motivation for that experiment.
+
 Refit the response/loadings/noise parameters with correlated residuals across
 a small, predeclared set of fixed latent GP timescales, selecting within that
 set using training data. The existing API rejects joint GP-timescale learning
@@ -143,7 +149,7 @@ Also check sensitivity to post-splice contamination and response history at
 segment boundaries. These data include pauses, so preserving movie timestamps
 does not by itself validate an uninterrupted physiological response history.
 Once the preprocessing and model choices are settled, evaluate the prepared
-fresh folds before drawing response-family conclusions or starting a large
+additional blocked schedules before drawing response-family conclusions or starting a large
 NUTS/Gibbs/VI comparison.
 
 <!-- PROBES:END -->

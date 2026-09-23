@@ -93,9 +93,12 @@ def with_masks(data, masks, values=None):
     return result
 
 
-def split_data(data, *, fold="original"):
+def split_data(data, *, fold="original", excluded_folds=None):
     """Predeclare blocks; standardize using only common eligible training rows."""
     blocks = BLOCK_FOLDS[fold]
+    excluded_folds = (fold,) if excluded_folds is None else tuple(excluded_folds)
+    if fold not in excluded_folds or any(f not in BLOCK_FOLDS for f in excluded_folds):
+        raise ValueError("excluded_folds must contain the scoring fold and known fold names")
     models = [make_model(data, candidate) for candidate in CANDIDATES]
     support = {
         m: (
@@ -120,7 +123,13 @@ def split_data(data, *, fold="original"):
                 eligible = (ts.times - hi >= a - 1e-8) & (ts.times - lo <= b + 1e-8)
                 start, end = blocks[m]
                 hidden = (ts.times >= start) & (ts.times < end)
-                training[key] = ts.mask & ~hidden[:, None]
+                reserved = np.logical_or.reduce(
+                    [
+                        (ts.times >= BLOCK_FOLDS[f][m][0]) & (ts.times < BLOCK_FOLDS[f][m][1])
+                        for f in excluded_folds
+                    ]
+                )
+                training[key] = ts.mask & ~reserved[:, None]
                 common[key] = training[key] & eligible[:, None]
                 testing[key] = ts.mask & hidden[:, None] & eligible[:, None]
                 assert not np.any(common[key] & testing[key])
@@ -136,7 +145,7 @@ def split_data(data, *, fold="original"):
             for m, ts in mods.items():
                 key = (s, r, m)
                 affine[key] = ts.values * 2.3 + 7.0
-                poisoned[key] = np.where(testing[key], ts.values + 10000, ts.values)
+                poisoned[key] = np.where(ts.mask & ~training[key], ts.values + 10000, ts.values)
     affine_data = with_masks(data, common, affine)
     affine_scale = TrainingStandardizer.fit(affine_data)
     affine_z = affine_scale.transform(affine_data)

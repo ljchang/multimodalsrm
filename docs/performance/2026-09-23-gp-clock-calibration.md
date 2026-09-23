@@ -132,5 +132,9 @@ The preserved-clock fit report includes repeated innovation diagnostics and
 baselines. Interpret those results before choosing further model changes.
 Private temporal residuals and learning the latent timescale remain candidates;
 neither the old fixed-parameter probes nor one repeatedly examined holdout block
-justify a response-family winner. A fresh validation fold is still needed after
-the preprocessing and model specification are settled.
+justify a response-family winner. The
+[subsequent refit study](2026-09-23-gp-temporal-refits.md) excludes all three
+prepared block schedules before fitting and training-based selection, then
+scores them. The additional blocks were present in earlier exploratory training
+fits, so this is further within-cohort validation, not an independent test set.
+Independent validation remains necessary after the model specification is settled.
