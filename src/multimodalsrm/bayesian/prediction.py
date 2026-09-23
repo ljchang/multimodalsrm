@@ -97,6 +97,19 @@ def project(problem, draws, run, times, *, key, include_noise, latent_loading=No
         np.eye(problem.features)[0] if latent_loading is None else latent_loading,
         (len(draws), problem.features),
     )
+    if problem.linear_algebra == "grouped" and not problem.run_baseline_sd:
+        from .grouped_prediction import project as grouped_project
+
+        means, variances = grouped_project(
+            problem,
+            draws,
+            run,
+            times,
+            keys=[key],
+            include_noise=include_noise,
+            directions=directions[:, None, :] if key is None else None,
+        )
+        return means[..., 0], variances[..., 0]
 
     def one(x, query, direction):
         weights, offsets, noise, widths, lags = problem.arrays(x)
@@ -143,16 +156,9 @@ def project(problem, draws, run, times, *, key, include_noise, latent_loading=No
                     query, problem.keys.index(key), noise[problem._packed[run][1]]
                 )
             residual = jnp.asarray(system.values) - offsets[ki]
-            if problem.linear_algebra == "grouped":
-                from .temporal_noise import factor, solve
-
-                _, _, _, lu = factor(problem, x, run)
-                alpha = solve(problem, x, run, residual, lu)
-                inverse_cross = solve(problem, x, run, cross.T, lu)
-            else:
-                L = jnp.linalg.cholesky(problem.covariance(x, run))
-                alpha = jsp.linalg.cho_solve((L, True), residual)
-                inverse_cross = jsp.linalg.cho_solve((L, True), cross.T)
+            L = jnp.linalg.cholesky(problem.covariance(x, run))
+            alpha = jsp.linalg.cho_solve((L, True), residual)
+            inverse_cross = jsp.linalg.cho_solve((L, True), cross.T)
             mean = cross @ alpha + offset
             reduction = jnp.sum(cross.T * inverse_cross, axis=0)
         elif problem.linear_algebra == "grouped" and problem.run_baseline_sd:
@@ -176,24 +182,6 @@ def project(problem, draws, run, times, *, key, include_noise, latent_loading=No
             # Law of total variance avoids subtracting large baseline terms.
             projected_baseline = jsp.linalg.solve_triangular(L, delta.T, lower=True)
             baseline_uncertainty = jnp.sum(projected_baseline**2, axis=0)
-        elif problem.linear_algebra == "grouped":
-            from .grouped import factor
-
-            _, q, precision, lu = factor(problem, x, run)
-            nodes = problem.grouped_systems[run]
-            nm = nodes.modalities
-            cross = problem.temporal_covariance(x, query, qm, nodes.times, nm)
-            if problem.features == 1:
-                cross = loading * cross
-            else:
-                cross = (cross[:, :, None] * loading).reshape(len(query), -1)
-            mean = cross @ q + offset
-            solved = jsp.linalg.lu_solve(lu, cross.T)
-            reduction = jnp.sum(
-                cross.T
-                * (precision[:, None] * solved if problem.features == 1 else precision @ solved),
-                axis=0,
-            )
         else:
             L = jnp.linalg.cholesky(problem.covariance(x, run))
             residual = jnp.asarray(system.values) - offsets[ki]
@@ -268,20 +256,35 @@ def result(model, run, times, draws, keys, *, include_noise, draw_indices=None):
         from .posterior_coordinates import rotations
 
         rotation = rotations(model.problem_, draws, model._factor_anchor_keys_, draw_indices)
-    components = [
-        project(
+    if model.problem_.linear_algebra == "grouped" and not model.problem_.run_baseline_sd:
+        from .grouped_prediction import project as grouped_project
+
+        means, variances = grouped_project(
             model.problem_,
             draws,
             run,
             times,
-            key=key,
+            keys=keys,
             include_noise=include_noise,
-            latent_loading=rotation[..., i] if key is None and rotation is not None else None,
+            directions=np.swapaxes(rotation, -1, -2)
+            if rotation is not None and keys[0] is None
+            else None,
         )
-        for i, key in enumerate(keys)
-    ]
-    means = np.stack([c[0] for c in components], axis=-1)
-    variances = np.stack([c[1] for c in components], axis=-1)
+    else:
+        components = [
+            project(
+                model.problem_,
+                draws,
+                run,
+                times,
+                key=key,
+                include_noise=include_noise,
+                latent_loading=rotation[..., i] if key is None and rotation is not None else None,
+            )
+            for i, key in enumerate(keys)
+        ]
+        means = np.stack([c[0] for c in components], axis=-1)
+        variances = np.stack([c[1] for c in components], axis=-1)
     a, b = model.prediction_runs_[run]
     modality = keys[0][1] if keys[0] is not None else None
     valid = (

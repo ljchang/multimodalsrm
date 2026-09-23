@@ -1,0 +1,1372 @@
+{
+  "date_local": "2026-09-22",
+  "base_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+  "benchmark_script": "scripts/benchmark_gp_parallel_filter.py",
+  "benchmark_sha256": "e1e4e8720e227dde4ddbbbb072e7aef99e8421c0c3cb09cd6e108a54660a170b",
+  "scope": "Research probes; no production backend/default changes. Warm evaluation timings are not complete-fit or posterior speedups. Saved Gibbs draws were re-diagnosed, not resampled.",
+  "runs": {
+    "small-identity": {
+      "arguments": {
+        "response": "identity",
+        "duration": 20.0,
+        "factors": 3,
+        "channels": 4,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/small-identity.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cpu:0",
+      "device_kind": "cpu",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "load": [
+        0.54296875,
+        0.44873046875,
+        0.38134765625
+      ],
+      "observations": 327,
+      "nodes": 43,
+      "parameters": 102,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 0.706452920101583,
+          "median_seconds": 0.002321917563676834,
+          "repeats_seconds": [
+            0.0014347033575177193,
+            0.001721397042274475,
+            0.0024767909198999405,
+            0.002406436949968338,
+            0.002321917563676834
+          ],
+          "objective": 842.5426527942825,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 2.0189529079943895,
+          "median_seconds": 0.0026781130582094193,
+          "repeats_seconds": [
+            0.0026781130582094193,
+            0.0029593156650662422,
+            0.0018109166994690895,
+            0.003025241196155548,
+            0.002142886631190777
+          ],
+          "objective": 842.5426527942825,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 5.684341886080802e-14,
+          "gradient_relative_l2": 1.0867107491886584e-16
+        },
+        "dense_grouped": {
+          "first_seconds": 0.76508704200387,
+          "median_seconds": 0.0008005090057849884,
+          "repeats_seconds": [
+            0.0009490912780165672,
+            0.0008159680292010307,
+            0.0008005090057849884,
+            0.0007908707484602928,
+            0.000788847915828228
+          ],
+          "objective": 842.5426527942827,
+          "value_absolute_difference": 2.2737367544323206e-13,
+          "gradient_max_absolute_difference": 7.389644451905042e-13,
+          "gradient_relative_l2": 1.4945928170106842e-15
+        }
+      },
+      "status": "complete",
+      "dataset": "seeded synthetic"
+    },
+    "cpu-identity-450": {
+      "arguments": {
+        "response": "identity",
+        "duration": 450.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/cpu-identity-450.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cpu:0",
+      "device_kind": "cpu",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "load": [
+        1.20849609375,
+        0.62646484375,
+        0.443359375
+      ],
+      "observations": 56289,
+      "nodes": 925,
+      "parameters": 774,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 0.8505793679505587,
+          "median_seconds": 0.054016007110476494,
+          "repeats_seconds": [
+            0.06551231630146503,
+            0.054016007110476494,
+            0.05291844438761473,
+            0.04662459809333086,
+            0.057719506323337555
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 3.8546347515657544,
+          "median_seconds": 0.07086642738431692,
+          "repeats_seconds": [
+            0.07044285349547863,
+            0.06929123867303133,
+            0.07086642738431692,
+            0.07126204762607813,
+            0.07169845700263977
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.1827872842550278e-11,
+          "gradient_relative_l2": 1.3168473788965253e-16
+        },
+        "dense_grouped": {
+          "first_seconds": 1.776943102478981,
+          "median_seconds": 0.7183452555909753,
+          "repeats_seconds": [
+            0.7110281903296709,
+            0.7186738708987832,
+            0.719289580360055,
+            0.7134198592975736,
+            0.7183452555909753
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 3.2741809263825417e-10,
+          "gradient_relative_l2": 2.864564448103143e-15
+        }
+      },
+      "status": "complete",
+      "dataset": "seeded synthetic"
+    },
+    "rtx3090-identity-450": {
+      "arguments": {
+        "response": "identity",
+        "duration": 450.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/pro6000-identity-450.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA GeForce RTX 3090",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        1.20849609375,
+        0.62646484375,
+        0.443359375
+      ],
+      "observations": 56289,
+      "nodes": 925,
+      "parameters": 774,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 2.4660290954634547,
+          "median_seconds": 0.6451380085200071,
+          "repeats_seconds": [
+            0.6451380085200071,
+            0.5988728022202849,
+            0.6458604093641043,
+            0.5988510111346841,
+            0.6455601193010807
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 8.239172770641744,
+          "median_seconds": 0.005765693262219429,
+          "repeats_seconds": [
+            0.00579187273979187,
+            0.005642358213663101,
+            0.005765693262219429,
+            0.005808263085782528,
+            0.0055224113166332245
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 6.402842700481415e-10,
+          "gradient_relative_l2": 4.640475986655075e-15
+        },
+        "dense_grouped": {
+          "first_seconds": 2.778369728475809,
+          "median_seconds": 0.13301936723291874,
+          "repeats_seconds": [
+            0.14112172462046146,
+            0.13317411113530397,
+            0.13301936723291874,
+            0.13292035926133394,
+            0.1329630594700575
+          ],
+          "objective": 168336.06163853352,
+          "value_absolute_difference": 2.9103830456733704e-11,
+          "gradient_max_absolute_difference": 4.0745362639427185e-10,
+          "gradient_relative_l2": 3.5897535379689e-15
+        }
+      },
+      "status": "complete",
+      "provenance_note": "Originally named pro6000 in the output argument. JAX device_kind correctly identified the RTX 3090; file was renamed. Subsequent GPU selections used UUIDs.",
+      "dataset": "seeded synthetic"
+    },
+    "pro6000-identity-450": {
+      "arguments": {
+        "response": "identity",
+        "duration": 450.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/pro6000-identity-450.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        1.45751953125,
+        0.85986328125,
+        0.54052734375
+      ],
+      "observations": 56289,
+      "nodes": 925,
+      "parameters": 774,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 2.6931503219529986,
+          "median_seconds": 0.486503011547029,
+          "repeats_seconds": [
+            0.4865862503647804,
+            0.486503011547029,
+            0.4864857979118824,
+            0.4864796260371804,
+            0.4895369606092572
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 10.365537658333778,
+          "median_seconds": 0.005559480749070644,
+          "repeats_seconds": [
+            0.005540094338357449,
+            0.005559480749070644,
+            0.005566243082284927,
+            0.005600869655609131,
+            0.005541637539863586
+          ],
+          "objective": 168336.0616385335,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 4.0745362639427185e-10,
+          "gradient_relative_l2": 2.9166066702587307e-15
+        },
+        "dense_grouped": {
+          "first_seconds": 3.7977248476818204,
+          "median_seconds": 0.04290561843663454,
+          "repeats_seconds": [
+            0.04287820681929588,
+            0.04289821535348892,
+            0.042961024679243565,
+            0.04291963670402765,
+            0.04290561843663454
+          ],
+          "objective": 168336.06163853346,
+          "value_absolute_difference": 2.9103830456733704e-11,
+          "gradient_max_absolute_difference": 2.1827872842550278e-10,
+          "gradient_relative_l2": 2.1966584344764716e-15
+        }
+      },
+      "status": "complete",
+      "dataset": "seeded synthetic"
+    },
+    "cpu-bateman-learned-scalar": {
+      "arguments": {
+        "response": "bateman",
+        "duration": 40.0,
+        "factors": 3,
+        "channels": 8,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": true,
+        "scalar": true,
+        "skip_dense": true,
+        "output": "local_data/gp-next-2026-09-22/cpu-bateman-learned-scalar.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cpu:0",
+      "device_kind": "cpu",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "load": [
+        3.328125,
+        1.482421875,
+        0.7763671875
+      ],
+      "observations": 1282,
+      "nodes": 84,
+      "parameters": 200,
+      "state_dimension": 12,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 1.6177276410162449,
+          "median_seconds": 0.012502097524702549,
+          "repeats_seconds": [
+            0.013331370428204536,
+            0.01328749768435955,
+            0.012502097524702549,
+            0.011765528470277786,
+            0.012389943934977055
+          ],
+          "objective": 4154.429643307613,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 3.68153003975749,
+          "median_seconds": 0.016142736189067364,
+          "repeats_seconds": [
+            0.020393023267388344,
+            0.015615074895322323,
+            0.017375306226313114,
+            0.016142736189067364,
+            0.015903462655842304
+          ],
+          "objective": 4154.429643307613,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 9.094947017729282e-13,
+          "gradient_relative_l2": 4.593098260726052e-16
+        },
+        "scalar": {
+          "first_seconds": 1.3147635078057647,
+          "median_seconds": 0.12976654712110758,
+          "repeats_seconds": [
+            0.12477295007556677,
+            0.12478229682892561,
+            0.12976654712110758,
+            0.1306903501972556,
+            0.13490138202905655
+          ],
+          "objective": 4154.429643307617,
+          "value_absolute_difference": 3.637978807091713e-12,
+          "gradient_max_absolute_difference": 3.979039320256561e-12,
+          "gradient_relative_l2": 1.7456243395559162e-15
+        }
+      },
+      "status": "complete",
+      "dataset": "seeded synthetic"
+    },
+    "pro6000-bateman-learned-450": {
+      "arguments": {
+        "response": "bateman",
+        "duration": 450.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": true,
+        "scalar": false,
+        "skip_dense": true,
+        "output": "local_data/gp-next-2026-09-22/pro6000-bateman-learned-450.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        5.02490234375,
+        4.8515625,
+        2.619140625
+      ],
+      "observations": 56236,
+      "nodes": 924,
+      "parameters": 776,
+      "state_dimension": 12,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 6.090153560973704,
+          "median_seconds": 0.4940310828387737,
+          "repeats_seconds": [
+            0.49432594142854214,
+            0.4940310828387737,
+            0.4939427049830556,
+            0.4940508399158716,
+            0.4939651880413294
+          ],
+          "objective": 178159.0648299514,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 14.269890551455319,
+          "median_seconds": 0.007101463153958321,
+          "repeats_seconds": [
+            0.007218553684651852,
+            0.007114667445421219,
+            0.007101463153958321,
+            0.007078959606587887,
+            0.00705544650554657
+          ],
+          "objective": 178159.0648299514,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 6.402842700481415e-10,
+          "gradient_relative_l2": 4.916679567054826e-15
+        }
+      },
+      "status": "complete",
+      "dataset": "seeded synthetic"
+    },
+    "pro6000-identity-1800": {
+      "arguments": {
+        "response": "identity",
+        "duration": 1800.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 3,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/pro6000-identity-1800.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        4.673828125,
+        4.8173828125,
+        2.71533203125
+      ],
+      "observations": 225167,
+      "nodes": 3700,
+      "parameters": 774,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 4.548351892270148,
+          "median_seconds": 1.9910306371748447,
+          "repeats_seconds": [
+            1.9910306371748447,
+            1.9919153973460197,
+            1.9692267561331391
+          ],
+          "objective": 688794.3727666643,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 13.480396390892565,
+          "median_seconds": 0.018876072019338608,
+          "repeats_seconds": [
+            0.019107750616967678,
+            0.018781392835080624,
+            0.018876072019338608
+          ],
+          "objective": 688794.3727666643,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 4.190951585769653e-09,
+          "gradient_relative_l2": 6.4332993634941875e-15
+        },
+        "dense_grouped": {
+          "first_seconds": 10.3529480881989,
+          "median_seconds": 1.9292435599491,
+          "repeats_seconds": [
+            1.9294917052611709,
+            1.9291915791109204,
+            1.9292435599491
+          ],
+          "objective": 688794.3727666643,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.3865140974521637e-09,
+          "gradient_relative_l2": 4.892316603510588e-15
+        }
+      },
+      "status": "complete",
+      "dataset": "seeded synthetic"
+    },
+    "cpu-empirical-identity": {
+      "arguments": {
+        "response": "identity",
+        "duration": 503.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/cpu-empirical-identity.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cpu:0",
+      "device_kind": "cpu",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "load": [
+        3.6884765625,
+        4.57666015625,
+        2.4443359375
+      ],
+      "observations": 192167,
+      "nodes": 1346,
+      "parameters": 2787,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 0.9541509635746479,
+          "median_seconds": 0.10726116877049208,
+          "repeats_seconds": [
+            0.10726116877049208,
+            0.11212265212088823,
+            0.10783667117357254,
+            0.10678978450596333,
+            0.09061133209615946
+          ],
+          "objective": 305546.31144705415,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 4.621333708055317,
+          "median_seconds": 0.11768199969083071,
+          "repeats_seconds": [
+            0.11624946258962154,
+            0.1224257992580533,
+            0.11768199969083071,
+            0.12338982801884413,
+            0.11447369307279587
+          ],
+          "objective": 305546.31144705415,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "dense_grouped": {
+          "first_seconds": 4.660021846182644,
+          "median_seconds": 3.252696678042412,
+          "repeats_seconds": [
+            3.210294066928327,
+            3.2214034516364336,
+            3.252696678042412,
+            3.26847090292722,
+            3.2920843297615647
+          ],
+          "objective": 305546.31144705415,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        }
+      },
+      "dataset": "empirical; existing loader assumptions; default parameter vector; timing only",
+      "status": "complete",
+      "ignored_synthetic_arguments": [
+        "channels",
+        "duration",
+        "noise",
+        "rank"
+      ],
+      "provenance_note": " Empirical adapter uses the existing full recording; synthetic-only command arguments do not specify this dataset."
+    },
+    "cpu8-empirical-identity-map": {
+      "arguments": {
+        "response": "identity",
+        "duration": 503.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 3,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/cpu8-empirical-identity-map.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cpu:0",
+      "device_kind": "cpu",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "load": [
+        4.11572265625,
+        4.681640625,
+        2.78125
+      ],
+      "observations": 192167,
+      "nodes": 1346,
+      "parameters": 2787,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 0.9714240841567516,
+          "median_seconds": 0.10011332854628563,
+          "repeats_seconds": [
+            0.10678725130856037,
+            0.09765656851232052,
+            0.10011332854628563
+          ],
+          "objective": 252077.12190920833,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 4.685780055820942,
+          "median_seconds": 0.12030236143618822,
+          "repeats_seconds": [
+            0.12030236143618822,
+            0.11990034021437168,
+            0.12278658617287874
+          ],
+          "objective": 252077.1219092083,
+          "value_absolute_difference": 2.9103830456733704e-11,
+          "gradient_max_absolute_difference": 2.5477397969098092e-12,
+          "gradient_relative_l2": 3.055066844485105e-12
+        },
+        "dense_grouped": {
+          "first_seconds": 2.25798536837101,
+          "median_seconds": 0.8129048403352499,
+          "repeats_seconds": [
+            0.870698188431561,
+            0.8118850560858846,
+            0.8129048403352499
+          ],
+          "objective": 252077.12190920828,
+          "value_absolute_difference": 5.820766091346741e-11,
+          "gradient_max_absolute_difference": 5.726135121619791e-10,
+          "gradient_relative_l2": 6.640271107157302e-10
+        }
+      },
+      "dataset": "empirical; existing loader assumptions; cached Identity MAP or seeded nonzero Gaussian loadings; timing only",
+      "status": "complete",
+      "ignored_synthetic_arguments": [
+        "channels",
+        "duration",
+        "noise",
+        "rank"
+      ],
+      "provenance_note": " Empirical adapter uses the existing full recording; synthetic-only command arguments do not specify this dataset."
+    },
+    "pro6000-empirical-identity": {
+      "arguments": {
+        "response": "identity",
+        "duration": 503.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/pro6000-empirical-identity.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        4.2744140625,
+        4.68359375,
+        2.49072265625
+      ],
+      "observations": 192167,
+      "nodes": 1346,
+      "parameters": 2787,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 3.1534355180338025,
+          "median_seconds": 0.7095361044630408,
+          "repeats_seconds": [
+            0.7065360303968191,
+            0.7066615587100387,
+            0.7154767038300633,
+            0.7154461359605193,
+            0.7095361044630408
+          ],
+          "objective": 305546.31144705415,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 12.3278679670766,
+          "median_seconds": 0.007061425596475601,
+          "repeats_seconds": [
+            0.007261265069246292,
+            0.007018584758043289,
+            0.007049433887004852,
+            0.007104657590389252,
+            0.007061425596475601
+          ],
+          "objective": 305546.31144705415,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.255546860396862e-10,
+          "gradient_relative_l2": 5.312656481568136e-15
+        },
+        "dense_grouped": {
+          "first_seconds": 4.206294231116772,
+          "median_seconds": 0.1402824278920889,
+          "repeats_seconds": [
+            0.14060869719833136,
+            0.14022222440689802,
+            0.14031263627111912,
+            0.14028097689151764,
+            0.1402824278920889
+          ],
+          "objective": 305546.31144705415,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 1.964508555829525e-10,
+          "gradient_relative_l2": 5.986533699271687e-15
+        }
+      },
+      "dataset": "empirical; existing loader assumptions; default parameter vector; timing only",
+      "status": "complete",
+      "ignored_synthetic_arguments": [
+        "channels",
+        "duration",
+        "noise",
+        "rank"
+      ],
+      "provenance_note": " Empirical adapter uses the existing full recording; synthetic-only command arguments do not specify this dataset."
+    },
+    "pro6000-empirical-identity-map": {
+      "arguments": {
+        "response": "identity",
+        "duration": 503.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/pro6000-empirical-identity-map.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "benchmark_sha256": "e1e4e8720e227dde4ddbbbb072e7aef99e8421c0c3cb09cd6e108a54660a170b",
+      "timestamp_utc": "2026-09-23T00:43:42.517698+00:00",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        5.6162109375,
+        7.154296875,
+        4.86376953125
+      ],
+      "environment": {
+        "JAX_PLATFORMS": "cuda",
+        "CUDA_VISIBLE_DEVICES": "GPU-699be210-f639-277d-0337-0d4fd2495546",
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+      },
+      "preparation_seconds": 3.6055888710543513,
+      "observations": 192167,
+      "nodes": 1346,
+      "parameters": 2787,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 3.1944722048938274,
+          "median_seconds": 0.7025034781545401,
+          "repeats_seconds": [
+            0.702477477490902,
+            0.7025619177147746,
+            0.7128486363217235,
+            0.6975046033039689,
+            0.7025034781545401
+          ],
+          "objective": 252077.1219092083,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 12.340179934166372,
+          "median_seconds": 0.0062774112448096275,
+          "repeats_seconds": [
+            0.006494311615824699,
+            0.006330370903015137,
+            0.006277110427618027,
+            0.006197178736329079,
+            0.0062774112448096275
+          ],
+          "objective": 252077.1219092083,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.6074697956346427e-12,
+          "gradient_relative_l2": 4.395833345068061e-12
+        },
+        "dense_grouped": {
+          "first_seconds": 4.11443726439029,
+          "median_seconds": 0.12026607804000378,
+          "repeats_seconds": [
+            0.12020539306104183,
+            0.12035675998777151,
+            0.12024475634098053,
+            0.1204327642917633,
+            0.12026607804000378
+          ],
+          "objective": 252077.12190920833,
+          "value_absolute_difference": 2.9103830456733704e-11,
+          "gradient_max_absolute_difference": 1.8479195951215388e-10,
+          "gradient_relative_l2": 3.3855218007813845e-10
+        }
+      },
+      "dataset": "empirical; existing loader assumptions; cached Identity MAP or seeded nonzero Gaussian loadings; timing only",
+      "status": "complete",
+      "ignored_synthetic_arguments": [
+        "channels",
+        "duration",
+        "noise",
+        "rank"
+      ],
+      "provenance_note": " Empirical adapter uses the existing full recording; synthetic-only command arguments do not specify this dataset."
+    },
+    "rtx3090-empirical-identity-map": {
+      "arguments": {
+        "response": "identity",
+        "duration": 503.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 5,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": false,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/rtx3090-empirical-identity-map.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "benchmark_sha256": "e1e4e8720e227dde4ddbbbb072e7aef99e8421c0c3cb09cd6e108a54660a170b",
+      "timestamp_utc": "2026-09-23T00:42:44.387562+00:00",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA GeForce RTX 3090",
+      "cpu_affinity": [
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ],
+      "load": [
+        8.4638671875,
+        7.62353515625,
+        4.83935546875
+      ],
+      "environment": {
+        "JAX_PLATFORMS": "cuda",
+        "CUDA_VISIBLE_DEVICES": "GPU-8ae3c7eb-80d0-3584-63c9-d3e22a324033",
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+      },
+      "preparation_seconds": 3.539312061853707,
+      "observations": 192167,
+      "nodes": 1346,
+      "parameters": 2787,
+      "state_dimension": 6,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 3.0103187831118703,
+          "median_seconds": 0.9406445389613509,
+          "repeats_seconds": [
+            0.9406445389613509,
+            0.8733232524245977,
+            0.940881279297173,
+            0.8729355866089463,
+            0.9409351516515017
+          ],
+          "objective": 252077.1219092083,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        },
+        "parallel": {
+          "first_seconds": 9.195626957342029,
+          "median_seconds": 0.007051108404994011,
+          "repeats_seconds": [
+            0.007471767254173756,
+            0.007048414088785648,
+            0.007105001248419285,
+            0.007051108404994011,
+            0.006996325217187405
+          ],
+          "objective": 252077.1219092083,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.844169344484726e-12,
+          "gradient_relative_l2": 4.115957024265743e-12
+        },
+        "dense_grouped": {
+          "first_seconds": 3.555710008367896,
+          "median_seconds": 0.36306572053581476,
+          "repeats_seconds": [
+            0.3627222999930382,
+            0.3629122795537114,
+            0.36321379244327545,
+            0.36306572053581476,
+            0.3630699897184968
+          ],
+          "objective": 252077.1219092083,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.166244961188113e-10,
+          "gradient_relative_l2": 3.0964777165325384e-10
+        }
+      },
+      "dataset": "empirical; existing loader assumptions; cached Identity MAP or seeded nonzero Gaussian loadings; timing only",
+      "status": "complete",
+      "ignored_synthetic_arguments": [
+        "channels",
+        "duration",
+        "noise",
+        "rank"
+      ],
+      "provenance_note": " Empirical adapter uses the existing full recording; synthetic-only command arguments do not specify this dataset."
+    },
+    "pro6000-empirical-gaussian": {
+      "arguments": {
+        "response": "gaussian",
+        "duration": 503.0,
+        "factors": 3,
+        "channels": 32,
+        "seed": 722,
+        "repeats": 3,
+        "noise": 0.3,
+        "rank": "full",
+        "learned": true,
+        "scalar": false,
+        "skip_dense": false,
+        "output": "local_data/gp-next-2026-09-22/pro6000-empirical-gaussian.json"
+      },
+      "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "numpy": "2.5.3",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "load": [
+        3.9462890625,
+        4.63671875,
+        2.77685546875
+      ],
+      "observations": 189292,
+      "nodes": 1298,
+      "parameters": 2790,
+      "state_dimension": 78,
+      "measurements": {
+        "sequential": {
+          "first_seconds": 54.66343442257494,
+          "median_seconds": 0.7972414046525955,
+          "repeats_seconds": [
+            0.7972414046525955,
+            0.7977539794519544,
+            0.7971591297537088
+          ],
+          "objective": 298278.64879411686,
+          "value_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 0.0,
+          "gradient_relative_l2": 0.0
+        }
+      },
+      "status": "timeout",
+      "limit_seconds": 420,
+      "stage_at_timeout": "parallel first evaluation; compilation and execution not separately instrumented",
+      "dataset": "empirical; existing loader assumptions; seeded nonzero loadings; learned Gaussian lags; timing only",
+      "ignored_synthetic_arguments": [
+        "channels",
+        "duration",
+        "noise",
+        "rank"
+      ],
+      "provenance_note": " Empirical adapter uses the existing full recording; synthetic-only command arguments do not specify this dataset."
+    },
+    "pro6000-gaussian-450-timeout": {
+      "status": "timeout",
+      "limit_seconds": 240,
+      "response": "two fixed Gaussian widths, 0.7 and 1.1; synthetic 450 s",
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "last_completed_method": "sequential",
+      "sequential_first_seconds": 25.90730178076774,
+      "sequential_warm_median_seconds": 0.658595840446651,
+      "stage_at_timeout": "parallel first evaluation; compilation and execution were not separately instrumented",
+      "parallel_warm_timing_available": false
+    },
+    "diagnostics-current": [
+      {
+        "chains": 1,
+        "draws": 15,
+        "parameters": 57758,
+        "seconds": [
+          0.36100830137729645,
+          0.3610487701371312,
+          0.36183422058820724
+        ],
+        "median_s": 0.3610487701371312
+      },
+      {
+        "chains": 2,
+        "draws": 15,
+        "parameters": 57758,
+        "seconds": [
+          0.6838477868586779,
+          0.6830826438963413,
+          0.6839506914839149
+        ],
+        "median_s": 0.6838477868586779
+      },
+      {
+        "chains": 1,
+        "draws": 200,
+        "parameters": 5000,
+        "seconds": [
+          0.16821971163153648,
+          0.16162662021815777,
+          0.16107127536088228
+        ],
+        "median_s": 0.16162662021815777
+      }
+    ],
+    "diagnostics-paired": {
+      "shape": [
+        2,
+        15,
+        57758
+      ],
+      "arviz": "1.3.0",
+      "old_seconds": 90.78055300097913,
+      "new_seconds": [
+        0.6651378525421023,
+        0.6650747144594789,
+        0.6625525094568729
+      ],
+      "max_absolute_differences": {
+        "ess_bulk": 9.237055564881302e-14,
+        "ess_tail": 3.907985046680551e-14,
+        "r_hat": 0.0,
+        "mcse_mean": 3.3306690738754696e-16,
+        "mcse_sd": 2.498001805406602e-16
+      }
+    },
+    "numerical-checks": [
+      {
+        "case": "full",
+        "objective_abs_difference": 5.684341886080802e-14,
+        "gradient_max_abs_difference": 1.9895196601282805e-13,
+        "gradient_relative_l2": 8.192696996545969e-16
+      },
+      {
+        "case": "one",
+        "objective_abs_difference": 0.0,
+        "gradient_max_abs_difference": 1.4210854715202004e-13,
+        "gradient_relative_l2": 4.158036075892483e-16
+      },
+      {
+        "case": "zero",
+        "objective_abs_difference": 1.1368683772161603e-13,
+        "gradient_max_abs_difference": 1.7053025658242404e-13,
+        "gradient_relative_l2": 3.684728685768485e-16
+      },
+      {
+        "case": "high_snr",
+        "objective_abs_difference": 3.391278369235806e-10,
+        "gradient_max_abs_difference": 0.001013040542602539,
+        "gradient_relative_l2": 4.560455934464296e-12
+      }
+    ],
+    "gibbs-saved-draws-recheck": [
+      {
+        "tag": "K3_pall_wfull",
+        "sampling_seconds": 444.5219749696553,
+        "measurements": {
+          "loglik": {
+            "shape": [
+              2,
+              1000,
+              1
+            ],
+            "min_bulk_ess": 1958.4386141886762,
+            "min_tail_ess": 1890.3436191281514,
+            "max_rhat": 1.0011754736166976
+          },
+          "v": {
+            "shape": [
+              2,
+              1000,
+              19
+            ],
+            "min_bulk_ess": 1644.7720137051135,
+            "min_tail_ess": 1631.318454047359,
+            "max_rhat": 1.0031764623225388
+          },
+          "wnorm": {
+            "shape": [
+              2,
+              1000,
+              692
+            ],
+            "min_bulk_ess": 1123.2921738723173,
+            "min_tail_ess": 1358.2520639554784,
+            "max_rhat": 1.0050547264811192
+          },
+          "offset": {
+            "shape": [
+              2,
+              1000,
+              692
+            ],
+            "min_bulk_ess": 5.177500123351504,
+            "min_tail_ess": 18.78302687648806,
+            "max_rhat": 1.314797770357009
+          }
+        }
+      },
+      {
+        "tag": "K3_pall_wfull_shift",
+        "sampling_seconds": 445.2788367252797,
+        "measurements": {
+          "loglik": {
+            "shape": [
+              2,
+              1000,
+              1
+            ],
+            "min_bulk_ess": 1960.6514683235505,
+            "min_tail_ess": 2046.666446554296,
+            "max_rhat": 1.0009455849507474
+          },
+          "v": {
+            "shape": [
+              2,
+              1000,
+              19
+            ],
+            "min_bulk_ess": 1730.3127529655414,
+            "min_tail_ess": 1660.466110421353,
+            "max_rhat": 1.00389524434028
+          },
+          "wnorm": {
+            "shape": [
+              2,
+              1000,
+              692
+            ],
+            "min_bulk_ess": 1145.4085046258376,
+            "min_tail_ess": 1377.0415392643683,
+            "max_rhat": 1.0072109920941625
+          },
+          "offset": {
+            "shape": [
+              2,
+              1000,
+              692
+            ],
+            "min_bulk_ess": 1521.491076140551,
+            "min_tail_ess": 1282.9778413184215,
+            "max_rhat": 1.0047976705383794
+          }
+        }
+      }
+    ]
+  }
+}

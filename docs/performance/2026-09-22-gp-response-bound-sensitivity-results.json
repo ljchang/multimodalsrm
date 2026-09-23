@@ -1,0 +1,1226 @@
+{
+  "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+  "python": "3.12.13",
+  "jax": "0.11.2",
+  "device": "cpu:0",
+  "parameters": 180,
+  "observations": {
+    "scalar_observations": 5316,
+    "counts": {
+      "s001/brain": 275,
+      "s001/face": 1240,
+      "s001/rating": 1088,
+      "s001/eda": 55,
+      "s002/brain": 330,
+      "s002/face": 1240,
+      "s002/rating": 1088
+    },
+    "sha256": "dfa918c454fde9520015e4e7e13206284331cc3f9623c36e67653f259fcc1f44",
+    "nodes": 251
+  },
+  "original_eligibility": {
+    "scalar_observations": 7108,
+    "counts": {
+      "s001/brain": 275,
+      "s001/face": 1240,
+      "s001/rating": 1984,
+      "s001/eda": 55,
+      "s002/brain": 330,
+      "s002/face": 1240,
+      "s002/rating": 1984
+    },
+    "sha256": "1dd33f145bccb1c8657460c3ad599f7d9ee4cc404704ae2dff225c13e9779bb5",
+    "nodes": 307
+  },
+  "state_dimension": 26,
+  "response_boxes": {
+    "original": {
+      "face": {
+        "scale": [
+          0.3,
+          2.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      },
+      "rating": {
+        "scale": [
+          0.3,
+          2.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      }
+    },
+    "expanded": {
+      "face": {
+        "scale": [
+          0.1,
+          2.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      },
+      "rating": {
+        "scale": [
+          0.3,
+          3.0
+        ],
+        "lag": [
+          -6.0,
+          6.0
+        ]
+      }
+    },
+    "wide": {
+      "face": {
+        "scale": [
+          0.05,
+          2.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      },
+      "rating": {
+        "scale": [
+          0.3,
+          4.0
+        ],
+        "lag": [
+          -10.0,
+          6.0
+        ]
+      }
+    }
+  },
+  "response_supports": {
+    "brain": [
+      0.0,
+      49.35865885304877
+    ],
+    "eda": [
+      -2.0,
+      96.0
+    ],
+    "face": [
+      -2.0,
+      54.36262752441768
+    ],
+    "rating": [
+      -10.0,
+      102.72525504883536
+    ]
+  },
+  "covariance_tolerance": 1e-06,
+  "covariance_error_bound": 4.2666666881056355e-07,
+  "physical_gradient_tolerance": 0.001,
+  "density": "One widest-box prior density and fixed observations; nested optimizer boxes only",
+  "fit_seconds_after_imports": 353.8248842051253,
+  "validation": {
+    "original": {
+      "response_derivatives": [
+        {
+          "parameter": [
+            "filter",
+            "face",
+            "scale"
+          ],
+          "gradient": 14.016016746173712,
+          "finite_difference": 14.016016696890194,
+          "absolute_difference": 4.9283517711273817e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "face",
+            "lag"
+          ],
+          "gradient": 1.0115157524648963,
+          "finite_difference": 1.0115158147527836,
+          "absolute_difference": 6.228788729245593e-08,
+          "scheme": "one_sided_second_order"
+        },
+        {
+          "parameter": [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          "gradient": -9.031637067609713,
+          "finite_difference": -9.031637068801501,
+          "absolute_difference": 1.1917880016198978e-09,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "rating",
+            "lag"
+          ],
+          "gradient": 0.22455349197936836,
+          "finite_difference": 0.22455353700934208,
+          "absolute_difference": 4.5029973722021666e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "rise"
+          ],
+          "gradient": 3.644851983786168e-06,
+          "finite_difference": 3.660319839392345e-06,
+          "absolute_difference": 1.546785560617666e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "decay"
+          ],
+          "gradient": 5.69658247906446e-07,
+          "finite_difference": 5.647815186433675e-07,
+          "absolute_difference": 4.8767292630785015e-09,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "lag"
+          ],
+          "gradient": 1.0506229117801524e-06,
+          "finite_difference": 1.2930796422170802e-06,
+          "absolute_difference": 2.424567304369277e-07,
+          "scheme": "central"
+        }
+      ],
+      "quadrature": [
+        {
+          "order": 96,
+          "objective_absolute_difference": 3.6550190998241305e-06,
+          "gradient_max_absolute_difference": 2.096755665093042e-05
+        },
+        {
+          "order": 192,
+          "objective_absolute_difference": 6.537266017403454e-08,
+          "gradient_max_absolute_difference": 9.857762236720191e-06
+        },
+        {
+          "order": 384,
+          "objective_absolute_difference": 3.5605626180768013e-07,
+          "gradient_max_absolute_difference": 6.525498108089778e-06
+        }
+      ]
+    },
+    "expanded": {
+      "response_derivatives": [
+        {
+          "parameter": [
+            "filter",
+            "face",
+            "scale"
+          ],
+          "gradient": -5.254259118459004e-06,
+          "finite_difference": -5.424002674346331e-06,
+          "absolute_difference": 1.6974355588732711e-07,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "face",
+            "lag"
+          ],
+          "gradient": 1.2094500704767408,
+          "finite_difference": 1.2094500107195927,
+          "absolute_difference": 5.97571481186776e-08,
+          "scheme": "one_sided_second_order"
+        },
+        {
+          "parameter": [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          "gradient": -2.210466093954044,
+          "finite_difference": -2.210466118413023,
+          "absolute_difference": 2.445897928637919e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "rating",
+            "lag"
+          ],
+          "gradient": -4.1078929746696247e-07,
+          "finite_difference": -4.0624882454112514e-07,
+          "absolute_difference": 4.540472925837324e-09,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "rise"
+          ],
+          "gradient": 3.4592929897270253e-06,
+          "finite_difference": 3.5433975237484072e-06,
+          "absolute_difference": 8.410453402138197e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "decay"
+          ],
+          "gradient": 1.7305730692918075e-07,
+          "finite_difference": 1.53707361500635e-07,
+          "absolute_difference": 1.9349945428545742e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "lag"
+          ],
+          "gradient": 9.269446169524187e-07,
+          "finite_difference": 8.102869794635845e-07,
+          "absolute_difference": 1.1665763748883419e-07,
+          "scheme": "central"
+        }
+      ],
+      "quadrature": [
+        {
+          "order": 96,
+          "objective_absolute_difference": 3.106906206085114e-05,
+          "gradient_max_absolute_difference": 5.073747501560533e-05
+        },
+        {
+          "order": 192,
+          "objective_absolute_difference": 1.0570138329057954e-06,
+          "gradient_max_absolute_difference": 2.6894239155694777e-06
+        },
+        {
+          "order": 384,
+          "objective_absolute_difference": 3.062750693061389e-07,
+          "gradient_max_absolute_difference": 2.3962675186339766e-06
+        }
+      ]
+    },
+    "wide": {
+      "response_derivatives": [
+        {
+          "parameter": [
+            "filter",
+            "face",
+            "scale"
+          ],
+          "gradient": 4.702458088701178e-06,
+          "finite_difference": 4.728589285101767e-06,
+          "absolute_difference": 2.6131196400588702e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "face",
+            "lag"
+          ],
+          "gradient": -2.0761864141238817e-06,
+          "finite_difference": -2.073278664195269e-06,
+          "absolute_difference": 2.9077499286128656e-09,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          "gradient": -6.110418047100552e-07,
+          "finite_difference": -6.137750862927921e-07,
+          "absolute_difference": 2.733281582736872e-09,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "rating",
+            "lag"
+          ],
+          "gradient": -2.9623481923035655e-07,
+          "finite_difference": -3.395313043936618e-07,
+          "absolute_difference": 4.329648516330523e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "rise"
+          ],
+          "gradient": -3.13189382200596e-06,
+          "finite_difference": -3.170934966547995e-06,
+          "absolute_difference": 3.9041144542035155e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "decay"
+          ],
+          "gradient": 1.2952101920010728e-06,
+          "finite_difference": 1.2785090425977421e-06,
+          "absolute_difference": 1.6701149403330643e-08,
+          "scheme": "central"
+        },
+        {
+          "parameter": [
+            "filter",
+            "eda",
+            "lag"
+          ],
+          "gradient": 2.1523548176527463e-06,
+          "finite_difference": 2.1436094188718575e-06,
+          "absolute_difference": 8.745398780888731e-09,
+          "scheme": "central"
+        }
+      ],
+      "quadrature": [
+        {
+          "order": 96,
+          "objective_absolute_difference": 0.00010813295011757873,
+          "gradient_max_absolute_difference": 0.0001765151453767544
+        },
+        {
+          "order": 192,
+          "objective_absolute_difference": 6.27273038844578e-06,
+          "gradient_max_absolute_difference": 4.126870091791801e-05
+        },
+        {
+          "order": 384,
+          "objective_absolute_difference": 6.603459041798487e-07,
+          "gradient_max_absolute_difference": 7.038677102499946e-06
+        }
+      ]
+    }
+  },
+  "validation_runs": [
+    {
+      "orders": [
+        384
+      ],
+      "seconds": 26.404517063871026,
+      "script_sha256": "1e0e06149bcb699b45527bd0f7aff142fb8f9a69d57b05a114014380d0c45058"
+    }
+  ],
+  "figure": "docs/assets/figures/gp-response-bound-sensitivity.svg",
+  "scope": {
+    "subjects": [
+      "s001",
+      "s002"
+    ],
+    "modalities": [
+      "brain",
+      "face",
+      "rating",
+      "eda"
+    ],
+    "window_seconds": 180,
+    "brain_parcels": 5,
+    "latent_factors": 1,
+    "float64": true,
+    "cpu_affinity": "0-7",
+    "blas_threads": 1
+  },
+  "fits": {
+    "original": {
+      "best": {
+        "objective": 6255.883502049741,
+        "optimizer_success": true,
+        "status": 0,
+        "iterations": 106,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "physical_projected_gradient": 2.0712670750100415e-05,
+        "boundary_parameters": [
+          [
+            "filter",
+            "face",
+            "scale"
+          ],
+          [
+            "filter",
+            "face",
+            "lag"
+          ],
+          [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "lag"
+          ]
+        ],
+        "meets_gradient_tolerance": true,
+        "start": 0,
+        "initialization": "prior_or_data",
+        "seconds": 26.4673343738541,
+        "seconds_including_polishing": 26.467338521964848,
+        "filter_parameters": {
+          "face/scale": 0.3,
+          "face/lag": -2.0,
+          "rating/scale": 2.0,
+          "rating/lag": -2.0,
+          "eda/rise": 0.5839141503877977,
+          "eda/decay": 1.9324174147006332,
+          "eda/lag": -0.42201331089562244
+        }
+      },
+      "records": [
+        {
+          "objective": 6255.883502049741,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 106,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 2.0712670750100415e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "scale"
+            ],
+            [
+              "filter",
+              "face",
+              "lag"
+            ],
+            [
+              "filter",
+              "rating",
+              "scale"
+            ],
+            [
+              "filter",
+              "rating",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "initialization": "prior_or_data",
+          "seconds": 26.4673343738541,
+          "seconds_including_polishing": 26.467338521964848,
+          "filter_parameters": {
+            "face/scale": 0.3,
+            "face/lag": -2.0,
+            "rating/scale": 2.0,
+            "rating/lag": -2.0,
+            "eda/rise": 0.5839141503877977,
+            "eda/decay": 1.9324174147006332,
+            "eda/lag": -0.42201331089562244
+          }
+        },
+        {
+          "objective": 6255.883502049746,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 131,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 6.639310584399816e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "scale"
+            ],
+            [
+              "filter",
+              "face",
+              "lag"
+            ],
+            [
+              "filter",
+              "rating",
+              "scale"
+            ],
+            [
+              "filter",
+              "rating",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "initialization": "prior_or_data",
+          "seconds": 29.614596532657743,
+          "seconds_including_polishing": 29.614600660279393,
+          "filter_parameters": {
+            "face/scale": 0.3,
+            "face/lag": -2.0,
+            "rating/scale": 2.0,
+            "rating/lag": -2.0,
+            "eda/rise": 0.5839141057086267,
+            "eda/decay": 1.9324166268900047,
+            "eda/lag": -0.4220134902081398
+          }
+        },
+        {
+          "objective": 6277.632907843596,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 152,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 1.97498370075877e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "scale"
+            ],
+            [
+              "filter",
+              "rating",
+              "scale"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "initialization": "prior_or_data",
+          "seconds": 35.83887529280037,
+          "seconds_including_polishing": 35.83887950051576,
+          "filter_parameters": {
+            "face/scale": 0.3,
+            "face/lag": 3.265880769008878,
+            "rating/scale": 2.0,
+            "rating/lag": 3.729193004600966,
+            "eda/rise": 0.6026436758856396,
+            "eda/decay": 2.121466847251451,
+            "eda/lag": 0.8723476924851324
+          }
+        }
+      ],
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.5839141503877977,
+            "decay": 1.9324174147006332,
+            "lag": -0.42201331089562244
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 0.5793916748397806,
+            "fwhm_seconds": 2.758354755913916,
+            "support_relative_seconds": [
+              -0.42201331089562244,
+              89.57798668910438
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "face": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 0.3,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -1.3999997540573927,
+            "fwhm_seconds": 1.0184042012541903,
+            "support_relative_seconds": [
+              -2.0,
+              5.254394128662652
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 2.0,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 2.00000163961742,
+            "fwhm_seconds": 6.789361341693603,
+            "support_relative_seconds": [
+              -2.0,
+              46.36262752441768
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        }
+      },
+      "wide_box_diagnostic": {
+        "objective": 6255.883502049741,
+        "physical_projected_gradient": 14.016016746173712,
+        "meets_gradient_tolerance": false,
+        "boundary_parameters": [
+          [
+            "filter",
+            "face",
+            "lag"
+          ]
+        ]
+      },
+      "observation_sha256": "dfa918c454fde9520015e4e7e13206284331cc3f9623c36e67653f259fcc1f44"
+    },
+    "expanded": {
+      "best": {
+        "objective": 6248.677298586595,
+        "optimizer_success": true,
+        "status": 0,
+        "iterations": 156,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "physical_projected_gradient": 1.866010983242461e-05,
+        "boundary_parameters": [
+          [
+            "filter",
+            "face",
+            "lag"
+          ],
+          [
+            "filter",
+            "rating",
+            "scale"
+          ]
+        ],
+        "meets_gradient_tolerance": true,
+        "start": 0,
+        "initialization": "prior_or_data",
+        "seconds": 35.950165351852775,
+        "seconds_including_polishing": 35.95016956049949,
+        "filter_parameters": {
+          "face/scale": 0.2599034094167237,
+          "face/lag": -2.0,
+          "rating/scale": 3.0,
+          "rating/lag": -5.596906666746913,
+          "eda/rise": 0.5903480487464104,
+          "eda/decay": 2.070968771519832,
+          "eda/lag": -0.6734611747371431
+        }
+      },
+      "records": [
+        {
+          "objective": 6248.677298586595,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 156,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 1.866010983242461e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "lag"
+            ],
+            [
+              "filter",
+              "rating",
+              "scale"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "initialization": "prior_or_data",
+          "seconds": 35.950165351852775,
+          "seconds_including_polishing": 35.95016956049949,
+          "filter_parameters": {
+            "face/scale": 0.2599034094167237,
+            "face/lag": -2.0,
+            "rating/scale": 3.0,
+            "rating/lag": -5.596906666746913,
+            "eda/rise": 0.5903480487464104,
+            "eda/decay": 2.070968771519832,
+            "eda/lag": -0.6734611747371431
+          }
+        },
+        {
+          "objective": 6248.8081735480555,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 147,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 0.00017894787499694864,
+          "boundary_parameters": [
+            [
+              "filter",
+              "rating",
+              "scale"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "initialization": "prior_or_data",
+          "seconds": 33.143082117661834,
+          "seconds_including_polishing": 33.14308601524681,
+          "filter_parameters": {
+            "face/scale": 0.28019908854614045,
+            "face/lag": 3.1606010582497963,
+            "rating/scale": 3.0,
+            "rating/lag": -1.470434636262163,
+            "eda/rise": 0.5958244342555268,
+            "eda/decay": 2.3911813148587457,
+            "eda/lag": -1.771157538078196
+          }
+        },
+        {
+          "objective": 6249.1218825329515,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 172,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 3.466597669898874e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "scale"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "initialization": "prior_or_data",
+          "seconds": 40.04792289528996,
+          "seconds_including_polishing": 40.04792644176632,
+          "filter_parameters": {
+            "face/scale": 0.28046902784000477,
+            "face/lag": 3.1575369478384907,
+            "rating/scale": 3.0,
+            "rating/lag": -1.5039346414359778,
+            "eda/rise": 0.5958503581257482,
+            "eda/decay": 2.3915773409366747,
+            "eda/lag": -1.7723639457400673
+          }
+        },
+        {
+          "objective": 6248.677298586602,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 104,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 0.00011272599836686936,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "lag"
+            ],
+            [
+              "filter",
+              "rating",
+              "scale"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 3,
+          "initialization": "previous_box_best",
+          "seconds": 23.197779662907124,
+          "seconds_including_polishing": 23.197783840820193,
+          "filter_parameters": {
+            "face/scale": 0.2599034946634211,
+            "face/lag": -2.0,
+            "rating/scale": 3.0,
+            "rating/lag": -5.596907209341967,
+            "eda/rise": 0.5903479103990117,
+            "eda/decay": 2.0709683673494954,
+            "eda/lag": -0.6734612621353986
+          }
+        }
+      ],
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.5903480487464104,
+            "decay": 2.070968771519832,
+            "lag": -0.6734611747371431
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 0.36287861092084334,
+            "fwhm_seconds": 2.8899532150517975,
+            "support_relative_seconds": [
+              -0.6734611747371431,
+              89.32653882526286
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "face": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 0.2599034094167237,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -1.480192968095466,
+            "fwhm_seconds": 0.8822890802342644,
+            "support_relative_seconds": [
+              -2.0,
+              4.28480589097362
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 3.0,
+            "lag": -5.596906666746913
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 0.40309245336706856,
+            "fwhm_seconds": 10.18404201253961,
+            "support_relative_seconds": [
+              -5.596906666746913,
+              66.9470346198796
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        }
+      },
+      "wide_box_diagnostic": {
+        "objective": 6248.677298586595,
+        "physical_projected_gradient": 2.210466093954044,
+        "meets_gradient_tolerance": false,
+        "boundary_parameters": [
+          [
+            "filter",
+            "face",
+            "lag"
+          ]
+        ]
+      },
+      "observation_sha256": "dfa918c454fde9520015e4e7e13206284331cc3f9623c36e67653f259fcc1f44"
+    },
+    "wide": {
+      "best": {
+        "objective": 6247.47929471928,
+        "optimizer_success": true,
+        "status": 0,
+        "iterations": 163,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "physical_projected_gradient": 1.4263013814241887e-05,
+        "boundary_parameters": [],
+        "meets_gradient_tolerance": true,
+        "start": 1,
+        "initialization": "prior_or_data",
+        "seconds": 35.89235199801624,
+        "seconds_including_polishing": 35.892355925403535,
+        "filter_parameters": {
+          "face/scale": 0.28850931438635863,
+          "face/lag": 3.377794468535547,
+          "rating/scale": 3.8526917716591313,
+          "rating/lag": -2.2768754648044767,
+          "eda/rise": 0.6023267250423567,
+          "eda/decay": 2.560936854799156,
+          "eda/lag": -1.5062007858656936
+        }
+      },
+      "records": [
+        {
+          "objective": 6251.761252339017,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 135,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 3.7383406290558696e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "rating",
+              "scale"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "initialization": "prior_or_data",
+          "seconds": 30.307923782616854,
+          "seconds_including_polishing": 30.307928430847824,
+          "filter_parameters": {
+            "face/scale": 0.2943328950190906,
+            "face/lag": 1.3288113610062031,
+            "rating/scale": 4.0,
+            "rating/lag": -2.3580910439972764,
+            "eda/rise": 0.6235774412833223,
+            "eda/decay": 2.2671064727187415,
+            "eda/lag": 2.507084287942864
+          }
+        },
+        {
+          "objective": 6247.47929471928,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 163,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 1.4263013814241887e-05,
+          "boundary_parameters": [],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "initialization": "prior_or_data",
+          "seconds": 35.89235199801624,
+          "seconds_including_polishing": 35.892355925403535,
+          "filter_parameters": {
+            "face/scale": 0.28850931438635863,
+            "face/lag": 3.377794468535547,
+            "rating/scale": 3.8526917716591313,
+            "rating/lag": -2.2768754648044767,
+            "eda/rise": 0.6023267250423567,
+            "eda/decay": 2.560936854799156,
+            "eda/lag": -1.5062007858656936
+          }
+        },
+        {
+          "objective": 6247.8436498248375,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 142,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 4.947434974056364e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "initialization": "prior_or_data",
+          "seconds": 32.775459077209234,
+          "seconds_including_polishing": 32.77546300366521,
+          "filter_parameters": {
+            "face/scale": 0.2887054157321318,
+            "face/lag": 3.353522908609248,
+            "rating/scale": 3.835839780802048,
+            "rating/lag": -2.3220829655773496,
+            "eda/rise": 0.6020338824016874,
+            "eda/decay": 2.5549127804841585,
+            "eda/lag": -1.5286546037799489
+          }
+        },
+        {
+          "objective": 6248.161901379784,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 93,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 1.434546336387399e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 3,
+          "initialization": "previous_box_best",
+          "seconds": 22.022139908745885,
+          "seconds_including_polishing": 22.022143876180053,
+          "filter_parameters": {
+            "face/scale": 0.26750002230797887,
+            "face/lag": -2.0,
+            "rating/scale": 3.5135673437260344,
+            "rating/lag": -6.104865732700694,
+            "eda/rise": 0.5931774522433934,
+            "eda/decay": 2.0999167041149818,
+            "eda/lag": -0.6194484423605972
+          }
+        }
+      ],
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.6023267250423567,
+            "decay": 2.560936854799156,
+            "lag": -1.5062007858656936
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -0.36634449571002925,
+            "fwhm_seconds": 3.3263502654398076,
+            "support_relative_seconds": [
+              -1.5062007858656936,
+              88.49379921413431
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "face": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 0.28850931438635863,
+            "lag": 3.377794468535547
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 3.954813333830702,
+            "fwhm_seconds": 0.9793969929067785,
+            "support_relative_seconds": [
+              3.377794468535547,
+              10.354328723031838
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 3.8526917716591313,
+            "lag": -2.2768754648044767
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 5.428507823132609,
+            "fwhm_seconds": 13.078658287980556,
+            "support_relative_seconds": [
+              -2.2768754648044767,
+              90.88627309476524
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0.0
+          }
+        }
+      },
+      "wide_box_diagnostic": {
+        "objective": 6247.47929471928,
+        "physical_projected_gradient": 1.4263013814241887e-05,
+        "meets_gradient_tolerance": true,
+        "boundary_parameters": []
+      },
+      "observation_sha256": "dfa918c454fde9520015e4e7e13206284331cc3f9623c36e67653f259fcc1f44"
+    }
+  },
+  "objective_improvement_original_to_wide": 8.40420733046085,
+  "maximum_finite_difference_error": 2.424567304369277e-07,
+  "source": {
+    "script": "scripts/investigate_gp_response_bounds.py",
+    "executed_fit_script_sha256": "d21c347b6900bc110d7e7e73097603583e583a8c7b6e40724c9c1a1315ddc265",
+    "current_script_sha256": "343d23c6294c28171d3d6c72bbfbee48da6919e91f996145fda42207222b7249",
+    "post_fit_change": "Added configurable quadrature orders and retained earlier checks; ran additional order-384 validation without refitting. Added a saved-objective consistency assertion after validation.",
+    "raw_results": "local_data/gp-response-candidates-2026-09-22/core-bounds-sensitivity.json"
+  },
+  "interpretation": {
+    "all_11_constrained_stationarity_checks_pass": true,
+    "selected_wide_response_parameters_all_interior": true,
+    "global_optimum_established": false,
+    "posterior_uncertainty_established": false,
+    "heldout_performance_established": false,
+    "nvidia_speedup_measured": false,
+    "production_defaults_changed": false,
+    "next_step": "Longer-window held-out family comparison with training-only preprocessing, common eligible rows, and multiple starts."
+  }
+}

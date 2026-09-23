@@ -1,0 +1,555 @@
+{
+  "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+  "python": "3.12.13",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "qualification": "Finite-band numerical estimates; not posterior-error certificates",
+  "measurements": [
+    {
+      "order": 6,
+      "fit_and_integral_seconds": 0.06391049455851316,
+      "l1_bound": 0.26090437482248247,
+      "worst_normalized_cross": 0.047235916429905725,
+      "worst_relative_self": 0.04384316938098849,
+      "integral_refinement_max_difference": 1.3816618209261389e-06,
+      "cases": [
+        {
+          "width": 0.5,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.03395712040773625,
+          "self_covariance_error_bound": 0.04738808728578461,
+          "variance": 1.3180399054937835,
+          "normalized_cross_bound": 0.029577848146652704,
+          "relative_self_bound": 0.035953454131596556
+        },
+        {
+          "width": 0.5,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.0332129983826877,
+          "self_covariance_error_bound": 0.05699877791118694,
+          "variance": 1.6739893373698167,
+          "normalized_cross_bound": 0.025670347079222926,
+          "relative_self_bound": 0.034049666051483816
+        },
+        {
+          "width": 0.5,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.034010148790872,
+          "self_covariance_error_bound": 0.0764255786864368,
+          "variance": 1.7607527480514737,
+          "normalized_cross_bound": 0.025630633731727786,
+          "relative_self_bound": 0.043405060006870756
+        },
+        {
+          "width": 1.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.05031109085918135,
+          "self_covariance_error_bound": 0.07304920161743181,
+          "variance": 1.8352121876776393,
+          "normalized_cross_bound": 0.03713817784033246,
+          "relative_self_bound": 0.0398042265128326
+        },
+        {
+          "width": 1.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.04726173267392212,
+          "self_covariance_error_bound": 0.10333506874664738,
+          "variance": 2.9924873558881924,
+          "normalized_cross_bound": 0.027320804104602858,
+          "relative_self_bound": 0.03453149719858274
+        },
+        {
+          "width": 1.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.047343381012271334,
+          "self_covariance_error_bound": 0.12685013012906587,
+          "variance": 3.4620807892942067,
+          "normalized_cross_bound": 0.025444309559865427,
+          "relative_self_bound": 0.036639852692439925
+        },
+        {
+          "width": 2.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.06919014258645369,
+          "self_covariance_error_bound": 0.09406882110876101,
+          "variance": 2.1455752956936465,
+          "normalized_cross_bound": 0.047235916429905725,
+          "relative_self_bound": 0.04384316938098849
+        },
+        {
+          "width": 2.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.0691470712464618,
+          "self_covariance_error_bound": 0.1735699943062692,
+          "variance": 4.64412709986754,
+          "normalized_cross_bound": 0.03208645529119902,
+          "relative_self_bound": 0.03737408356270434
+        },
+        {
+          "width": 2.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.06638947358568338,
+          "self_covariance_error_bound": 0.2221602496991231,
+          "variance": 6.563486903412932,
+          "normalized_cross_bound": 0.02591384838866689,
+          "relative_self_bound": 0.03384790020432622
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "fit_and_integral_seconds": 0.07161796931177378,
+      "l1_bound": 0.046613106476684006,
+      "worst_normalized_cross": 0.007801879556747139,
+      "worst_relative_self": 0.007006706016609095,
+      "integral_refinement_max_difference": 7.04049440483634e-08,
+      "cases": [
+        {
+          "width": 0.5,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.005451140183151285,
+          "self_covariance_error_bound": 0.00765082813397065,
+          "variance": 1.3180399054937835,
+          "normalized_cross_bound": 0.004748135137119358,
+          "relative_self_bound": 0.005804701437400246
+        },
+        {
+          "width": 0.5,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.005371541919380531,
+          "self_covariance_error_bound": 0.009233010692748563,
+          "variance": 1.6739893373698167,
+          "normalized_cross_bound": 0.004151668085859073,
+          "relative_self_bound": 0.005515573179967521
+        },
+        {
+          "width": 0.5,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.005522453134967448,
+          "self_covariance_error_bound": 0.012337076873533259,
+          "variance": 1.7607527480514737,
+          "normalized_cross_bound": 0.004161815770737575,
+          "relative_self_bound": 0.007006706016609095
+        },
+        {
+          "width": 1.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.008003366716629778,
+          "self_covariance_error_bound": 0.011720856103790133,
+          "variance": 1.8352121876776393,
+          "normalized_cross_bound": 0.005907851556539096,
+          "relative_self_bound": 0.0063866490112090175
+        },
+        {
+          "width": 1.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.007627296683074919,
+          "self_covariance_error_bound": 0.016747072253688173,
+          "variance": 2.9924873558881924,
+          "normalized_cross_bound": 0.004409145977861243,
+          "relative_self_bound": 0.005596371934783837
+        },
+        {
+          "width": 1.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.007660514669266986,
+          "self_covariance_error_bound": 0.020386814925301457,
+          "variance": 3.4620807892942067,
+          "normalized_cross_bound": 0.004117080412617705,
+          "relative_self_bound": 0.005888601730018436
+        },
+        {
+          "width": 2.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.011428023414655491,
+          "self_covariance_error_bound": 0.015009787160935047,
+          "variance": 2.1455752956936465,
+          "normalized_cross_bound": 0.007801879556747139,
+          "relative_self_bound": 0.006995693505168975
+        },
+        {
+          "width": 2.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.011042308824785031,
+          "self_covariance_error_bound": 0.027948782125411707,
+          "variance": 4.64412709986754,
+          "normalized_cross_bound": 0.0051239848923638545,
+          "relative_self_bound": 0.0060180915647655
+        },
+        {
+          "width": 2.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.010736915732967603,
+          "self_covariance_error_bound": 0.03605025996958958,
+          "variance": 6.563486903412932,
+          "normalized_cross_bound": 0.004190947622244965,
+          "relative_self_bound": 0.005492546949525243
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "fit_and_integral_seconds": 0.09851430729031563,
+      "l1_bound": 0.0007328184625977023,
+      "worst_normalized_cross": 0.00010053650121694428,
+      "worst_relative_self": 9.052638907925862e-05,
+      "integral_refinement_max_difference": 4.054084033728407e-09,
+      "cases": [
+        {
+          "width": 0.5,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 6.957321319696503e-05,
+          "self_covariance_error_bound": 9.79190370621074e-05,
+          "variance": 1.3180399054937835,
+          "normalized_cross_bound": 6.060071968133385e-05,
+          "relative_self_bound": 7.429140548322286e-05
+        },
+        {
+          "width": 0.5,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 6.910217584374586e-05,
+          "self_covariance_error_bound": 0.00011948655122231344,
+          "variance": 1.6739893373698167,
+          "normalized_cross_bound": 5.3409114630345604e-05,
+          "relative_self_bound": 7.137832276163211e-05
+        },
+        {
+          "width": 0.5,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 7.216103595631787e-05,
+          "self_covariance_error_bound": 0.00015939458834248154,
+          "variance": 1.7607527480514737,
+          "normalized_cross_bound": 5.438179919973827e-05,
+          "relative_self_bound": 9.052638907925862e-05
+        },
+        {
+          "width": 1.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.00010088410670453784,
+          "self_covariance_error_bound": 0.000149611227158595,
+          "variance": 1.8352121876776393,
+          "normalized_cross_bound": 7.446970105543778e-05,
+          "relative_self_bound": 8.152257715110308e-05
+        },
+        {
+          "width": 1.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 9.779861602357646e-05,
+          "self_covariance_error_bound": 0.00021504507340588177,
+          "variance": 2.9924873558881924,
+          "normalized_cross_bound": 5.6534889410766706e-05,
+          "relative_self_bound": 7.186164813119312e-05
+        },
+        {
+          "width": 1.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 9.896251440063043e-05,
+          "self_covariance_error_bound": 0.00026258684968112405,
+          "variance": 3.4620807892942067,
+          "normalized_cross_bound": 5.3186586960901895e-05,
+          "relative_self_bound": 7.584654017697144e-05
+        },
+        {
+          "width": 2.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 0.00014726367942211708,
+          "self_covariance_error_bound": 0.00019062910671091318,
+          "variance": 2.1455752956936465,
+          "normalized_cross_bound": 0.00010053650121694428,
+          "relative_self_bound": 8.884754923004667e-05
+        },
+        {
+          "width": 2.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 0.00014021686888745832,
+          "self_covariance_error_bound": 0.0003573546681070886,
+          "variance": 4.64412709986754,
+          "normalized_cross_bound": 6.506511719915484e-05,
+          "relative_self_bound": 7.694765031673682e-05
+        },
+        {
+          "width": 2.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 0.00013802785402671424,
+          "self_covariance_error_bound": 0.000466077362558993,
+          "variance": 6.563486903412932,
+          "normalized_cross_bound": 5.3876506160950295e-05,
+          "relative_self_bound": 7.101063343580964e-05
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "fit_and_integral_seconds": 0.12978703062981367,
+      "l1_bound": 5.992632405110614e-06,
+      "worst_normalized_cross": 6.445423323368448e-07,
+      "worst_relative_self": 5.796653837789047e-07,
+      "integral_refinement_max_difference": 1.1246559239452836e-10,
+      "cases": [
+        {
+          "width": 0.5,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 4.4806763905712107e-07,
+          "self_covariance_error_bound": 6.304111354774552e-07,
+          "variance": 1.3180399054937835,
+          "normalized_cross_bound": 3.9028269854240635e-07,
+          "relative_self_bound": 4.782944225359256e-07
+        },
+        {
+          "width": 0.5,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 4.46336952750867e-07,
+          "self_covariance_error_bound": 7.689602020357755e-07,
+          "variance": 1.6739893373698167,
+          "normalized_cross_bound": 3.449741080097657e-07,
+          "relative_self_bound": 4.59357885304079e-07
+        },
+        {
+          "width": 0.5,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 4.6912130973333025e-07,
+          "self_covariance_error_bound": 1.0206474174390186e-06,
+          "variance": 1.7607527480514737,
+          "normalized_cross_bound": 3.5353789656899435e-07,
+          "relative_self_bound": 5.796653837789047e-07
+        },
+        {
+          "width": 1.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 6.45227834270873e-07,
+          "self_covariance_error_bound": 9.639717844779658e-07,
+          "variance": 1.8352121876776393,
+          "normalized_cross_bound": 4.7628834214218343e-07,
+          "relative_self_bound": 5.252644849192176e-07
+        },
+        {
+          "width": 1.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 6.310900608755533e-07,
+          "self_covariance_error_bound": 1.3823862655585061e-06,
+          "variance": 2.9924873558881924,
+          "normalized_cross_bound": 3.6481709302749585e-07,
+          "relative_self_bound": 4.6195224946847056e-07
+        },
+        {
+          "width": 1.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 6.398060657282271e-07,
+          "self_covariance_error_bound": 1.6824178081824128e-06,
+          "variance": 3.4620807892942067,
+          "normalized_cross_bound": 3.4385849186497717e-07,
+          "relative_self_bound": 4.859556753802378e-07
+        },
+        {
+          "width": 2.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 9.441115838954566e-07,
+          "self_covariance_error_bound": 1.2261924862078516e-06,
+          "variance": 2.1455752956936465,
+          "normalized_cross_bound": 6.445423323368448e-07,
+          "relative_self_bound": 5.714982311126181e-07
+        },
+        {
+          "width": 2.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 9.008897898979093e-07,
+          "self_covariance_error_bound": 2.3027712461305814e-06,
+          "variance": 4.64412709986754,
+          "normalized_cross_bound": 4.180417108748632e-07,
+          "relative_self_bound": 4.958458708411018e-07
+        },
+        {
+          "width": 2.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 8.914799919451687e-07,
+          "self_covariance_error_bound": 2.998724243466828e-06,
+          "variance": 6.563486903412932,
+          "normalized_cross_bound": 3.479719917191641e-07,
+          "relative_self_bound": 4.5687974815757284e-07
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "fit_and_integral_seconds": 0.16317111812531948,
+      "l1_bound": 3.4001476948207976e-08,
+      "worst_normalized_cross": 2.817527505753225e-09,
+      "worst_relative_self": 3.096108443657226e-09,
+      "integral_refinement_max_difference": 1.1246559239452836e-10,
+      "cases": [
+        {
+          "width": 0.5,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 1.9824319909563826e-09,
+          "self_covariance_error_bound": 2.7985438311615515e-09,
+          "variance": 1.3180399054937835,
+          "normalized_cross_bound": 1.7267681029930784e-09,
+          "relative_self_bound": 2.123261837139233e-09
+        },
+        {
+          "width": 0.5,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 1.9879973982395902e-09,
+          "self_covariance_error_bound": 3.694293540197119e-09,
+          "variance": 1.6739893373698167,
+          "normalized_cross_bound": 1.536524423883488e-09,
+          "relative_self_bound": 2.2068799709331588e-09
+        },
+        {
+          "width": 0.5,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 2.3093615759265036e-09,
+          "self_covariance_error_bound": 5.451481450434832e-09,
+          "variance": 1.7607527480514737,
+          "normalized_cross_bound": 1.7403746473048076e-09,
+          "relative_self_bound": 3.096108443657226e-09
+        },
+        {
+          "width": 1.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 2.8371540766825337e-09,
+          "self_covariance_error_bound": 4.267108131372729e-09,
+          "variance": 1.8352121876776393,
+          "normalized_cross_bound": 2.094304274880012e-09,
+          "relative_self_bound": 2.3251306633771438e-09
+        },
+        {
+          "width": 1.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 2.796578071761065e-09,
+          "self_covariance_error_bound": 6.211651252111132e-09,
+          "variance": 2.9924873558881924,
+          "normalized_cross_bound": 1.6166305664026226e-09,
+          "relative_self_bound": 2.0757485373793563e-09
+        },
+        {
+          "width": 1.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 2.9262074286151916e-09,
+          "self_covariance_error_bound": 8.60707704042089e-09,
+          "variance": 3.4620807892942067,
+          "normalized_cross_bound": 1.5726660423927906e-09,
+          "relative_self_bound": 2.486099419469516e-09
+        },
+        {
+          "width": 2.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 4.127052984218135e-09,
+          "self_covariance_error_bound": 5.42114579761932e-09,
+          "variance": 2.1455752956936465,
+          "normalized_cross_bound": 2.817527505753225e-09,
+          "relative_self_bound": 2.5266630392790334e-09
+        },
+        {
+          "width": 2.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 3.978222290106914e-09,
+          "self_covariance_error_bound": 1.020221754692809e-08,
+          "variance": 4.64412709986754,
+          "normalized_cross_bound": 1.8460225335501609e-09,
+          "relative_self_bound": 2.1967998135148102e-09
+        },
+        {
+          "width": 2.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 3.959349233632061e-09,
+          "self_covariance_error_bound": 1.4085808464982194e-08,
+          "variance": 6.563486903412932,
+          "normalized_cross_bound": 1.5454554798616653e-09,
+          "relative_self_bound": 2.146086169175983e-09
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "fit_and_integral_seconds": 0.19958708994090557,
+      "l1_bound": 1.2233737294317492e-08,
+      "worst_normalized_cross": 1.0717343404268307e-09,
+      "worst_relative_self": 1.4085027479506343e-09,
+      "integral_refinement_max_difference": 1.1246559239452836e-10,
+      "cases": [
+        {
+          "width": 0.5,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 8.124291186243523e-10,
+          "self_covariance_error_bound": 1.03152599143828e-09,
+          "variance": 1.3180399054937835,
+          "normalized_cross_bound": 7.076543832943914e-10,
+          "relative_self_bound": 7.826212143795711e-10
+        },
+        {
+          "width": 0.5,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 8.183752894624117e-10,
+          "self_covariance_error_bound": 1.383737702308375e-09,
+          "variance": 1.6739893373698167,
+          "normalized_cross_bound": 6.32522769534414e-10,
+          "relative_self_bound": 8.266108220751949e-10
+        },
+        {
+          "width": 0.5,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 9.864509435189033e-10,
+          "self_covariance_error_bound": 2.4800250840921317e-09,
+          "variance": 1.7607527480514737,
+          "normalized_cross_bound": 7.434064162176238e-10,
+          "relative_self_bound": 1.4085027479506343e-09
+        },
+        {
+          "width": 1.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 1.1381093570351898e-09,
+          "self_covariance_error_bound": 1.586871822584643e-09,
+          "variance": 1.8352121876776393,
+          "normalized_cross_bound": 8.40119086696485e-10,
+          "relative_self_bound": 8.646802986812891e-10
+        },
+        {
+          "width": 1.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 1.1515170603189434e-09,
+          "self_covariance_error_bound": 2.2583416021155615e-09,
+          "variance": 2.9924873558881924,
+          "normalized_cross_bound": 6.656626883559239e-10,
+          "relative_self_bound": 7.546703907276057e-10
+        },
+        {
+          "width": 1.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 1.2015020450431974e-09,
+          "self_covariance_error_bound": 3.5750566788982644e-09,
+          "variance": 3.4620807892942067,
+          "normalized_cross_bound": 6.457373621661375e-10,
+          "relative_self_bound": 1.0326323666257047e-09
+        },
+        {
+          "width": 2.0,
+          "length_scale": 1.0,
+          "cross_covariance_error_bound": 1.5698531421311372e-09,
+          "self_covariance_error_bound": 2.0285626599207504e-09,
+          "variance": 2.1455752956936465,
+          "normalized_cross_bound": 1.0717343404268307e-09,
+          "relative_self_bound": 9.454632815694e-10
+        },
+        {
+          "width": 2.0,
+          "length_scale": 3.0,
+          "cross_covariance_error_bound": 1.620360506090776e-09,
+          "self_covariance_error_bound": 3.778725751881503e-09,
+          "variance": 4.64412709986754,
+          "normalized_cross_bound": 7.518991621350366e-10,
+          "relative_self_bound": 8.136568338082909e-10
+        },
+        {
+          "width": 2.0,
+          "length_scale": 10.0,
+          "cross_covariance_error_bound": 1.6321668993418277e-09,
+          "self_covariance_error_bound": 5.1547741309727875e-09,
+          "variance": 6.563486903412932,
+          "normalized_cross_bound": 6.370848161637714e-10,
+          "relative_self_bound": 7.853712831044683e-10
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2873 @@
+{
+  "scope": "Clock metadata, aggregate innovations and held-out diagnostics; no individual signal arrays or loadings",
+  "clock_audit": {
+    "status": "finished",
+    "readme_sha256": "8f583aac1e4e2afce2bb9b9d95a26cc72e7e4de2f83be3cad3ce657ec58eddc6",
+    "subjects": {
+      "s001": {
+        "brain_volumes": 260,
+        "brain_info_rows": 260,
+        "face_rows": 252,
+        "rating_native_rows": 504,
+        "rating_tr_rows": 252,
+        "rating_pair_mean_max_absolute_difference": 1.4210854715202004e-14,
+        "splice_rows": [
+          21,
+          49,
+          87,
+          101,
+          150,
+          161,
+          216,
+          234
+        ],
+        "non_splice_rows": 252,
+        "rows_beyond_face_length": 8,
+        "nonzero_censor_rows_beyond_face_length": 8,
+        "censor_nonzero_rows": 21,
+        "censor_fractional_rows": 8,
+        "retained_nonzero_censor_rows": 20,
+        "retained_post_splice_contamination_rows": 16,
+        "current_loader": "Remove splice-flagged rows, mask any nonzero censor value, compress remaining rows to a 2 s grid; post-splice flags are not separately masked",
+        "physiology": {
+          "samples": 251715,
+          "time_sec_range": [
+            0.0,
+            863.5820000000001
+          ],
+          "stitched_range": [
+            0.0,
+            503.428
+          ],
+          "original_steps_above_10ms": 8,
+          "stitched_steps_above_10ms": 0,
+          "total_removed_pause_seconds": 360.1540000000001,
+          "current_clock": "time_stitched, averaged into 1.5 s bins at bin centers",
+          "current_signal": "EDA - EDA100C-MRI channel, not the separately supplied phasic EDA series"
+        },
+        "pause_marker_alignment": {
+          "boundaries": 8,
+          "original_row_clock_errors_seconds": [
+            -0.5219999999999985,
+            -0.8640000000000043,
+            -0.37000000000000455,
+            0.2259999999999991,
+            0.7080000000000268,
+            0.3439999999999941,
+            -0.73599999999999,
+            -0.6920000000000073
+          ],
+          "compressed_clock_errors_seconds": [
+            -0.5219999999999985,
+            -2.8640000000000043,
+            -4.3700000000000045,
+            -5.774000000000001,
+            -7.291999999999973,
+            -9.656000000000006,
+            -12.73599999999999,
+            -14.692000000000007
+          ],
+          "original_max_absolute_error": 0.8640000000000043,
+          "compressed_max_absolute_error": 14.692000000000007,
+          "final_remaining_observation_shift_seconds": 16
+        }
+      },
+      "s002": {
+        "brain_volumes": 260,
+        "brain_info_rows": 260,
+        "face_rows": 252,
+        "rating_native_rows": 504,
+        "rating_tr_rows": 252,
+        "rating_pair_mean_max_absolute_difference": 7.105427357601002e-15,
+        "splice_rows": [
+          22,
+          40,
+          65,
+          96,
+          152,
+          164,
+          214,
+          220
+        ],
+        "non_splice_rows": 252,
+        "rows_beyond_face_length": 8,
+        "nonzero_censor_rows_beyond_face_length": 7,
+        "censor_nonzero_rows": 8,
+        "censor_fractional_rows": 1,
+        "retained_nonzero_censor_rows": 8,
+        "retained_post_splice_contamination_rows": 16,
+        "current_loader": "Remove splice-flagged rows, mask any nonzero censor value, compress remaining rows to a 2 s grid; post-splice flags are not separately masked"
+      },
+      "s004": {
+        "brain_volumes": 260,
+        "brain_info_rows": 260,
+        "face_rows": 252,
+        "rating_native_rows": 504,
+        "rating_tr_rows": 252,
+        "rating_pair_mean_max_absolute_difference": 7.105427357601002e-15,
+        "splice_rows": [
+          4,
+          41,
+          63,
+          118,
+          140,
+          175,
+          197,
+          232
+        ],
+        "non_splice_rows": 252,
+        "rows_beyond_face_length": 8,
+        "nonzero_censor_rows_beyond_face_length": 0,
+        "censor_nonzero_rows": 1,
+        "censor_fractional_rows": 1,
+        "retained_nonzero_censor_rows": 0,
+        "retained_post_splice_contamination_rows": 16,
+        "current_loader": "Remove splice-flagged rows, mask any nonzero censor value, compress remaining rows to a 2 s grid; post-splice flags are not separately masked",
+        "physiology": {
+          "samples": 252196,
+          "time_sec_range": [
+            0.0009999999999905,
+            680.8629999999999
+          ],
+          "stitched_range": [
+            0.0,
+            504.39
+          ],
+          "original_steps_above_10ms": 8,
+          "stitched_steps_above_10ms": 0,
+          "total_removed_pause_seconds": 176.47299999999996,
+          "current_clock": "time_stitched, averaged into 1.5 s bins at bin centers",
+          "current_signal": "EDA - EDA100C-MRI channel, not the separately supplied phasic EDA series"
+        },
+        "pause_marker_alignment": {
+          "boundaries": 8,
+          "original_row_clock_errors_seconds": [
+            0.16999999999999993,
+            0.367999999999995,
+            -0.7759999999999962,
+            -0.5339999999999918,
+            -0.4660000000000082,
+            0.37999999999999545,
+            -0.15800000000001546,
+            -0.060000000000002274
+          ],
+          "compressed_clock_errors_seconds": [
+            0.16999999999999993,
+            -1.632000000000005,
+            -4.775999999999996,
+            -6.533999999999992,
+            -8.466000000000008,
+            -9.620000000000005,
+            -12.158000000000015,
+            -14.060000000000002
+          ],
+          "original_max_absolute_error": 0.7759999999999962,
+          "compressed_max_absolute_error": 14.060000000000002,
+          "final_remaining_observation_shift_seconds": 16
+        }
+      },
+      "s009": {
+        "brain_volumes": 260,
+        "brain_info_rows": 260,
+        "face_rows": 252,
+        "rating_native_rows": 504,
+        "rating_tr_rows": 252,
+        "rating_pair_mean_max_absolute_difference": 7.105427357601002e-15,
+        "splice_rows": [
+          24,
+          46,
+          75,
+          116,
+          147,
+          172,
+          202,
+          249
+        ],
+        "non_splice_rows": 252,
+        "rows_beyond_face_length": 8,
+        "nonzero_censor_rows_beyond_face_length": 0,
+        "censor_nonzero_rows": 7,
+        "censor_fractional_rows": 5,
+        "retained_nonzero_censor_rows": 6,
+        "retained_post_splice_contamination_rows": 0,
+        "current_loader": "Remove splice-flagged rows, mask any nonzero censor value, compress remaining rows to a 2 s grid; post-splice flags are not separately masked",
+        "physiology": {
+          "samples": 252911,
+          "time_sec_range": [
+            0.0005000000000023,
+            729.5045
+          ],
+          "stitched_range": [
+            0.0,
+            505.82
+          ],
+          "original_steps_above_10ms": 8,
+          "stitched_steps_above_10ms": 0,
+          "total_removed_pause_seconds": 223.6845,
+          "current_clock": "time_stitched, averaged into 1.5 s bins at bin centers",
+          "current_signal": "EDA - EDA100C-MRI channel, not the separately supplied phasic EDA series"
+        },
+        "pause_marker_alignment": {
+          "boundaries": 8,
+          "original_row_clock_errors_seconds": [
+            -0.09799999999999898,
+            -1.0679999999999978,
+            0.5339999999999918,
+            0.3580000000000041,
+            -0.6279999999999859,
+            0.09199999999998454,
+            0.41399999999998727,
+            0.26200000000000045
+          ],
+          "compressed_clock_errors_seconds": [
+            -0.09799999999999898,
+            -3.067999999999998,
+            -3.466000000000008,
+            -5.641999999999996,
+            -8.627999999999986,
+            -9.908000000000015,
+            -11.586000000000013,
+            -13.738
+          ],
+          "original_max_absolute_error": 1.0679999999999978,
+          "compressed_max_absolute_error": 13.738,
+          "final_remaining_observation_shift_seconds": 16
+        }
+      },
+      "s010": {
+        "brain_volumes": 260,
+        "brain_info_rows": 260,
+        "face_rows": 252,
+        "rating_native_rows": 504,
+        "rating_tr_rows": 252,
+        "rating_pair_mean_max_absolute_difference": 1.4210854715202004e-14,
+        "splice_rows": [
+          19,
+          57,
+          80,
+          107,
+          134,
+          174,
+          195,
+          239
+        ],
+        "non_splice_rows": 252,
+        "rows_beyond_face_length": 8,
+        "nonzero_censor_rows_beyond_face_length": 0,
+        "censor_nonzero_rows": 0,
+        "censor_fractional_rows": 0,
+        "retained_nonzero_censor_rows": 0,
+        "retained_post_splice_contamination_rows": 0,
+        "current_loader": "Remove splice-flagged rows, mask any nonzero censor value, compress remaining rows to a 2 s grid; post-splice flags are not separately masked",
+        "physiology": {
+          "samples": 252857,
+          "time_sec_range": [
+            0.0004999999999881,
+            718.7125
+          ],
+          "stitched_range": [
+            0.0,
+            505.712
+          ],
+          "original_steps_above_10ms": 8,
+          "stitched_steps_above_10ms": 0,
+          "total_removed_pause_seconds": 213.0005,
+          "current_clock": "time_stitched, averaged into 1.5 s bins at bin centers",
+          "current_signal": "EDA - EDA100C-MRI channel, not the separately supplied phasic EDA series"
+        },
+        "pause_marker_alignment": {
+          "boundaries": 8,
+          "original_row_clock_errors_seconds": [
+            0.46399999999999864,
+            -0.47400000000000375,
+            0.7340000000000089,
+            0.43199999999998795,
+            0.4200000000000159,
+            0.031999999999982265,
+            -0.005999999999971806,
+            0.7239999999999895
+          ],
+          "compressed_clock_errors_seconds": [
+            0.46399999999999864,
+            -2.4740000000000038,
+            -3.265999999999991,
+            -5.568000000000012,
+            -7.579999999999984,
+            -9.968000000000018,
+            -12.005999999999972,
+            -13.27600000000001
+          ],
+          "original_max_absolute_error": 0.7340000000000089,
+          "compressed_max_absolute_error": 13.27600000000001,
+          "final_remaining_observation_shift_seconds": 16
+        }
+      }
+    },
+    "interpretation": [
+      "README describes 252 brain volumes and splice-boundary markers; supplied images/info contain 260 rows with eight splice flags. File metadata alone do not establish the intended trimming rule; the separate movie-clock adapter implements the clarified first-252-row rule.",
+      "Independent physiology pause boundaries align with original brain row numbers. Removing flagged observations must be distinguished from compressing their timestamps; the latter creates cumulative clock drift.",
+      "Native 1 Hz ratings reproduce supplied 2 s TR ratings by pair averaging; no accumulating native/TR clock discrepancy is supported by that check.",
+      "Physiology time_sec includes pause jumps; time_stitched is the continuous watching clock. Replacing stitched time with time_sec would introduce those gaps.",
+      "Fractional censor values occur. Current masking treats every nonzero value as censored, rather than checking equality to one.",
+      "Post-splice contamination flags and tonic-versus-phasic EDA warrant separate preprocessing review. No preprocessing is changed by this audit."
+    ]
+  },
+  "loader_preparation": {
+    "status": "finished",
+    "loader_checks": {
+      "s001": {
+        "brain_shape": [
+          252,
+          100
+        ],
+        "time_range": [
+          0.0,
+          502.0
+        ],
+        "unmasked_splice_rows": 7,
+        "censor_mask_verified": true
+      },
+      "s002": {
+        "brain_shape": [
+          252,
+          100
+        ],
+        "time_range": [
+          0.0,
+          502.0
+        ],
+        "unmasked_splice_rows": 8,
+        "censor_mask_verified": true
+      }
+    },
+    "training": {
+      "scalar_observations": 58971,
+      "counts": {
+        "s001/brain": 20400,
+        "s001/face": 3880,
+        "s001/rating": 4528,
+        "s001/eda": 255,
+        "s002/brain": 21500,
+        "s002/face": 3880,
+        "s002/rating": 4528
+      },
+      "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+      "nodes": 948
+    },
+    "testing": {
+      "counts": {
+        "s001/brain": 1000,
+        "s001/face": 200,
+        "s001/rating": 320,
+        "s001/eda": 13,
+        "s002/brain": 1000,
+        "s002/face": 200,
+        "s002/rating": 320
+      },
+      "total": 3053,
+      "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+    },
+    "parameters": 1106,
+    "gamma_states": 78,
+    "gaussian_states": 180,
+    "preprocessing": "Training-only standardization, held-out perturbation and affine invariance assertions passed",
+    "legacy_comparison": {
+      "s001": {
+        "other_stream_values_masks_clocks_identical": true,
+        "common_brain_rows_mask_identical": true,
+        "common_brain_values_max_affine_residual": 3.1086244689504383e-15
+      },
+      "s002": {
+        "other_stream_values_masks_clocks_identical": true,
+        "common_brain_rows_mask_identical": true,
+        "common_brain_values_max_affine_residual": 2.6645352591003757e-15
+      }
+    }
+  },
+  "processing_decision": "Following the user's working interpretation, retain the first 252 original brain volumes, trim eight tail volumes, and treat splice flags as boundary markers; retain the nonzero censor mask.",
+  "legacy_compressed_clock": {
+    "gamma3": {
+      "diagnostics": {
+        "candidate": "gamma3",
+        "features": 3,
+        "training": {
+          "scalar_observations": 57671,
+          "counts": {
+            "s001/brain": 19700,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 20900,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+          "nodes": 942
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "899103e8cb09f1bb602de8089093af9e8aa8e7a622304867e6ddfdea2e15a29d"
+        },
+        "innovations": {
+          "likelihood_absolute_difference": 1.4551915228366852e-11,
+          "ordering": "Full node innovation Cholesky whitening in original observation order; shifted event clock",
+          "scope": "Training diagnostics at fitted parameters; adjacent native samples only, never across held-out or censored gaps",
+          "groups": {
+            "s001/brain": {
+              "observations": 19700,
+              "mean": 0.0007890240572841012,
+              "rms": 0.9638457450299058,
+              "coverage_95": 0.954771573604061,
+              "lag_one_correlation_median": 0.5145012327152474,
+              "lag_one_correlation_range": [
+                -0.006681392385461518,
+                0.7558020542101528
+              ],
+              "features_with_lag_one_check": 100,
+              "adjacent_pairs": 19100,
+              "fitted_noise_variance": 0.5283642505408356
+            },
+            "s001/face": {
+              "observations": 3880,
+              "mean": -0.005748610447130705,
+              "rms": 0.9877913577272541,
+              "coverage_95": 0.9551546391752578,
+              "lag_one_correlation_median": 0.1983996919419536,
+              "lag_one_correlation_range": [
+                -0.09424529397502977,
+                0.32421346879595003
+              ],
+              "features_with_lag_one_check": 20,
+              "adjacent_pairs": 3840,
+              "fitted_noise_variance": 0.921077184520028
+            },
+            "s001/rating": {
+              "observations": 4528,
+              "mean": 0.0005137981638569033,
+              "rms": 1.0360854697457338,
+              "coverage_95": 0.943904593639576,
+              "lag_one_correlation_median": 0.9190698847703069,
+              "lag_one_correlation_range": [
+                0.8651204594155386,
+                0.953610726341421
+              ],
+              "features_with_lag_one_check": 16,
+              "adjacent_pairs": 4496,
+              "fitted_noise_variance": 0.5893452404296766
+            },
+            "s001/eda": {
+              "observations": 255,
+              "mean": -0.019093273500404025,
+              "rms": 0.9949436046584806,
+              "coverage_95": 0.9411764705882353,
+              "lag_one_correlation_median": 0.760760819970379,
+              "lag_one_correlation_range": [
+                0.760760819970379,
+                0.760760819970379
+              ],
+              "features_with_lag_one_check": 1,
+              "adjacent_pairs": 253,
+              "fitted_noise_variance": 0.8393569708272534
+            },
+            "s002/brain": {
+              "observations": 20900,
+              "mean": -8.89577830770131e-05,
+              "rms": 1.026793750906226,
+              "coverage_95": 0.9433014354066985,
+              "lag_one_correlation_median": 0.5507744486174841,
+              "lag_one_correlation_range": [
+                0.020332237981677506,
+                0.7212947816655821
+              ],
+              "features_with_lag_one_check": 100,
+              "adjacent_pairs": 20600,
+              "fitted_noise_variance": 0.7954674424294604
+            },
+            "s002/face": {
+              "observations": 3880,
+              "mean": 0.0028372024198858323,
+              "rms": 0.9998212506082237,
+              "coverage_95": 0.954639175257732,
+              "lag_one_correlation_median": 0.2616821583462,
+              "lag_one_correlation_range": [
+                -0.024955910803137322,
+                0.47820778251676743
+              ],
+              "features_with_lag_one_check": 20,
+              "adjacent_pairs": 3840,
+              "fitted_noise_variance": 0.9721695552876115
+            },
+            "s002/rating": {
+              "observations": 4528,
+              "mean": 0.0025908136977613803,
+              "rms": 1.0126144389737963,
+              "coverage_95": 0.9423586572438163,
+              "lag_one_correlation_median": 0.9358382450359967,
+              "lag_one_correlation_range": [
+                0.8549237329362284,
+                0.9616787043566594
+              ],
+              "features_with_lag_one_check": 16,
+              "adjacent_pairs": 4496,
+              "fitted_noise_variance": 0.6720105403023942
+            }
+          }
+        },
+        "baselines": {
+          "modalities": {
+            "brain": {
+              "observations": 2000,
+              "training_mean_rmse": 0.9848388648681013,
+              "linear_interpolation_rmse": 0.986071152383109,
+              "previous_observation_rmse": 1.2344796872580341
+            },
+            "face": {
+              "observations": 400,
+              "training_mean_rmse": 2.392654104113942,
+              "linear_interpolation_rmse": 2.379856810080155,
+              "previous_observation_rmse": 2.42772597139304
+            },
+            "rating": {
+              "observations": 640,
+              "training_mean_rmse": 0.8702951347771586,
+              "linear_interpolation_rmse": 0.6815733568199965,
+              "previous_observation_rmse": 0.7362312297826803
+            },
+            "eda": {
+              "observations": 13,
+              "training_mean_rmse": 0.4810976694048836,
+              "linear_interpolation_rmse": 0.4057754586159958,
+              "previous_observation_rmse": 0.530822019066878
+            }
+          },
+          "brain_block_aggregates": [
+            {
+              "time": 220.0,
+              "observations": 200,
+              "observed_rms": 0.9973893659060149,
+              "predicted_rms": 0.4253612192204392,
+              "model_rmse": 1.2389501561142007,
+              "linear_rmse": 0.7158601879522287
+            },
+            {
+              "time": 222.0,
+              "observations": 200,
+              "observed_rms": 1.0305018178677796,
+              "predicted_rms": 1.2140747799617335,
+              "model_rmse": 1.9815870664910744,
+              "linear_rmse": 1.0184476070096082
+            },
+            {
+              "time": 224.0,
+              "observations": 200,
+              "observed_rms": 1.0368657732982405,
+              "predicted_rms": 1.5540544691552036,
+              "model_rmse": 2.0988898363531874,
+              "linear_rmse": 1.245332147231928
+            },
+            {
+              "time": 226.0,
+              "observations": 200,
+              "observed_rms": 1.1303123951697127,
+              "predicted_rms": 1.4639554733155682,
+              "model_rmse": 2.392240129264485,
+              "linear_rmse": 1.1123452808729979
+            },
+            {
+              "time": 228.0,
+              "observations": 200,
+              "observed_rms": 0.8028773702235448,
+              "predicted_rms": 1.267638750811359,
+              "model_rmse": 1.7994031765560008,
+              "linear_rmse": 0.8811793816814986
+            },
+            {
+              "time": 230.0,
+              "observations": 200,
+              "observed_rms": 0.8502034709646511,
+              "predicted_rms": 1.1928748632079045,
+              "model_rmse": 1.7397177255817053,
+              "linear_rmse": 0.9410268560195565
+            },
+            {
+              "time": 232.0,
+              "observations": 200,
+              "observed_rms": 0.7166269843703607,
+              "predicted_rms": 1.1377281902296263,
+              "model_rmse": 1.436007077379814,
+              "linear_rmse": 0.8857344305011885
+            },
+            {
+              "time": 234.0,
+              "observations": 200,
+              "observed_rms": 1.1411932560104086,
+              "predicted_rms": 0.7846219599872499,
+              "model_rmse": 1.5931817821761147,
+              "linear_rmse": 1.1857785417709854
+            },
+            {
+              "time": 236.0,
+              "observations": 200,
+              "observed_rms": 1.0388503334097787,
+              "predicted_rms": 0.9351246099125189,
+              "model_rmse": 1.6554893852207258,
+              "linear_rmse": 0.8923049607997381
+            },
+            {
+              "time": 238.0,
+              "observations": 200,
+              "observed_rms": 1.0134669703594852,
+              "predicted_rms": 1.095631382336532,
+              "model_rmse": 1.68089362328126,
+              "linear_rmse": 0.8583091732440973
+            }
+          ]
+        },
+        "status": "finished"
+      },
+      "fixed_parameter_sensitivity": {
+        "candidate": "gamma3",
+        "scope": "Fixed-parameter diagnostic; no refitting, no independent test set, no new convergence claim",
+        "training": {
+          "scalar_observations": 57671,
+          "counts": {
+            "s001/brain": 19700,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 20900,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+          "nodes": 942
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "899103e8cb09f1bb602de8089093af9e8aa8e7a622304867e6ddfdea2e15a29d"
+        },
+        "cases": [
+          {
+            "name": "original",
+            "length_scale": 3.0,
+            "conditioning": "all",
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.78943283539344,
+                  "marginal_nlpd": 3.015475890325659,
+                  "coverage_95": 0.6275,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.3925956784284326,
+                  "marginal_nlpd": 3.847062478538711,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1070177788121847,
+                  "marginal_nlpd": 1.628269263128661,
+                  "coverage_95": 0.8859375,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.2582696293081597,
+                  "marginal_nlpd": 0.8718564304455333,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3868289804855543,
+              "macro_marginal_nlpd": 2.340666015609641,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_10",
+            "length_scale": 10.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 57671,
+              "counts": {
+                "s001/brain": 19700,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 20900,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+              "nodes": 942
+            },
+            "covariance_error_bound": 5.027473393592208e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.7764363301928636,
+                  "marginal_nlpd": 3.147102526605493,
+                  "coverage_95": 0.628,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.39219382986516,
+                  "marginal_nlpd": 3.8460772080616015,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1075701957179716,
+                  "marginal_nlpd": 1.6292985583309119,
+                  "coverage_95": 0.884375,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.25963645569749166,
+                  "marginal_nlpd": 0.8718220104747613,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3839592028683718,
+              "macro_marginal_nlpd": 2.373575075868192,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_30",
+            "length_scale": 30.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 57671,
+              "counts": {
+                "s001/brain": 19700,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 20900,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+              "nodes": 942
+            },
+            "covariance_error_bound": 5.027473393592208e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.6077580497374389,
+                  "marginal_nlpd": 2.7673119739974434,
+                  "coverage_95": 0.67,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.3902655467835205,
+                  "marginal_nlpd": 3.8412208266290238,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1085730148282997,
+                  "marginal_nlpd": 1.6311789843215407,
+                  "coverage_95": 0.8828125,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.2654157087653635,
+                  "marginal_nlpd": 0.873492470791922,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3430030800286556,
+              "macro_marginal_nlpd": 2.278301063934982,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "brain_only",
+            "length_scale": 3.0,
+            "conditioning": "brain",
+            "training": {
+              "scalar_observations": 40600,
+              "counts": {
+                "s001/brain": 19700,
+                "s002/brain": 20900
+              },
+              "sha256": "d553d1e5658bb4d70b8ec4e2e69192e8a3c31e632519020f20b4bd72d61e0707",
+              "nodes": 210
+            },
+            "covariance_error_bound": 5.027473393592208e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.5758970090889197,
+                  "marginal_nlpd": 1.8918614782925407,
+                  "coverage_95": 0.8875,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.3943292465773833,
+                  "marginal_nlpd": 3.851357447880025,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1276905184936357,
+                  "marginal_nlpd": 1.6658143201487217,
+                  "coverage_95": 0.8796875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.269815294841525,
+                  "marginal_nlpd": 0.875517353363812,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3419330172503658,
+              "macro_marginal_nlpd": 2.071137649921275,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          }
+        ],
+        "status": "finished"
+      },
+      "fixed_parameter_ou_noise": {
+        "candidate": "gamma3",
+        "noise_timescales": {
+          "brain": 3.0,
+          "face": 1.5,
+          "rating": 15.0,
+          "eda": 5.0
+        },
+        "quadrature_order": 384,
+        "training": {
+          "scalar_observations": 57671,
+          "counts": {
+            "s001/brain": 19700,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 20900,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+          "nodes": 942
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "899103e8cb09f1bb602de8089093af9e8aa8e7a622304867e6ddfdea2e15a29d"
+        },
+        "nll_at_original_parameters": 55275.417777972245,
+        "scope": "No refit, no convergence claim, diagnostic use of an already examined validation fold",
+        "interpretation": "Observation means add private OU residual interpolation to the shared functional mean",
+        "modalities": {
+          "brain": {
+            "observations": 2000,
+            "shared_only_rmse": 1.6193307709852247,
+            "observation_rmse": 1.586205278483147,
+            "private_mean_rms": 0.20586996083523337
+          },
+          "face": {
+            "observations": 400,
+            "shared_only_rmse": 2.3930686415724063,
+            "observation_rmse": 2.3875094436403748,
+            "private_mean_rms": 0.0931582044451898
+          },
+          "rating": {
+            "observations": 640,
+            "shared_only_rmse": 1.0981442106715054,
+            "observation_rmse": 0.8109912119126735,
+            "private_mean_rms": 0.5842811351137314
+          },
+          "eda": {
+            "observations": 13,
+            "shared_only_rmse": 0.26352082981382496,
+            "observation_rmse": 0.2742919448403267,
+            "private_mean_rms": 0.17204278504322545
+          }
+        },
+        "prediction_api_checks": [
+          {
+            "subject": "s001",
+            "modality": "brain",
+            "max_absolute_difference": 2.9854829719511145e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "face",
+            "max_absolute_difference": 1.1550668754800597e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "rating",
+            "max_absolute_difference": 2.4391483277597104e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "eda",
+            "max_absolute_difference": 6.799641405486057e-11
+          }
+        ],
+        "status": "finished"
+      },
+      "ou_quadrature_refinement": {
+        "absolute_prediction_gate": 0.0001,
+        "max_absolute_prediction_differences": {
+          "brain": {
+            "shared": 2.6839899441855053e-08,
+            "private": 1.023955142898103e-09,
+            "observation": 2.6964158850173447e-08
+          },
+          "face": {
+            "shared": 2.5624836696991338e-09,
+            "private": 1.4552803406786552e-10,
+            "observation": 2.5655224611398353e-09
+          },
+          "rating": {
+            "shared": 1.7814773545232754e-08,
+            "private": 7.176314462120637e-08,
+            "observation": 8.934483014533257e-08
+          },
+          "eda": {
+            "shared": 9.549954160803509e-10,
+            "private": 9.312919324599989e-10,
+            "observation": 1.299887697481239e-09
+          }
+        },
+        "nll_absolute_difference": 3.068045771215111e-05
+      }
+    },
+    "gaussian": {
+      "diagnostics": {
+        "candidate": "gaussian",
+        "features": 3,
+        "training": {
+          "scalar_observations": 57671,
+          "counts": {
+            "s001/brain": 19700,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 20900,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+          "nodes": 942
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "899103e8cb09f1bb602de8089093af9e8aa8e7a622304867e6ddfdea2e15a29d"
+        },
+        "innovations": {
+          "likelihood_absolute_difference": 5.820766091346741e-11,
+          "ordering": "Full node innovation Cholesky whitening in original observation order; shifted event clock",
+          "scope": "Training diagnostics at fitted parameters; adjacent native samples only, never across held-out or censored gaps",
+          "groups": {
+            "s001/brain": {
+              "observations": 19700,
+              "mean": -0.0005299178161625228,
+              "rms": 0.9501123724227089,
+              "coverage_95": 0.9581218274111675,
+              "lag_one_correlation_median": 0.5141216049078181,
+              "lag_one_correlation_range": [
+                -0.40853408220616133,
+                0.7486996799585599
+              ],
+              "features_with_lag_one_check": 100,
+              "adjacent_pairs": 19100,
+              "fitted_noise_variance": 0.5339939601846577
+            },
+            "s001/face": {
+              "observations": 3880,
+              "mean": -0.0037618128641775457,
+              "rms": 1.013045011970946,
+              "coverage_95": 0.9525773195876288,
+              "lag_one_correlation_median": 0.2237244711414329,
+              "lag_one_correlation_range": [
+                -0.08698802443928573,
+                0.3800318328105656
+              ],
+              "features_with_lag_one_check": 20,
+              "adjacent_pairs": 3840,
+              "fitted_noise_variance": 0.9229428234284842
+            },
+            "s001/rating": {
+              "observations": 4528,
+              "mean": 0.005802976969084157,
+              "rms": 1.0491316709891594,
+              "coverage_95": 0.9379416961130742,
+              "lag_one_correlation_median": 0.9579586092350854,
+              "lag_one_correlation_range": [
+                0.9062917948402883,
+                0.981972879177432
+              ],
+              "features_with_lag_one_check": 16,
+              "adjacent_pairs": 4496,
+              "fitted_noise_variance": 0.5887127873795083
+            },
+            "s001/eda": {
+              "observations": 255,
+              "mean": -0.012715780633470284,
+              "rms": 0.974434457016457,
+              "coverage_95": 0.9294117647058824,
+              "lag_one_correlation_median": 0.7075384052287017,
+              "lag_one_correlation_range": [
+                0.7075384052287017,
+                0.7075384052287017
+              ],
+              "features_with_lag_one_check": 1,
+              "adjacent_pairs": 253,
+              "fitted_noise_variance": 0.837513665499722
+            },
+            "s002/brain": {
+              "observations": 20900,
+              "mean": -0.0009350411151729884,
+              "rms": 1.0285431109210108,
+              "coverage_95": 0.9430622009569378,
+              "lag_one_correlation_median": 0.5511108486643745,
+              "lag_one_correlation_range": [
+                0.016450100094031576,
+                0.7196499248132071
+              ],
+              "features_with_lag_one_check": 100,
+              "adjacent_pairs": 20600,
+              "fitted_noise_variance": 0.7867774073843767
+            },
+            "s002/face": {
+              "observations": 3880,
+              "mean": 0.004435758490683593,
+              "rms": 1.0043159595101758,
+              "coverage_95": 0.9541237113402062,
+              "lag_one_correlation_median": 0.2666472479297287,
+              "lag_one_correlation_range": [
+                -0.019771845221775965,
+                0.5055730539408049
+              ],
+              "features_with_lag_one_check": 20,
+              "adjacent_pairs": 3840,
+              "fitted_noise_variance": 0.9663149425065443
+            },
+            "s002/rating": {
+              "observations": 4528,
+              "mean": 0.006564601319376796,
+              "rms": 1.0233787035426434,
+              "coverage_95": 0.935291519434629,
+              "lag_one_correlation_median": 0.9505175623421069,
+              "lag_one_correlation_range": [
+                0.9127908633450388,
+                0.9738037493608994
+              ],
+              "features_with_lag_one_check": 16,
+              "adjacent_pairs": 4496,
+              "fitted_noise_variance": 0.6737779011651327
+            }
+          }
+        },
+        "baselines": {
+          "modalities": {
+            "brain": {
+              "observations": 2000,
+              "training_mean_rmse": 0.9848388648681013,
+              "linear_interpolation_rmse": 0.986071152383109,
+              "previous_observation_rmse": 1.2344796872580341
+            },
+            "face": {
+              "observations": 400,
+              "training_mean_rmse": 2.392654104113942,
+              "linear_interpolation_rmse": 2.379856810080155,
+              "previous_observation_rmse": 2.42772597139304
+            },
+            "rating": {
+              "observations": 640,
+              "training_mean_rmse": 0.8702951347771586,
+              "linear_interpolation_rmse": 0.6815733568199965,
+              "previous_observation_rmse": 0.7362312297826803
+            },
+            "eda": {
+              "observations": 13,
+              "training_mean_rmse": 0.4810976694048836,
+              "linear_interpolation_rmse": 0.4057754586159958,
+              "previous_observation_rmse": 0.530822019066878
+            }
+          },
+          "brain_block_aggregates": [
+            {
+              "time": 220.0,
+              "observations": 200,
+              "observed_rms": 0.9973893659060149,
+              "predicted_rms": 0.3343268893827832,
+              "model_rmse": 1.1652155079489235,
+              "linear_rmse": 0.7158601879522287
+            },
+            {
+              "time": 222.0,
+              "observations": 200,
+              "observed_rms": 1.0305018178677796,
+              "predicted_rms": 1.149684745031118,
+              "model_rmse": 1.9428241209228632,
+              "linear_rmse": 1.0184476070096082
+            },
+            {
+              "time": 224.0,
+              "observations": 200,
+              "observed_rms": 1.0368657732982405,
+              "predicted_rms": 1.685120768844266,
+              "model_rmse": 2.2952331155305767,
+              "linear_rmse": 1.245332147231928
+            },
+            {
+              "time": 226.0,
+              "observations": 200,
+              "observed_rms": 1.1303123951697127,
+              "predicted_rms": 1.84957976661665,
+              "model_rmse": 2.743188269547773,
+              "linear_rmse": 1.1123452808729979
+            },
+            {
+              "time": 228.0,
+              "observations": 200,
+              "observed_rms": 0.8028773702235448,
+              "predicted_rms": 2.008200864195613,
+              "model_rmse": 2.4570560273000117,
+              "linear_rmse": 0.8811793816814986
+            },
+            {
+              "time": 230.0,
+              "observations": 200,
+              "observed_rms": 0.8502034709646511,
+              "predicted_rms": 2.462934907802077,
+              "model_rmse": 2.8575216670655235,
+              "linear_rmse": 0.9410268560195565
+            },
+            {
+              "time": 232.0,
+              "observations": 200,
+              "observed_rms": 0.7166269843703607,
+              "predicted_rms": 2.6752574455998523,
+              "model_rmse": 2.84839606406982,
+              "linear_rmse": 0.8857344305011885
+            },
+            {
+              "time": 234.0,
+              "observations": 200,
+              "observed_rms": 1.1411932560104086,
+              "predicted_rms": 2.062317138777861,
+              "model_rmse": 2.4763479487099387,
+              "linear_rmse": 1.1857785417709854
+            },
+            {
+              "time": 236.0,
+              "observations": 200,
+              "observed_rms": 1.0388503334097787,
+              "predicted_rms": 1.3967132821221662,
+              "model_rmse": 2.1685280541280796,
+              "linear_rmse": 0.8923049607997381
+            },
+            {
+              "time": 238.0,
+              "observations": 200,
+              "observed_rms": 1.0134669703594852,
+              "predicted_rms": 1.0703074789423659,
+              "model_rmse": 1.770419743282978,
+              "linear_rmse": 0.8583091732440973
+            }
+          ]
+        },
+        "status": "finished"
+      },
+      "fixed_parameter_sensitivity": {
+        "candidate": "gaussian",
+        "scope": "Fixed-parameter diagnostic; no refitting, no independent test set, no new convergence claim",
+        "training": {
+          "scalar_observations": 57671,
+          "counts": {
+            "s001/brain": 19700,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 20900,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+          "nodes": 942
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "899103e8cb09f1bb602de8089093af9e8aa8e7a622304867e6ddfdea2e15a29d"
+        },
+        "cases": [
+          {
+            "name": "original",
+            "length_scale": 3.0,
+            "conditioning": "all",
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 2.328316631613758,
+                  "marginal_nlpd": 4.294022190980331,
+                  "coverage_95": 0.483,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.386143812474992,
+                  "marginal_nlpd": 3.846377935298266,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1871284535436906,
+                  "marginal_nlpd": 1.7728290457182454,
+                  "coverage_95": 0.85625,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.2726450130237548,
+                  "marginal_nlpd": 0.8754114270105657,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.5435584776640487,
+              "macro_marginal_nlpd": 2.6971601497518516,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_10",
+            "length_scale": 10.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 57671,
+              "counts": {
+                "s001/brain": 19700,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 20900,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+              "nodes": 942
+            },
+            "covariance_error_bound": 8.699464285772311e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 2.2893199381120275,
+                  "marginal_nlpd": 4.573671849141585,
+                  "coverage_95": 0.5155,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.3859087690722425,
+                  "marginal_nlpd": 3.845764165067652,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1877166949354914,
+                  "marginal_nlpd": 1.7740324239829994,
+                  "coverage_95": 0.8546875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.2737301931917908,
+                  "marginal_nlpd": 0.8753039192065107,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.534168898827888,
+              "macro_marginal_nlpd": 2.7671930893496866,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_30",
+            "length_scale": 30.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 57671,
+              "counts": {
+                "s001/brain": 19700,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 20900,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+              "nodes": 942
+            },
+            "covariance_error_bound": 8.699464285772311e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.9948670605492183,
+                  "marginal_nlpd": 3.790200992025173,
+                  "coverage_95": 0.5455,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.3850734480142086,
+                  "marginal_nlpd": 3.8436309337231442,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.1869376611596143,
+                  "marginal_nlpd": 1.7727694738831274,
+                  "coverage_95": 0.8546875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.2787307309247684,
+                  "marginal_nlpd": 0.8768119276695179,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.4614022251619525,
+              "macro_marginal_nlpd": 2.5708533318252407,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "brain_only",
+            "length_scale": 3.0,
+            "conditioning": "brain",
+            "training": {
+              "scalar_observations": 40600,
+              "counts": {
+                "s001/brain": 19700,
+                "s002/brain": 20900
+              },
+              "sha256": "d553d1e5658bb4d70b8ec4e2e69192e8a3c31e632519020f20b4bd72d61e0707",
+              "nodes": 210
+            },
+            "covariance_error_bound": 8.699464285772311e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.5421169571846112,
+                  "marginal_nlpd": 1.887164093331299,
+                  "coverage_95": 0.891,
+                  "zero_prediction_rmse": 0.9848388648681013,
+                  "unit_normal_nlpd": 1.403892328082018
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.386130426037962,
+                  "marginal_nlpd": 3.8462944862160033,
+                  "coverage_95": 0.9725,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 1.2505891823701538,
+                  "marginal_nlpd": 1.8951295280917226,
+                  "coverage_95": 0.8265625,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.2810535889031652,
+                  "marginal_nlpd": 0.8782253531383665,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.364972538623973,
+              "macro_marginal_nlpd": 2.126703365194348,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          }
+        ],
+        "status": "finished"
+      },
+      "fixed_parameter_ou_noise": {
+        "candidate": "gaussian",
+        "noise_timescales": {
+          "brain": 3.0,
+          "face": 1.5,
+          "rating": 15.0,
+          "eda": 5.0
+        },
+        "quadrature_order": 384,
+        "training": {
+          "scalar_observations": 57671,
+          "counts": {
+            "s001/brain": 19700,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 20900,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "8c60497f262f0d89bb82e0752b9a5545b87dc5a6af79c0fab246fbc093b4be4b",
+          "nodes": 942
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "899103e8cb09f1bb602de8089093af9e8aa8e7a622304867e6ddfdea2e15a29d"
+        },
+        "nll_at_original_parameters": 55223.368863106545,
+        "scope": "No refit, no convergence claim, diagnostic use of an already examined validation fold",
+        "interpretation": "Observation means add private OU residual interpolation to the shared functional mean",
+        "modalities": {
+          "brain": {
+            "observations": 2000,
+            "shared_only_rmse": 2.112647795531018,
+            "observation_rmse": 2.0875532382795283,
+            "private_mean_rms": 0.20599147402752982
+          },
+          "face": {
+            "observations": 400,
+            "shared_only_rmse": 2.3855522424687003,
+            "observation_rmse": 2.378787443459039,
+            "private_mean_rms": 0.09934004561320484
+          },
+          "rating": {
+            "observations": 640,
+            "shared_only_rmse": 1.185713224942776,
+            "observation_rmse": 0.8230520797691893,
+            "private_mean_rms": 0.632997737129206
+          },
+          "eda": {
+            "observations": 13,
+            "shared_only_rmse": 0.2748424579217445,
+            "observation_rmse": 0.29403783502519926,
+            "private_mean_rms": 0.16720430539598913
+          }
+        },
+        "prediction_api_checks": [
+          {
+            "subject": "s001",
+            "modality": "brain",
+            "max_absolute_difference": 4.979655576775599e-11
+          },
+          {
+            "subject": "s001",
+            "modality": "face",
+            "max_absolute_difference": 9.275182011325711e-11
+          },
+          {
+            "subject": "s001",
+            "modality": "rating",
+            "max_absolute_difference": 3.4155489547771367e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "eda",
+            "max_absolute_difference": 4.995265312501829e-11
+          }
+        ],
+        "status": "finished"
+      },
+      "ou_quadrature_refinement": {
+        "absolute_prediction_gate": 0.0001,
+        "max_absolute_prediction_differences": {
+          "brain": {
+            "shared": 1.1675321154314133e-08,
+            "private": 5.192584140445433e-10,
+            "observation": 1.2097973400848616e-08
+          },
+          "face": {
+            "shared": 2.3233748258633113e-10,
+            "private": 1.258342041676741e-11,
+            "observation": 2.31803857358992e-10
+          },
+          "rating": {
+            "shared": 8.445282917435293e-09,
+            "private": 1.6824304394091882e-08,
+            "observation": 2.276084032359904e-08
+          },
+          "eda": {
+            "shared": 5.640737876788648e-10,
+            "private": 1.0870959687991899e-10,
+            "observation": 5.953202392855461e-10
+          }
+        },
+        "nll_absolute_difference": 4.149580490775406e-06
+      }
+    }
+  },
+  "preserved_row_clock": {
+    "gamma3": {
+      "candidate": "gamma3",
+      "features": 3,
+      "training": {
+        "scalar_observations": 58971,
+        "counts": {
+          "s001/brain": 20400,
+          "s001/face": 3880,
+          "s001/rating": 4528,
+          "s001/eda": 255,
+          "s002/brain": 21500,
+          "s002/face": 3880,
+          "s002/rating": 4528
+        },
+        "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+        "nodes": 948
+      },
+      "testing": {
+        "counts": {
+          "s001/brain": 1000,
+          "s001/face": 200,
+          "s001/rating": 320,
+          "s001/eda": 13,
+          "s002/brain": 1000,
+          "s002/face": 200,
+          "s002/rating": 320
+        },
+        "total": 3053,
+        "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+      },
+      "innovations": {
+        "likelihood_absolute_difference": 1.1641532182693481e-10,
+        "ordering": "Full node innovation Cholesky whitening in original observation order; shifted event clock",
+        "scope": "Training diagnostics at fitted parameters; adjacent native samples only, never across held-out or censored gaps",
+        "groups": {
+          "s001/brain": {
+            "observations": 20400,
+            "mean": -0.0007014221453473645,
+            "rms": 0.9625604928996462,
+            "coverage_95": 0.9554901960784313,
+            "lag_one_correlation_median": 0.5413487094012328,
+            "lag_one_correlation_range": [
+              -0.1608468569961646,
+              0.7320377128745683
+            ],
+            "features_with_lag_one_check": 100,
+            "adjacent_pairs": 19800,
+            "fitted_noise_variance": 0.53307336186334
+          },
+          "s001/face": {
+            "observations": 3880,
+            "mean": -0.0034211395493602336,
+            "rms": 0.9861857236889833,
+            "coverage_95": 0.956958762886598,
+            "lag_one_correlation_median": 0.1580937575502869,
+            "lag_one_correlation_range": [
+              -0.13367264142015892,
+              0.33718041167374996
+            ],
+            "features_with_lag_one_check": 20,
+            "adjacent_pairs": 3840,
+            "fitted_noise_variance": 0.9347723805397458
+          },
+          "s001/rating": {
+            "observations": 4528,
+            "mean": -0.0006364120953892727,
+            "rms": 1.037729820319438,
+            "coverage_95": 0.9421378091872792,
+            "lag_one_correlation_median": 0.9273083628885301,
+            "lag_one_correlation_range": [
+              0.8264597937637195,
+              0.9629799622413844
+            ],
+            "features_with_lag_one_check": 16,
+            "adjacent_pairs": 4496,
+            "fitted_noise_variance": 0.6310245537743747
+          },
+          "s001/eda": {
+            "observations": 255,
+            "mean": 0.006624672772198112,
+            "rms": 0.9274107403107024,
+            "coverage_95": 0.9686274509803922,
+            "lag_one_correlation_median": 0.7835107023077281,
+            "lag_one_correlation_range": [
+              0.7835107023077281,
+              0.7835107023077281
+            ],
+            "features_with_lag_one_check": 1,
+            "adjacent_pairs": 253,
+            "fitted_noise_variance": 0.9399035832075526
+          },
+          "s002/brain": {
+            "observations": 21500,
+            "mean": -0.00015239473837285478,
+            "rms": 1.028826867690715,
+            "coverage_95": 0.9416744186046512,
+            "lag_one_correlation_median": 0.5605497765606654,
+            "lag_one_correlation_range": [
+              0.017990682861464626,
+              0.7223609918101107
+            ],
+            "features_with_lag_one_check": 100,
+            "adjacent_pairs": 21200,
+            "fitted_noise_variance": 0.7769383593951411
+          },
+          "s002/face": {
+            "observations": 3880,
+            "mean": 0.0009012491402300505,
+            "rms": 0.9940439941845813,
+            "coverage_95": 0.9541237113402062,
+            "lag_one_correlation_median": 0.19476258305159477,
+            "lag_one_correlation_range": [
+              -0.031359394847747996,
+              0.5134137976155075
+            ],
+            "features_with_lag_one_check": 20,
+            "adjacent_pairs": 3840,
+            "fitted_noise_variance": 0.9448624895669392
+          },
+          "s002/rating": {
+            "observations": 4528,
+            "mean": 0.0023126159358446354,
+            "rms": 1.019706565979873,
+            "coverage_95": 0.9372791519434629,
+            "lag_one_correlation_median": 0.931203234153527,
+            "lag_one_correlation_range": [
+              0.8291822827336915,
+              0.9616994707507038
+            ],
+            "features_with_lag_one_check": 16,
+            "adjacent_pairs": 4496,
+            "fitted_noise_variance": 0.6708465143533292
+          }
+        }
+      },
+      "baselines": {
+        "modalities": {
+          "brain": {
+            "observations": 2000,
+            "training_mean_rmse": 0.9834176573130273,
+            "linear_interpolation_rmse": 1.090553624307688,
+            "previous_observation_rmse": 1.3670255510380782
+          },
+          "face": {
+            "observations": 400,
+            "training_mean_rmse": 2.392654104113942,
+            "linear_interpolation_rmse": 2.379856810080155,
+            "previous_observation_rmse": 2.42772597139304
+          },
+          "rating": {
+            "observations": 640,
+            "training_mean_rmse": 0.8702951347771586,
+            "linear_interpolation_rmse": 0.6815733568199965,
+            "previous_observation_rmse": 0.7362312297826803
+          },
+          "eda": {
+            "observations": 13,
+            "training_mean_rmse": 0.4810976694048836,
+            "linear_interpolation_rmse": 0.4057754586159958,
+            "previous_observation_rmse": 0.530822019066878
+          }
+        },
+        "brain_block_aggregates": [
+          {
+            "time": 220.0,
+            "observations": 200,
+            "observed_rms": 0.9455494863271511,
+            "predicted_rms": 1.1998417992032793,
+            "model_rmse": 1.693154968841392,
+            "linear_rmse": 0.7397343136967038
+          },
+          {
+            "time": 222.0,
+            "observations": 200,
+            "observed_rms": 1.0696222422541637,
+            "predicted_rms": 2.765235046724229,
+            "model_rmse": 3.4565492698206213,
+            "linear_rmse": 1.1415482320280712
+          },
+          {
+            "time": 224.0,
+            "observations": 200,
+            "observed_rms": 1.0523049325344518,
+            "predicted_rms": 3.5308856467434757,
+            "model_rmse": 3.942906975990698,
+            "linear_rmse": 1.2359605851821989
+          },
+          {
+            "time": 226.0,
+            "observations": 200,
+            "observed_rms": 0.8892841620891266,
+            "predicted_rms": 3.129656444367424,
+            "model_rmse": 3.136492197628704,
+            "linear_rmse": 1.2281531609009315
+          },
+          {
+            "time": 228.0,
+            "observations": 200,
+            "observed_rms": 0.9988304207451498,
+            "predicted_rms": 2.066020525565343,
+            "model_rmse": 1.952019170503908,
+            "linear_rmse": 1.2933250631579594
+          },
+          {
+            "time": 230.0,
+            "observations": 200,
+            "observed_rms": 1.0274191157323143,
+            "predicted_rms": 1.139613309149688,
+            "model_rmse": 1.185978755164625,
+            "linear_rmse": 1.148106240825221
+          },
+          {
+            "time": 232.0,
+            "observations": 200,
+            "observed_rms": 1.0223432820688954,
+            "predicted_rms": 0.9743575393066755,
+            "model_rmse": 1.0723101048146892,
+            "linear_rmse": 1.1074469305137542
+          },
+          {
+            "time": 234.0,
+            "observations": 200,
+            "observed_rms": 1.131521543869079,
+            "predicted_rms": 1.2877651237966827,
+            "model_rmse": 1.9339889067899183,
+            "linear_rmse": 1.1846479057825385
+          },
+          {
+            "time": 236.0,
+            "observations": 200,
+            "observed_rms": 0.7983099361897467,
+            "predicted_rms": 1.0767910194410335,
+            "model_rmse": 1.3785270882895064,
+            "linear_rmse": 0.8306709956853613
+          },
+          {
+            "time": 238.0,
+            "observations": 200,
+            "observed_rms": 0.8477603018097273,
+            "predicted_rms": 0.3160901336895112,
+            "model_rmse": 0.9393690608464879,
+            "linear_rmse": 0.8343217439202713
+          }
+        ]
+      },
+      "status": "finished"
+    },
+    "gaussian": {
+      "candidate": "gaussian",
+      "features": 3,
+      "training": {
+        "scalar_observations": 58971,
+        "counts": {
+          "s001/brain": 20400,
+          "s001/face": 3880,
+          "s001/rating": 4528,
+          "s001/eda": 255,
+          "s002/brain": 21500,
+          "s002/face": 3880,
+          "s002/rating": 4528
+        },
+        "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+        "nodes": 948
+      },
+      "testing": {
+        "counts": {
+          "s001/brain": 1000,
+          "s001/face": 200,
+          "s001/rating": 320,
+          "s001/eda": 13,
+          "s002/brain": 1000,
+          "s002/face": 200,
+          "s002/rating": 320
+        },
+        "total": 3053,
+        "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+      },
+      "innovations": {
+        "likelihood_absolute_difference": 1.4551915228366852e-10,
+        "ordering": "Full node innovation Cholesky whitening in original observation order; shifted event clock",
+        "scope": "Training diagnostics at fitted parameters; adjacent native samples only, never across held-out or censored gaps",
+        "groups": {
+          "s001/brain": {
+            "observations": 20400,
+            "mean": -0.0007502480170524626,
+            "rms": 0.9442165066186068,
+            "coverage_95": 0.957843137254902,
+            "lag_one_correlation_median": 0.5365919572713611,
+            "lag_one_correlation_range": [
+              -0.5512500059691352,
+              0.7304011830110266
+            ],
+            "features_with_lag_one_check": 100,
+            "adjacent_pairs": 19800,
+            "fitted_noise_variance": 0.5389615164482302
+          },
+          "s001/face": {
+            "observations": 3880,
+            "mean": 0.002671721150398175,
+            "rms": 1.007484122308781,
+            "coverage_95": 0.9533505154639176,
+            "lag_one_correlation_median": 0.20861015424397344,
+            "lag_one_correlation_range": [
+              -0.11301922007544166,
+              0.3825990743959598
+            ],
+            "features_with_lag_one_check": 20,
+            "adjacent_pairs": 3840,
+            "fitted_noise_variance": 0.9403169308011432
+          },
+          "s001/rating": {
+            "observations": 4528,
+            "mean": 0.005262121974005547,
+            "rms": 1.058622575258082,
+            "coverage_95": 0.9375,
+            "lag_one_correlation_median": 0.9644180396552011,
+            "lag_one_correlation_range": [
+              0.8966965027140763,
+              0.9818603423610768
+            ],
+            "features_with_lag_one_check": 16,
+            "adjacent_pairs": 4496,
+            "fitted_noise_variance": 0.6128419372958138
+          },
+          "s001/eda": {
+            "observations": 255,
+            "mean": 0.0040306536067091945,
+            "rms": 1.017049314380796,
+            "coverage_95": 0.9372549019607843,
+            "lag_one_correlation_median": 0.7402629265563602,
+            "lag_one_correlation_range": [
+              0.7402629265563602,
+              0.7402629265563602
+            ],
+            "features_with_lag_one_check": 1,
+            "adjacent_pairs": 253,
+            "fitted_noise_variance": 0.9335228696260166
+          },
+          "s002/brain": {
+            "observations": 21500,
+            "mean": -1.8470976526929016e-05,
+            "rms": 1.0312063176324353,
+            "coverage_95": 0.9412093023255814,
+            "lag_one_correlation_median": 0.5580593037860013,
+            "lag_one_correlation_range": [
+              0.018535720760058327,
+              0.7211760964105577
+            ],
+            "features_with_lag_one_check": 100,
+            "adjacent_pairs": 21200,
+            "fitted_noise_variance": 0.7749984030779512
+          },
+          "s002/face": {
+            "observations": 3880,
+            "mean": 0.0033782447409543667,
+            "rms": 1.0056394499837662,
+            "coverage_95": 0.9536082474226805,
+            "lag_one_correlation_median": 0.23715088512090277,
+            "lag_one_correlation_range": [
+              -0.038247246914404016,
+              0.5218510112542152
+            ],
+            "features_with_lag_one_check": 20,
+            "adjacent_pairs": 3840,
+            "fitted_noise_variance": 0.9391300380084762
+          },
+          "s002/rating": {
+            "observations": 4528,
+            "mean": 0.0026451943186355073,
+            "rms": 1.031031122628577,
+            "coverage_95": 0.9355123674911661,
+            "lag_one_correlation_median": 0.9522313813684196,
+            "lag_one_correlation_range": [
+              0.9304735789544312,
+              0.9721684565368367
+            ],
+            "features_with_lag_one_check": 16,
+            "adjacent_pairs": 4496,
+            "fitted_noise_variance": 0.6572451104870862
+          }
+        }
+      },
+      "baselines": {
+        "modalities": {
+          "brain": {
+            "observations": 2000,
+            "training_mean_rmse": 0.9834176573130273,
+            "linear_interpolation_rmse": 1.090553624307688,
+            "previous_observation_rmse": 1.3670255510380782
+          },
+          "face": {
+            "observations": 400,
+            "training_mean_rmse": 2.392654104113942,
+            "linear_interpolation_rmse": 2.379856810080155,
+            "previous_observation_rmse": 2.42772597139304
+          },
+          "rating": {
+            "observations": 640,
+            "training_mean_rmse": 0.8702951347771586,
+            "linear_interpolation_rmse": 0.6815733568199965,
+            "previous_observation_rmse": 0.7362312297826803
+          },
+          "eda": {
+            "observations": 13,
+            "training_mean_rmse": 0.4810976694048836,
+            "linear_interpolation_rmse": 0.4057754586159958,
+            "previous_observation_rmse": 0.530822019066878
+          }
+        },
+        "brain_block_aggregates": [
+          {
+            "time": 220.0,
+            "observations": 200,
+            "observed_rms": 0.9455494863271511,
+            "predicted_rms": 1.3404778907482267,
+            "model_rmse": 1.858077884720533,
+            "linear_rmse": 0.7397343136967038
+          },
+          {
+            "time": 222.0,
+            "observations": 200,
+            "observed_rms": 1.0696222422541637,
+            "predicted_rms": 2.8782048162400176,
+            "model_rmse": 3.550230844253691,
+            "linear_rmse": 1.1415482320280712
+          },
+          {
+            "time": 224.0,
+            "observations": 200,
+            "observed_rms": 1.0523049325344518,
+            "predicted_rms": 3.4348063218114984,
+            "model_rmse": 3.8767581229480634,
+            "linear_rmse": 1.2359605851821989
+          },
+          {
+            "time": 226.0,
+            "observations": 200,
+            "observed_rms": 0.8892841620891266,
+            "predicted_rms": 2.7262530953229653,
+            "model_rmse": 2.7645419742000117,
+            "linear_rmse": 1.2281531609009315
+          },
+          {
+            "time": 228.0,
+            "observations": 200,
+            "observed_rms": 0.9988304207451498,
+            "predicted_rms": 1.477549932341792,
+            "model_rmse": 1.4708932513429935,
+            "linear_rmse": 1.2933250631579594
+          },
+          {
+            "time": 230.0,
+            "observations": 200,
+            "observed_rms": 1.0274191157323143,
+            "predicted_rms": 0.720589896336315,
+            "model_rmse": 1.1114846615782223,
+            "linear_rmse": 1.148106240825221
+          },
+          {
+            "time": 232.0,
+            "observations": 200,
+            "observed_rms": 1.0223432820688954,
+            "predicted_rms": 0.9120097269069919,
+            "model_rmse": 1.1358120307268613,
+            "linear_rmse": 1.1074469305137542
+          },
+          {
+            "time": 234.0,
+            "observations": 200,
+            "observed_rms": 1.131521543869079,
+            "predicted_rms": 0.9938068798422689,
+            "model_rmse": 1.7788770189298997,
+            "linear_rmse": 1.1846479057825385
+          },
+          {
+            "time": 236.0,
+            "observations": 200,
+            "observed_rms": 0.7983099361897467,
+            "predicted_rms": 0.520972694981338,
+            "model_rmse": 0.994451319854018,
+            "linear_rmse": 0.8306709956853613
+          },
+          {
+            "time": 238.0,
+            "observations": 200,
+            "observed_rms": 0.8477603018097273,
+            "predicted_rms": 0.10478129257109568,
+            "model_rmse": 0.8415812360209008,
+            "linear_rmse": 0.8343217439202713
+          }
+        ]
+      },
+      "status": "finished"
+    }
+  },
+  "preserved_clock_fixed_parameter_probes": {
+    "gamma3": {
+      "sensitivity": {
+        "candidate": "gamma3",
+        "scope": "Fixed-parameter diagnostic; no refitting, no independent test set, no new convergence claim",
+        "training": {
+          "scalar_observations": 58971,
+          "counts": {
+            "s001/brain": 20400,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 21500,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+          "nodes": 948
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+        },
+        "cases": [
+          {
+            "name": "original",
+            "length_scale": 3.0,
+            "conditioning": "all",
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 2.3040929451332017,
+                  "marginal_nlpd": 4.24054457243841,
+                  "coverage_95": 0.5875,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.40980991130712,
+                  "marginal_nlpd": 3.962845558925323,
+                  "coverage_95": 0.96,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9372963552187944,
+                  "marginal_nlpd": 1.3735803323932818,
+                  "coverage_95": 0.925,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.4253432568765345,
+                  "marginal_nlpd": 0.9844965357700044,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.5191356171339128,
+              "macro_marginal_nlpd": 2.6403667498817547,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_10",
+            "length_scale": 10.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 58971,
+              "counts": {
+                "s001/brain": 20400,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 21500,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+              "nodes": 948
+            },
+            "covariance_error_bound": 5.027473393592208e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 2.078040194247251,
+                  "marginal_nlpd": 3.9006160097977585,
+                  "coverage_95": 0.576,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.409746992072151,
+                  "marginal_nlpd": 3.9629087718117533,
+                  "coverage_95": 0.96,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9369943201173611,
+                  "marginal_nlpd": 1.3732434846112374,
+                  "coverage_95": 0.925,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.43086767559747224,
+                  "marginal_nlpd": 0.9868158092487321,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.4639122955085588,
+              "macro_marginal_nlpd": 2.55589601886737,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_30",
+            "length_scale": 30.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 58971,
+              "counts": {
+                "s001/brain": 20400,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 21500,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+              "nodes": 948
+            },
+            "covariance_error_bound": 5.027473393592208e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.5492637080482194,
+                  "marginal_nlpd": 2.6236852071745527,
+                  "coverage_95": 0.686,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.406958938397745,
+                  "marginal_nlpd": 3.9559782944274695,
+                  "coverage_95": 0.96,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9386969727475537,
+                  "marginal_nlpd": 1.3758923330529698,
+                  "coverage_95": 0.9234375,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.42972438979047595,
+                  "marginal_nlpd": 0.9862378599126552,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3311610022459985,
+              "macro_marginal_nlpd": 2.2354484236419117,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "brain_only",
+            "length_scale": 3.0,
+            "conditioning": "brain",
+            "training": {
+              "scalar_observations": 41900,
+              "counts": {
+                "s001/brain": 20400,
+                "s002/brain": 21500
+              },
+              "sha256": "82e29e8b6c7008fcf7fd0cd7869569dadd2cb61ccfa31adac9ce08a2dab112e4",
+              "nodes": 216
+            },
+            "covariance_error_bound": 5.027473393592208e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.5626279933179856,
+                  "marginal_nlpd": 1.9043915775315154,
+                  "coverage_95": 0.922,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.4142457900906584,
+                  "marginal_nlpd": 3.9740980575351625,
+                  "coverage_95": 0.9575,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9524478726525423,
+                  "marginal_nlpd": 1.395331952403293,
+                  "coverage_95": 0.91875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.41416643141623266,
+                  "marginal_nlpd": 0.9795232812181223,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3358720218693547,
+              "macro_marginal_nlpd": 2.0633362171720235,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          }
+        ],
+        "status": "finished"
+      },
+      "ou_noise": {
+        "candidate": "gamma3",
+        "noise_timescales": {
+          "brain": 3.0,
+          "face": 1.5,
+          "rating": 15.0,
+          "eda": 5.0
+        },
+        "quadrature_order": 384,
+        "training": {
+          "scalar_observations": 58971,
+          "counts": {
+            "s001/brain": 20400,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 21500,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+          "nodes": 948
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+        },
+        "nll_at_original_parameters": 56246.7134851957,
+        "scope": "No refit, no convergence claim, diagnostic use of an already examined validation fold",
+        "interpretation": "Observation means add private OU residual interpolation to the shared functional mean",
+        "modalities": {
+          "brain": {
+            "observations": 2000,
+            "shared_only_rmse": 1.885726604578683,
+            "observation_rmse": 1.8757996503369425,
+            "private_mean_rms": 0.22339232628480832
+          },
+          "face": {
+            "observations": 400,
+            "shared_only_rmse": 2.4114202457958314,
+            "observation_rmse": 2.402547514150868,
+            "private_mean_rms": 0.09986509687584261
+          },
+          "rating": {
+            "observations": 640,
+            "shared_only_rmse": 0.936610552536526,
+            "observation_rmse": 0.6546020027510331,
+            "private_mean_rms": 0.6071658690076374
+          },
+          "eda": {
+            "observations": 13,
+            "shared_only_rmse": 0.4160586179368604,
+            "observation_rmse": 0.42610017438526215,
+            "private_mean_rms": 0.054071301110147525
+          }
+        },
+        "prediction_api_checks": [
+          {
+            "subject": "s001",
+            "modality": "brain",
+            "max_absolute_difference": 3.942881576790569e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "face",
+            "max_absolute_difference": 2.5362503763837196e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "rating",
+            "max_absolute_difference": 5.595407470693203e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "eda",
+            "max_absolute_difference": 8.14832923357045e-11
+          }
+        ],
+        "status": "finished"
+      },
+      "ou_quadrature_refinement": {
+        "absolute_prediction_gate": 0.0001,
+        "max_absolute_prediction_differences": {
+          "brain": {
+            "shared": 2.2314206260531932e-08,
+            "private": 1.155825712917391e-09,
+            "observation": 2.247354508738697e-08
+          },
+          "face": {
+            "shared": 7.832950399411232e-10,
+            "private": 5.7606669434662194e-11,
+            "observation": 7.872979412501535e-10
+          },
+          "rating": {
+            "shared": 8.119834804531934e-09,
+            "private": 5.0956025399173654e-08,
+            "observation": 5.7812338249974005e-08
+          },
+          "eda": {
+            "shared": 8.361447090265983e-10,
+            "private": 7.312717098528765e-11,
+            "observation": 8.206762752011043e-10
+          }
+        },
+        "nll_absolute_difference": 2.1010710042901337e-05
+      }
+    },
+    "gaussian": {
+      "sensitivity": {
+        "candidate": "gaussian",
+        "scope": "Fixed-parameter diagnostic; no refitting, no independent test set, no new convergence claim",
+        "training": {
+          "scalar_observations": 58971,
+          "counts": {
+            "s001/brain": 20400,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 21500,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+          "nodes": 948
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+        },
+        "cases": [
+          {
+            "name": "original",
+            "length_scale": 3.0,
+            "conditioning": "all",
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 2.197251198108855,
+                  "marginal_nlpd": 3.891032313869585,
+                  "coverage_95": 0.6515,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.412143712519788,
+                  "marginal_nlpd": 3.9848286766573575,
+                  "coverage_95": 0.9575,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9918936220274778,
+                  "marginal_nlpd": 1.4630296877846616,
+                  "coverage_95": 0.8796875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.4418888289657972,
+                  "marginal_nlpd": 0.9895134121010718,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.5107943404054793,
+              "macro_marginal_nlpd": 2.582101022603169,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_10",
+            "length_scale": 10.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 58971,
+              "counts": {
+                "s001/brain": 20400,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 21500,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+              "nodes": 948
+            },
+            "covariance_error_bound": 8.699464285772311e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.9375842485972916,
+                  "marginal_nlpd": 3.446607869090651,
+                  "coverage_95": 0.6245,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.4120012794102004,
+                  "marginal_nlpd": 3.984501363716762,
+                  "coverage_95": 0.9575,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9922306109797309,
+                  "marginal_nlpd": 1.463618608447674,
+                  "coverage_95": 0.8796875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.44556872715253903,
+                  "marginal_nlpd": 0.9910189596096385,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.4468462165349405,
+              "macro_marginal_nlpd": 2.4714367002161817,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "length_30",
+            "length_scale": 30.0,
+            "conditioning": "all",
+            "training": {
+              "scalar_observations": 58971,
+              "counts": {
+                "s001/brain": 20400,
+                "s001/face": 3880,
+                "s001/rating": 4528,
+                "s001/eda": 255,
+                "s002/brain": 21500,
+                "s002/face": 3880,
+                "s002/rating": 4528
+              },
+              "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+              "nodes": 948
+            },
+            "covariance_error_bound": 8.699464285772311e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.4025312172671285,
+                  "marginal_nlpd": 2.2312716443620246,
+                  "coverage_95": 0.7275,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.4092217144404744,
+                  "marginal_nlpd": 3.977480733076023,
+                  "coverage_95": 0.96,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9917494842199145,
+                  "marginal_nlpd": 1.4629455941957235,
+                  "coverage_95": 0.8796875,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.44310862176291843,
+                  "marginal_nlpd": 0.9897776125752316,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3116527594226088,
+              "macro_marginal_nlpd": 2.1653688960522506,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          },
+          {
+            "name": "brain_only",
+            "length_scale": 3.0,
+            "conditioning": "brain",
+            "training": {
+              "scalar_observations": 41900,
+              "counts": {
+                "s001/brain": 20400,
+                "s002/brain": 21500
+              },
+              "sha256": "82e29e8b6c7008fcf7fd0cd7869569dadd2cb61ccfa31adac9ce08a2dab112e4",
+              "nodes": 216
+            },
+            "covariance_error_bound": 8.699464285772311e-07,
+            "scores": {
+              "modalities": {
+                "brain": {
+                  "observations": 2000,
+                  "rmse": 1.491855111740294,
+                  "marginal_nlpd": 1.8650636347763379,
+                  "coverage_95": 0.9265,
+                  "zero_prediction_rmse": 0.9834176573130273,
+                  "unit_normal_nlpd": 1.4024936775621941
+                },
+                "face": {
+                  "observations": 400,
+                  "rmse": 2.417256486235419,
+                  "marginal_nlpd": 3.9977417643054447,
+                  "coverage_95": 0.9525,
+                  "zero_prediction_rmse": 2.392654104113942,
+                  "unit_normal_nlpd": 3.7813353641713183
+                },
+                "rating": {
+                  "observations": 640,
+                  "rmse": 0.9989809225295991,
+                  "marginal_nlpd": 1.4733914504504546,
+                  "coverage_95": 0.8828125,
+                  "zero_prediction_rmse": 0.8702951347771586,
+                  "unit_normal_nlpd": 1.297645344013069
+                },
+                "eda": {
+                  "observations": 13,
+                  "rmse": 0.4166196104269087,
+                  "marginal_nlpd": 0.9779252315241951,
+                  "coverage_95": 1.0,
+                  "zero_prediction_rmse": 0.4810976694048836,
+                  "unit_normal_nlpd": 1.0346660169580781
+                }
+              },
+              "macro_rmse": 1.3311780327330553,
+              "macro_marginal_nlpd": 2.078530520264108,
+              "uncertainty": "conditional on MAP parameters and training standardization",
+              "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+            }
+          }
+        ],
+        "status": "finished"
+      },
+      "ou_noise": {
+        "candidate": "gaussian",
+        "noise_timescales": {
+          "brain": 3.0,
+          "face": 1.5,
+          "rating": 15.0,
+          "eda": 5.0
+        },
+        "quadrature_order": 384,
+        "training": {
+          "scalar_observations": 58971,
+          "counts": {
+            "s001/brain": 20400,
+            "s001/face": 3880,
+            "s001/rating": 4528,
+            "s001/eda": 255,
+            "s002/brain": 21500,
+            "s002/face": 3880,
+            "s002/rating": 4528
+          },
+          "sha256": "607f8d99ed7026976ed9b633211393da55abb37ac5e4cf27c9898e7e18c8bffe",
+          "nodes": 948
+        },
+        "testing": {
+          "counts": {
+            "s001/brain": 1000,
+            "s001/face": 200,
+            "s001/rating": 320,
+            "s001/eda": 13,
+            "s002/brain": 1000,
+            "s002/face": 200,
+            "s002/rating": 320
+          },
+          "total": 3053,
+          "sha256": "0390d8666bfae450abb956af1faf59ffb6cc7278b3d005b1a4bec37c38e069af"
+        },
+        "nll_at_original_parameters": 56240.90447455018,
+        "scope": "No refit, no convergence claim, diagnostic use of an already examined validation fold",
+        "interpretation": "Observation means add private OU residual interpolation to the shared functional mean",
+        "modalities": {
+          "brain": {
+            "observations": 2000,
+            "shared_only_rmse": 1.9218747342023812,
+            "observation_rmse": 1.9141593043404297,
+            "private_mean_rms": 0.2234634987212796
+          },
+          "face": {
+            "observations": 400,
+            "shared_only_rmse": 2.4141104857568734,
+            "observation_rmse": 2.4053484175103463,
+            "private_mean_rms": 0.09982886892406313
+          },
+          "rating": {
+            "observations": 640,
+            "shared_only_rmse": 0.9829949477902279,
+            "observation_rmse": 0.7036213281581963,
+            "private_mean_rms": 0.5939318405059889
+          },
+          "eda": {
+            "observations": 13,
+            "shared_only_rmse": 0.42609239598647736,
+            "observation_rmse": 0.43606683914771843,
+            "private_mean_rms": 0.05768317512964515
+          }
+        },
+        "prediction_api_checks": [
+          {
+            "subject": "s001",
+            "modality": "brain",
+            "max_absolute_difference": 1.2200063181921905e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "face",
+            "max_absolute_difference": 2.400906695676497e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "rating",
+            "max_absolute_difference": 2.213795258221296e-10
+          },
+          {
+            "subject": "s001",
+            "modality": "eda",
+            "max_absolute_difference": 4.616002025059629e-11
+          }
+        ],
+        "status": "finished"
+      },
+      "ou_quadrature_refinement": {
+        "absolute_prediction_gate": 0.0001,
+        "max_absolute_prediction_differences": {
+          "brain": {
+            "shared": 1.5240731343624248e-08,
+            "private": 7.898826037688877e-10,
+            "observation": 1.5901894356851187e-08
+          },
+          "face": {
+            "shared": 7.530120971210863e-11,
+            "private": 1.4335310716262484e-11,
+            "observation": 7.265217247254263e-11
+          },
+          "rating": {
+            "shared": 9.057969263537302e-09,
+            "private": 1.8303063953339915e-08,
+            "observation": 2.1936978747416624e-08
+          },
+          "eda": {
+            "shared": 4.280440307757871e-10,
+            "private": 7.43570760519674e-11,
+            "observation": 4.185704144399338e-10
+          }
+        },
+        "nll_absolute_difference": 5.246125510893762e-06
+      }
+    }
+  },
+  "limitations": [
+    "Clock evidence supports retaining original row times. The user's clarified working rule trims the final eight volumes and retains uncensored splice-marker rows.",
+    "Complete acquisition timing is not independently reconstructed here; the first 252 original rows span 0 to 502 seconds.",
+    "Sensitivity and OU probes hold parameters fixed, with no refits or new convergence claims, on both clocks.",
+    "Innovation correlations use fitted parameters and a specified simultaneous-observation whitening order; these are descriptive diagnostics.",
+    "All predictive diagnostics reuse the examined original validation fold, not an independent final test set."
+  ]
+}

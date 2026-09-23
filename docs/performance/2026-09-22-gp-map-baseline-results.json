@@ -1,0 +1,717 @@
+{
+  "git_commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+  "scope": {
+    "modalities": [
+      "brain",
+      "face",
+      "rating",
+      "eda"
+    ],
+    "subjects": [
+      "s001",
+      "s002"
+    ],
+    "brain_parcels": 5,
+    "window_seconds": 180,
+    "latent_factors": 1,
+    "parameters": 180,
+    "observations": 7108,
+    "nodes": 307,
+    "state_dimension": 26
+  },
+  "qualification": "All three starts pass constrained physical-gradient optimality; two agree at the best objective. Active face/rating bounds require sensitivity analysis. No posterior or held-out convergence claim.",
+  "environment": {
+    "python": "3.12.13",
+    "jax": "0.11.2",
+    "device": "cpu:0"
+  },
+  "float64": true,
+  "cpu_affinity": {
+    "public_solver": "0-7",
+    "bounded_solver": "8-15"
+  },
+  "blas_threads": 1,
+  "reference": {
+    "mode": "explicit_fixed_lag",
+    "positive_loading_anchor": [
+      "s001",
+      "brain",
+      0
+    ],
+    "reference_modality": "brain",
+    "reference_family": "DoubleGamma",
+    "reference_lag_seconds": 0.0,
+    "reference_width": "not_applicable",
+    "latent_mean": 0.0,
+    "latent_variance": 1.0,
+    "fixed_length_scale_seconds": 3.0,
+    "lag_coordinates": "model_clock_seconds",
+    "relative_lag_definition": "modality_lag_minus_reference_lag",
+    "absolute_physiological_timing_established": false,
+    "identification": "convention_only; data_connectivity_and_information_not_verified",
+    "reference_shape_parameters_estimated": []
+  },
+  "responses": {
+    "brain": {
+      "family": "DoubleGamma",
+      "parameters": {
+        "peak_shape": 6.0,
+        "peak_scale": 1.0,
+        "undershoot_shape": 16.0,
+        "undershoot_scale": 1.0,
+        "undershoot_ratio": 0.16666666666666666,
+        "lag": 0.0
+      },
+      "support": [
+        0.0,
+        49.35865885304877
+      ],
+      "normalization": "continuous_l2",
+      "reference": null,
+      "coordinates": {
+        "peak_shape": "log",
+        "peak_scale": "log",
+        "undershoot_shape": "log",
+        "undershoot_scale": "log",
+        "undershoot_ratio": "log",
+        "lag": "linear"
+      },
+      "truncation": "each gamma survival probability 1e-8",
+      "free": [],
+      "bounds": {
+        "peak_shape": [
+          4.5,
+          7.5
+        ],
+        "peak_scale": [
+          0.5,
+          1.5
+        ],
+        "undershoot_shape": [
+          12.0,
+          20.0
+        ],
+        "undershoot_scale": [
+          0.5,
+          1.5
+        ],
+        "undershoot_ratio": [
+          0.08333333333333333,
+          0.25
+        ],
+        "lag": [
+          -2.0,
+          2.0
+        ]
+      }
+    },
+    "eda": {
+      "family": "BatemanSCR",
+      "parameters": {
+        "rise": 0.7,
+        "decay": 3.0,
+        "lag": 0.0
+      },
+      "support": [
+        0.0,
+        90.0
+      ],
+      "normalization": "continuous_l2",
+      "reference": "Benedek & Kaernbach (2010), doi:10.1016/j.jneumeth.2010.04.028",
+      "coordinates": {
+        "rise": "log",
+        "decay": "log",
+        "lag": "linear"
+      },
+      "truncation": "90 seconds after lag; finite continuous L2 normalization",
+      "free": [
+        "rise",
+        "decay",
+        "lag"
+      ],
+      "bounds": {
+        "rise": [
+          0.3,
+          1.4
+        ],
+        "decay": [
+          1.5,
+          4.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      }
+    },
+    "face": {
+      "family": "Gamma",
+      "parameters": {
+        "shape": 3.0,
+        "scale": 1.0,
+        "lag": 0.0
+      },
+      "support": [
+        0.0,
+        24.18131376220884
+      ],
+      "normalization": "continuous_l2",
+      "reference": null,
+      "coordinates": {
+        "shape": "log",
+        "scale": "log",
+        "lag": "linear"
+      },
+      "truncation": "gamma survival probability 1e-8",
+      "free": [
+        "scale",
+        "lag"
+      ],
+      "bounds": {
+        "shape": [
+          2.25,
+          3.75
+        ],
+        "scale": [
+          0.3,
+          2.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      }
+    },
+    "rating": {
+      "family": "Gamma",
+      "parameters": {
+        "shape": 3.0,
+        "scale": 1.0,
+        "lag": 0.0
+      },
+      "support": [
+        0.0,
+        24.18131376220884
+      ],
+      "normalization": "continuous_l2",
+      "reference": null,
+      "coordinates": {
+        "shape": "log",
+        "scale": "log",
+        "lag": "linear"
+      },
+      "truncation": "gamma survival probability 1e-8",
+      "free": [
+        "scale",
+        "lag"
+      ],
+      "bounds": {
+        "shape": [
+          2.25,
+          3.75
+        ],
+        "scale": [
+          0.3,
+          2.0
+        ],
+        "lag": [
+          -2.0,
+          6.0
+        ]
+      }
+    }
+  },
+  "priors": {
+    "noise": {
+      "family": "lognormal",
+      "loc": -0.6931471805599453,
+      "scale": 1.0,
+      "lower": 0.0,
+      "upper": "Infinity"
+    },
+    "loading_sd": 1.5,
+    "offset_sd": 1.0,
+    "filters": {
+      "eda": {
+        "rise": {
+          "family": "lognormal",
+          "loc": -0.35667494393873245,
+          "scale": 0.35,
+          "lower": 0.0,
+          "upper": "Infinity"
+        },
+        "decay": {
+          "family": "lognormal",
+          "loc": 1.0986122886681098,
+          "scale": 0.35,
+          "lower": 0.0,
+          "upper": "Infinity"
+        },
+        "lag": {
+          "family": "normal",
+          "loc": 0.0,
+          "scale": 2.0,
+          "lower": "-Infinity",
+          "upper": "Infinity"
+        }
+      },
+      "face": {
+        "scale": {
+          "family": "lognormal",
+          "loc": 0.0,
+          "scale": 0.4,
+          "lower": 0.0,
+          "upper": "Infinity"
+        },
+        "lag": {
+          "family": "normal",
+          "loc": 0.0,
+          "scale": 2.0,
+          "lower": "-Infinity",
+          "upper": "Infinity"
+        }
+      },
+      "rating": {
+        "scale": {
+          "family": "lognormal",
+          "loc": 0.0,
+          "scale": 0.4,
+          "lower": 0.0,
+          "upper": "Infinity"
+        },
+        "lag": {
+          "family": "normal",
+          "loc": 0.0,
+          "scale": 2.0,
+          "lower": "-Infinity",
+          "upper": "Infinity"
+        }
+      }
+    }
+  },
+  "covariance_tolerance": 1e-06,
+  "covariance_error_bound": 2.2206083272621594e-07,
+  "physical_gradient_tolerance": 0.001,
+  "public_search": {
+    "start": 0,
+    "objective": 8051.7625777637695,
+    "optimizer_success": true,
+    "status": 0,
+    "iterations": 269,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "physical_projected_gradient": 6.600332644996234,
+    "boundary_parameters": [
+      [
+        "loading",
+        "s001",
+        "brain",
+        0
+      ],
+      [
+        "filter",
+        "face",
+        "scale"
+      ],
+      [
+        "filter",
+        "rating",
+        "scale"
+      ],
+      [
+        "filter",
+        "rating",
+        "lag"
+      ]
+    ],
+    "meets_gradient_tolerance": false,
+    "function_evaluations": 281,
+    "elapsed_seconds": 77.11727902851999
+  },
+  "research_solver": {
+    "coordinates": "physical loadings/offsets/filters; log noise variance; no Jacobian",
+    "seed": 722,
+    "options": {
+      "method": "L-BFGS-B",
+      "ftol": 1e-15,
+      "gtol": 1e-08,
+      "maxcor": 50,
+      "maxls": 40,
+      "maxiter": 1000
+    },
+    "records": [
+      {
+        "objective": 8051.465161519365,
+        "optimizer_success": true,
+        "status": 0,
+        "iterations": 206,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "physical_projected_gradient": 6.932115121216498e-05,
+        "boundary_parameters": [
+          [
+            "filter",
+            "face",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "lag"
+          ]
+        ],
+        "meets_gradient_tolerance": true,
+        "start": 0,
+        "elapsed_seconds": 52.740007226355374,
+        "function_evaluations": 212
+      },
+      {
+        "objective": 8051.762577747429,
+        "optimizer_success": true,
+        "status": 0,
+        "iterations": 208,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "physical_projected_gradient": 8.161920571986281e-06,
+        "boundary_parameters": [
+          [
+            "loading",
+            "s001",
+            "brain",
+            0
+          ],
+          [
+            "filter",
+            "face",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "lag"
+          ]
+        ],
+        "meets_gradient_tolerance": true,
+        "start": 1,
+        "elapsed_seconds": 54.85413673799485,
+        "function_evaluations": 220
+      },
+      {
+        "objective": 8051.465161519361,
+        "optimizer_success": true,
+        "status": 0,
+        "iterations": 225,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "physical_projected_gradient": 4.625397571444978e-05,
+        "boundary_parameters": [
+          [
+            "filter",
+            "face",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "scale"
+          ],
+          [
+            "filter",
+            "rating",
+            "lag"
+          ]
+        ],
+        "meets_gradient_tolerance": true,
+        "start": 2,
+        "elapsed_seconds": 58.621581858955324,
+        "function_evaluations": 235
+      }
+    ],
+    "total_seconds_after_imports": 178.95666791126132,
+    "best_start": 2,
+    "best_summary": {
+      "start": 2,
+      "objective": 8051.465161519361,
+      "iterations": 225,
+      "physical_projected_gradient": 4.625397571444978e-05,
+      "meets_gradient_tolerance": true,
+      "elapsed_seconds": 58.621581858955324,
+      "boundary_parameters": [
+        [
+          "filter",
+          "face",
+          "scale"
+        ],
+        [
+          "filter",
+          "rating",
+          "scale"
+        ],
+        [
+          "filter",
+          "rating",
+          "lag"
+        ]
+      ]
+    },
+    "polishing_used": false
+  },
+  "best_pair_agreement": {
+    "starts": [
+      0,
+      2
+    ],
+    "objective_absolute_difference": 4.547473508864641e-12,
+    "parameter_max_absolute_difference": 2.2272312252269444e-06
+  },
+  "selected_filter_parameters": {
+    "face/scale": 0.3,
+    "face/lag": 3.303990011487834,
+    "rating/scale": 2.0,
+    "rating/lag": -2.0,
+    "eda/rise": 0.6297677074213127,
+    "eda/decay": 3.0657535437329275,
+    "eda/lag": 1.7466115854101318
+  },
+  "fitted_curves": {
+    "brain": {
+      "parameters": {
+        "peak_shape": 6.0,
+        "peak_scale": 1.0,
+        "undershoot_shape": 16.0,
+        "undershoot_scale": 1.0,
+        "undershoot_ratio": 0.16666666666666666,
+        "lag": 0.0
+      },
+      "shape": {
+        "shape_type": "curve",
+        "peak_delay_seconds": 4.99851203636161,
+        "fwhm_seconds": 5.2596085770327194,
+        "support_relative_seconds": [
+          0.0,
+          49.35865885304877
+        ],
+        "has_negative_lobe": true,
+        "shape_metric_method": "positive_lobe_numerical",
+        "reference_lag_seconds": 0.0
+      }
+    },
+    "face": {
+      "parameters": {
+        "shape": 3.0,
+        "scale": 0.3,
+        "lag": 3.303990011487834
+      },
+      "shape": {
+        "shape_type": "curve",
+        "peak_delay_seconds": 3.9039902574304644,
+        "fwhm_seconds": 1.0184042012541905,
+        "support_relative_seconds": [
+          3.303990011487834,
+          10.558384140150485
+        ],
+        "has_negative_lobe": false,
+        "shape_metric_method": "positive_lobe_numerical",
+        "reference_lag_seconds": 0.0
+      }
+    },
+    "rating": {
+      "parameters": {
+        "shape": 3.0,
+        "scale": 2.0,
+        "lag": -2.0
+      },
+      "shape": {
+        "shape_type": "curve",
+        "peak_delay_seconds": 2.00000163961742,
+        "fwhm_seconds": 6.789361341693603,
+        "support_relative_seconds": [
+          -2.0,
+          46.36262752441768
+        ],
+        "has_negative_lobe": false,
+        "shape_metric_method": "positive_lobe_numerical",
+        "reference_lag_seconds": 0.0
+      }
+    },
+    "eda": {
+      "parameters": {
+        "rise": 0.6297677074213127,
+        "decay": 3.0657535437329275,
+        "lag": 1.7466115854101318
+      },
+      "shape": {
+        "shape_type": "curve",
+        "peak_delay_seconds": 3.001025355536218,
+        "fwhm_seconds": 3.7968433427638546,
+        "support_relative_seconds": [
+          1.7466115854101318,
+          91.74661158541014
+        ],
+        "has_negative_lobe": false,
+        "shape_metric_method": "positive_lobe_numerical",
+        "reference_lag_seconds": 0.0
+      }
+    }
+  },
+  "coordinate_derivative_checks": [
+    {
+      "finite_difference": -65.20051738334587,
+      "gradient_projection": -65.20051749628067
+    },
+    {
+      "finite_difference": -108.56976268769357,
+      "gradient_projection": -108.56976254444204
+    },
+    {
+      "finite_difference": 37.58263237614301,
+      "gradient_projection": 37.58263225865755
+    }
+  ],
+  "physical_response_derivative_checks": [
+    {
+      "parameter": [
+        "filter",
+        "face",
+        "scale"
+      ],
+      "value": 0.3,
+      "gradient": 21.14414974539552,
+      "finite_difference": 21.14414989288586,
+      "scheme": "one_sided_second_order",
+      "absolute_difference": 1.474903399412142e-07
+    },
+    {
+      "parameter": [
+        "filter",
+        "face",
+        "lag"
+      ],
+      "value": 3.303990011487834,
+      "gradient": 3.870302612840604e-06,
+      "finite_difference": 3.85380275985979e-06,
+      "scheme": "central",
+      "absolute_difference": 1.6499852980813822e-08
+    },
+    {
+      "parameter": [
+        "filter",
+        "rating",
+        "scale"
+      ],
+      "value": 2.0,
+      "gradient": -18.939418020542906,
+      "finite_difference": -18.9394181006719,
+      "scheme": "one_sided_second_order",
+      "absolute_difference": 8.012899499476589e-08
+    },
+    {
+      "parameter": [
+        "filter",
+        "rating",
+        "lag"
+      ],
+      "value": -2.0,
+      "gradient": 2.1001109881629203,
+      "finite_difference": 2.10011114631925,
+      "scheme": "one_sided_second_order",
+      "absolute_difference": 1.5815632981031058e-07
+    },
+    {
+      "parameter": [
+        "filter",
+        "eda",
+        "rise"
+      ],
+      "value": 0.6297677074213127,
+      "gradient": -1.301203799319861e-06,
+      "finite_difference": -1.3719661337069083e-06,
+      "scheme": "central",
+      "absolute_difference": 7.076233438704723e-08
+    },
+    {
+      "parameter": [
+        "filter",
+        "eda",
+        "decay"
+      ],
+      "value": 3.0657535437329275,
+      "gradient": 8.993838448434488e-07,
+      "finite_difference": 8.899880784273754e-07,
+      "scheme": "central",
+      "absolute_difference": 9.395766416073448e-09
+    },
+    {
+      "parameter": [
+        "filter",
+        "eda",
+        "lag"
+      ],
+      "value": 1.7466115854101318,
+      "gradient": 1.3453233451143909e-06,
+      "finite_difference": 1.27576276142726e-06,
+      "scheme": "central",
+      "absolute_difference": 6.956058368713091e-08
+    }
+  ],
+  "quadrature_checks": [
+    {
+      "order": 96,
+      "seconds": 9.683479792438447,
+      "objective": 8051.46516300325,
+      "objective_absolute_difference": 1.4838897186564282e-06,
+      "gradient_max_absolute_difference": 1.1758934217453998e-05,
+      "gradient_relative_l2": 4.781892194807513e-07,
+      "filter_gradients": {
+        "face/scale": 21.14414940487359,
+        "face/lag": 4.060020513896312e-06,
+        "rating/scale": -18.93940626160869,
+        "rating/lag": 2.100114152116413,
+        "eda/rise": -1.2951492253665542e-06,
+        "eda/decay": 8.998287198691557e-07,
+        "eda/lag": 1.4214804835988026e-06
+      }
+    },
+    {
+      "order": 192,
+      "seconds": 10.270604975521564,
+      "objective": 8051.465161410247,
+      "objective_absolute_difference": 1.0911389836110175e-07,
+      "gradient_max_absolute_difference": 8.550571812260266e-07,
+      "gradient_relative_l2": 7.163844442623017e-08,
+      "filter_gradients": {
+        "face/scale": 21.144149942381038,
+        "face/lag": 3.941639320825807e-06,
+        "rating/scale": -18.9394185867033,
+        "rating/lag": 2.1001111397687975,
+        "eda/rise": -1.2990257727274468e-06,
+        "eda/decay": 8.993310726124193e-07,
+        "eda/lag": 1.3544829430278682e-06
+      }
+    }
+  ],
+  "figure": "docs/assets/figures/gp-four-modality-response-baseline.svg",
+  "raw_output_directory": "local_data/gp-response-candidates-2026-09-22",
+  "source": {
+    "script": "scripts/fit_gp_response_baseline.py",
+    "executed_script_sha256": "69bac1fea5acca88ea716c223e6100157cd177ed252663d4f1b898fb5ccef24e",
+    "current_script_sha256": "96e2d3f7944f1e48379396aa235f1010c364a82d7dd5f386b5696d954ad4ac41",
+    "post_run_change": "Removed unused resume argument and branch; experiment did not use resume."
+  },
+  "limitations": [
+    "Small one-factor empirical subset only.",
+    "Constrained local optimality does not prove global optimality.",
+    "Face and rating response bounds are active.",
+    "Fixed brain HRF and GP length scale; timing is a model convention.",
+    "Existing loader standardizes the complete clip; no held-out prediction assessment.",
+    "Numerical comparison at selected fit does not qualify the full parameter box.",
+    "CPU measurements do not establish an NVIDIA speedup."
+  ],
+  "serialization": "Unbounded prior limits are encoded as strings Infinity and -Infinity; explicit response bounds are recorded separately."
+}

@@ -1,0 +1,1430 @@
+{
+  "commit": "d06635741b671a691edc5b9ae6187c6de17930bc",
+  "training": {
+    "scalar_observations": 19101,
+    "counts": {
+      "s001/brain": 985,
+      "s001/face": 3880,
+      "s001/rating": 4528,
+      "s001/eda": 255,
+      "s002/brain": 1045,
+      "s002/face": 3880,
+      "s002/rating": 4528
+    },
+    "sha256": "46f9fd269e8ed92cca46fde6b03169a330edc003f86e13bb716b04a1008516b6",
+    "nodes": 942
+  },
+  "testing": {
+    "counts": {
+      "s001/brain": 50,
+      "s001/face": 200,
+      "s001/rating": 320,
+      "s001/eda": 13,
+      "s002/brain": 50,
+      "s002/face": 200,
+      "s002/rating": 320
+    },
+    "total": 1153,
+    "sha256": "e72c592e7d7998b2a4cc8c3ae146bcc630855cc06cb7cd164bfc6918f08b2d68"
+  },
+  "holdout_blocks": {
+    "brain": [
+      220,
+      240
+    ],
+    "face": [
+      260,
+      280
+    ],
+    "rating": [
+      300,
+      320
+    ],
+    "eda": [
+      340,
+      360
+    ]
+  },
+  "common_support": {
+    "brain": [
+      0.0,
+      49.35865885304877
+    ],
+    "eda": [
+      -2.0,
+      96.0
+    ],
+    "face": [
+      -21.835757806048402,
+      71.5399591069484
+    ],
+    "rating": [
+      -44.76744641382491,
+      152.44086200475178
+    ]
+  },
+  "width_bounds": {
+    "face": [
+      0.2,
+      7.0
+    ],
+    "rating": [
+      1.0,
+      16.0
+    ]
+  },
+  "peak_bounds": {
+    "face": [
+      -4.0,
+      10.0
+    ],
+    "rating": [
+      -4.0,
+      12.0
+    ]
+  },
+  "response_priors": "FWHM LogNormal(log(3.4), 0.7); peak Normal(2,3); truncated to common bounds",
+  "map_coordinates": "Physical FWHM/peak, loadings, offsets, noise variance, EDA parameters; optimizer uses log noise only",
+  "preprocessing_checks": "training-only statistics; held-out payload perturbation and affine-invariance assertions passed",
+  "candidates": {
+    "gamma2": {
+      "device_kind": "cpu",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "state_dimension": 24,
+      "timings": {
+        "first_value_gradient_seconds": 3.38054390065372,
+        "warm_value_gradient_seconds": [
+          0.5722085265442729,
+          0.5844332315027714,
+          0.5752899525687099
+        ]
+      },
+      "fit_pipeline_seconds_after_imports": 433.95598761271685,
+      "scoring_seconds": 5.572335307486355,
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.7954507959800717,
+            "decay": 4.0,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -0.3963236695445189,
+            "fwhm_seconds": 4.899455939051495,
+            "support_relative_seconds": [
+              -2.0,
+              88.0
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "face": {
+          "parameters": {
+            "shape": 2.0,
+            "scale": 0.15815474337975774,
+            "lag": 4.588687685038782
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.746842643393837,
+            "fwhm_seconds": 0.3869075558945996,
+            "support_relative_seconds": [
+              4.588687685038782,
+              7.994674273121908
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "shape": 2.0,
+            "scale": 6.540259696472006,
+            "lag": -1.0386539965165227
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 5.501604871195669,
+            "fwhm_seconds": 16.000000000000107,
+            "support_relative_seconds": [
+              -1.0386539965165227,
+              139.81097423926474
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        }
+      },
+      "scores": {
+        "modalities": {
+          "brain": {
+            "observations": 100,
+            "rmse": 1.0784238606610101,
+            "marginal_nlpd": 1.5028964878323006,
+            "coverage_95": 0.94,
+            "zero_prediction_rmse": 1.0460870125788757,
+            "unit_normal_nlpd": 1.4660875521477712
+          },
+          "face": {
+            "observations": 400,
+            "rmse": 2.3971137979407713,
+            "marginal_nlpd": 3.8233196665746076,
+            "coverage_95": 0.9625,
+            "zero_prediction_rmse": 2.392654104113942,
+            "unit_normal_nlpd": 3.7813353641713183
+          },
+          "rating": {
+            "observations": 640,
+            "rmse": 0.8686688150780055,
+            "marginal_nlpd": 1.2687186659030971,
+            "coverage_95": 0.9453125,
+            "zero_prediction_rmse": 0.8702951347771586,
+            "unit_normal_nlpd": 1.297645344013069
+          },
+          "eda": {
+            "observations": 13,
+            "rmse": 0.7415454334445108,
+            "marginal_nlpd": 1.1209541777664636,
+            "coverage_95": 1.0,
+            "zero_prediction_rmse": 0.4810976694048836,
+            "unit_normal_nlpd": 1.0346660169580781
+          }
+        },
+        "macro_rmse": 1.2714379767810744,
+        "macro_marginal_nlpd": 1.9289722495191173,
+        "uncertainty": "conditional on MAP parameters and training standardization",
+        "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+      },
+      "derivative_checks": [
+        {
+          "finite_difference": -54.14864008344011,
+          "gradient_projection": -54.14863994531483
+        },
+        {
+          "finite_difference": 64.98098155134358,
+          "gradient_projection": 64.98098273920668
+        },
+        {
+          "finite_difference": 94.17529454367467,
+          "gradient_projection": 94.17529441991495
+        }
+      ],
+      "covariance_error_bound": 5.232207783468189e-07,
+      "source_hashes": {
+        "gp_response_holdout.py": "3aa40a4f9ba2a24662cec486bae288208ba53c6badc4033f10690d322027345b",
+        "compare_gp_response_families.py": "7c6bc8dd72a9894ee573d4fad049920bb3636200973b197d5311a1bc676c26d4"
+      },
+      "raw_source": "local_data/gp-response-holdout-2026-09-22/gamma2-cpu.json",
+      "starts": [
+        {
+          "objective": 25880.57936596245,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 205,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 6.473393218087153e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "seconds": 129.60636906791478,
+          "total_iterations": 205
+        },
+        {
+          "objective": 25880.579365962385,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 225,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 4.132600542505749e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "seconds": 140.738262928091,
+          "total_iterations": 225
+        },
+        {
+          "objective": 25880.477955363116,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 235,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 4.4098006925397115e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "seconds": 147.31031476706266,
+          "total_iterations": 235
+        }
+      ],
+      "selected_start": 2,
+      "quadrature_checks": [
+        {
+          "order": 384,
+          "objective_absolute_difference": 4.810171958524734e-07,
+          "gradient_max_absolute_difference": 1.2646988860609554e-06
+        }
+      ]
+    },
+    "gamma3": {
+      "device_kind": "cpu",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "state_dimension": 26,
+      "timings": {
+        "first_value_gradient_seconds": 3.712737220339477,
+        "warm_value_gradient_seconds": [
+          0.6777280196547508,
+          0.7042985735461116,
+          0.6766850603744388
+        ]
+      },
+      "fit_pipeline_seconds_after_imports": 536.669270879589,
+      "scoring_seconds": 5.921970595605671,
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.8124936529771227,
+            "decay": 4.0,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -0.37482061944829953,
+            "fwhm_seconds": 4.934869041624629,
+            "support_relative_seconds": [
+              -2.0,
+              88.0
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "face": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 0.12391273846376036,
+            "lag": 4.40989298710257
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.657718565614837,
+            "fwhm_seconds": 0.42064417813468413,
+            "support_relative_seconds": [
+              4.40989298710257,
+              7.406265795029283
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "shape": 3.0,
+            "scale": 4.713256282809722,
+            "lag": -3.1890911738684764
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 6.237421309949542,
+            "fwhm_seconds": 15.999999999999904,
+            "support_relative_seconds": [
+              -3.1890911738684764,
+              110.78363784245553
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        }
+      },
+      "scores": {
+        "modalities": {
+          "brain": {
+            "observations": 100,
+            "rmse": 1.0788903848311326,
+            "marginal_nlpd": 1.5033268675399005,
+            "coverage_95": 0.94,
+            "zero_prediction_rmse": 1.0460870125788757,
+            "unit_normal_nlpd": 1.4660875521477712
+          },
+          "face": {
+            "observations": 400,
+            "rmse": 2.3969811962513385,
+            "marginal_nlpd": 3.82241531416253,
+            "coverage_95": 0.9625,
+            "zero_prediction_rmse": 2.392654104113942,
+            "unit_normal_nlpd": 3.7813353641713183
+          },
+          "rating": {
+            "observations": 640,
+            "rmse": 0.8680128010252732,
+            "marginal_nlpd": 1.2680674154040048,
+            "coverage_95": 0.9453125,
+            "zero_prediction_rmse": 0.8702951347771586,
+            "unit_normal_nlpd": 1.297645344013069
+          },
+          "eda": {
+            "observations": 13,
+            "rmse": 0.743578412327244,
+            "marginal_nlpd": 1.1236192554741458,
+            "coverage_95": 1.0,
+            "zero_prediction_rmse": 0.4810976694048836,
+            "unit_normal_nlpd": 1.0346660169580781
+          }
+        },
+        "macro_rmse": 1.271865698608747,
+        "macro_marginal_nlpd": 1.9293572131451453,
+        "uncertainty": "conditional on MAP parameters and training standardization",
+        "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+      },
+      "derivative_checks": [
+        {
+          "finite_difference": -54.57821553136454,
+          "gradient_projection": -54.578216099690295
+        },
+        {
+          "finite_difference": 65.23056927107973,
+          "gradient_projection": 65.2305689824379
+        },
+        {
+          "finite_difference": 93.6434524192009,
+          "gradient_projection": 93.64345224762313
+        }
+      ],
+      "covariance_error_bound": 5.027473393592208e-07,
+      "source_hashes": {
+        "gp_response_holdout.py": "3aa40a4f9ba2a24662cec486bae288208ba53c6badc4033f10690d322027345b",
+        "compare_gp_response_families.py": "7c6bc8dd72a9894ee573d4fad049920bb3636200973b197d5311a1bc676c26d4"
+      },
+      "raw_source": "local_data/gp-response-holdout-2026-09-22/gamma3-cpu.json",
+      "starts": [
+        {
+          "objective": 25878.156494433286,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 195,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 8.871434546842139e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "seconds": 149.96473230514675,
+          "total_iterations": 195
+        },
+        {
+          "objective": 25878.15649443316,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 220,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 3.550786980999199e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "seconds": 173.03177349362522,
+          "total_iterations": 220
+        },
+        {
+          "objective": 25878.03084248724,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 244,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 2.779846643896633e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "seconds": 195.01798754557967,
+          "total_iterations": 244
+        }
+      ],
+      "selected_start": 2,
+      "quadrature_checks": [
+        {
+          "order": 384,
+          "objective_absolute_difference": 1.8158279999624938e-06,
+          "gradient_max_absolute_difference": 1.3633550277614148e-06
+        }
+      ]
+    },
+    "gamma6": {
+      "device_kind": "cpu",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "state_dimension": 32,
+      "timings": {
+        "first_value_gradient_seconds": 4.234859756194055,
+        "warm_value_gradient_seconds": [
+          1.109224358573556,
+          1.0739043215289712,
+          1.0749114332720637
+        ]
+      },
+      "fit_pipeline_seconds_after_imports": 816.4400731436908,
+      "scoring_seconds": 5.934925553388894,
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.8177765562120202,
+            "decay": 4.0,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -0.36819920817408486,
+            "fwhm_seconds": 4.945807367012475,
+            "support_relative_seconds": [
+              -2.0,
+              88.0
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "face": {
+          "parameters": {
+            "shape": 6.0,
+            "scale": 0.08450565382170348,
+            "lag": 4.137734017022183
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.560262305799162,
+            "fwhm_seconds": 0.4484023599210589,
+            "support_relative_seconds": [
+              4.137734017022183,
+              6.754630398815994
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "shape": 6.0,
+            "scale": 3.0153509035639554,
+            "lag": -8.512007566988013
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 6.564747652657587,
+            "fwhm_seconds": 16.00000000000146,
+            "support_relative_seconds": [
+              -8.512007566988013,
+              84.86471354594437
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        }
+      },
+      "scores": {
+        "modalities": {
+          "brain": {
+            "observations": 100,
+            "rmse": 1.0785586480321272,
+            "marginal_nlpd": 1.5027463367481624,
+            "coverage_95": 0.94,
+            "zero_prediction_rmse": 1.0460870125788757,
+            "unit_normal_nlpd": 1.4660875521477712
+          },
+          "face": {
+            "observations": 400,
+            "rmse": 2.3967074023447013,
+            "marginal_nlpd": 3.821244834213278,
+            "coverage_95": 0.9625,
+            "zero_prediction_rmse": 2.392654104113942,
+            "unit_normal_nlpd": 3.7813353641713183
+          },
+          "rating": {
+            "observations": 640,
+            "rmse": 0.8682046462825993,
+            "marginal_nlpd": 1.2682135464233606,
+            "coverage_95": 0.9453125,
+            "zero_prediction_rmse": 0.8702951347771586,
+            "unit_normal_nlpd": 1.297645344013069
+          },
+          "eda": {
+            "observations": 13,
+            "rmse": 0.7408001175204382,
+            "marginal_nlpd": 1.120652678508083,
+            "coverage_95": 1.0,
+            "zero_prediction_rmse": 0.4810976694048836,
+            "unit_normal_nlpd": 1.0346660169580781
+          }
+        },
+        "macro_rmse": 1.2710677035449665,
+        "macro_marginal_nlpd": 1.928214348973221,
+        "uncertainty": "conditional on MAP parameters and training standardization",
+        "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+      },
+      "derivative_checks": [
+        {
+          "finite_difference": -54.99540020537096,
+          "gradient_projection": -54.995399979462235
+        },
+        {
+          "finite_difference": 65.38762736454373,
+          "gradient_projection": 65.38762772424725
+        },
+        {
+          "finite_difference": 93.18818101746727,
+          "gradient_projection": 93.18818079274179
+        }
+      ],
+      "covariance_error_bound": 4.901141810737354e-07,
+      "source_hashes": {
+        "gp_response_holdout.py": "3aa40a4f9ba2a24662cec486bae288208ba53c6badc4033f10690d322027345b",
+        "compare_gp_response_families.py": "7c6bc8dd72a9894ee573d4fad049920bb3636200973b197d5311a1bc676c26d4"
+      },
+      "raw_source": "local_data/gp-response-holdout-2026-09-22/gamma6-cpu.json",
+      "starts": [
+        {
+          "objective": 25877.30052971219,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 192,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 1.360642166781112e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "seconds": 233.19382759928703,
+          "total_iterations": 192
+        },
+        {
+          "objective": 25877.300529712214,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 235,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 2.33578946606805e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "seconds": 285.47149117384106,
+          "total_iterations": 235
+        },
+        {
+          "objective": 25877.133066184288,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 223,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 6.82087165582608e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "seconds": 274.2163289319724,
+          "total_iterations": 223
+        }
+      ],
+      "selected_start": 2,
+      "quadrature_checks": [
+        {
+          "order": 384,
+          "objective_absolute_difference": 1.083739334717393e-06,
+          "gradient_max_absolute_difference": 2.7301492488973622e-06
+        }
+      ]
+    },
+    "gaussian": {
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "state_dimension": 60,
+      "timings": {
+        "first_value_gradient_seconds": 67.30986162181944,
+        "warm_value_gradient_seconds": [
+          0.7881637662649155,
+          0.7870197566226125,
+          0.7865524897351861
+        ]
+      },
+      "fit_pipeline_seconds_after_imports": 607.8151773782447,
+      "scoring_seconds": 87.33707015402615,
+      "responses": {
+        "brain": {
+          "parameters": {
+            "peak_shape": 6.0,
+            "peak_scale": 1.0,
+            "undershoot_shape": 16.0,
+            "undershoot_scale": 1.0,
+            "undershoot_ratio": 0.16666666666666666,
+            "lag": 0.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.99851203636161,
+            "fwhm_seconds": 5.2596085770327194,
+            "support_relative_seconds": [
+              0.0,
+              49.35865885304877
+            ],
+            "has_negative_lobe": true,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "eda": {
+          "parameters": {
+            "rise": 0.802503539393834,
+            "decay": 4.0,
+            "lag": -2.0
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": -0.38739703274812776,
+            "fwhm_seconds": 4.914134104208714,
+            "support_relative_seconds": [
+              -2.0,
+              88.0
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "face": {
+          "parameters": {
+            "width": 0.20230064890191155,
+            "lag": 4.400503858669779
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 4.400503858669779,
+            "fwhm_seconds": 0.47638162315697485,
+            "support_relative_seconds": [
+              3.18669996525831,
+              5.614307752081249
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        },
+        "rating": {
+          "parameters": {
+            "width": 6.7945744023041525,
+            "lag": 5.905807706034807
+          },
+          "shape": {
+            "shape_type": "curve",
+            "peak_delay_seconds": 5.905807706034807,
+            "fwhm_seconds": 15.999999999999488,
+            "support_relative_seconds": [
+              -34.86163870779011,
+              46.67325411985972
+            ],
+            "has_negative_lobe": false,
+            "shape_metric_method": "positive_lobe_numerical",
+            "reference_lag_seconds": 0
+          }
+        }
+      },
+      "scores": {
+        "modalities": {
+          "brain": {
+            "observations": 100,
+            "rmse": 1.074493856036479,
+            "marginal_nlpd": 1.4976826992714354,
+            "coverage_95": 0.94,
+            "zero_prediction_rmse": 1.0460870125788757,
+            "unit_normal_nlpd": 1.4660875521477712
+          },
+          "face": {
+            "observations": 400,
+            "rmse": 2.3946744226377157,
+            "marginal_nlpd": 3.816561447910634,
+            "coverage_95": 0.9625,
+            "zero_prediction_rmse": 2.392654104113942,
+            "unit_normal_nlpd": 3.7813353641713183
+          },
+          "rating": {
+            "observations": 640,
+            "rmse": 0.870357183498918,
+            "marginal_nlpd": 1.270168496955177,
+            "coverage_95": 0.9453125,
+            "zero_prediction_rmse": 0.8702951347771586,
+            "unit_normal_nlpd": 1.297645344013069
+          },
+          "eda": {
+            "observations": 13,
+            "rmse": 0.7261110051078006,
+            "marginal_nlpd": 1.1053995322410515,
+            "coverage_95": 1.0,
+            "zero_prediction_rmse": 0.4810976694048836,
+            "unit_normal_nlpd": 1.0346660169580781
+          }
+        },
+        "macro_rmse": 1.2664091168202283,
+        "macro_marginal_nlpd": 1.9224530440945746,
+        "uncertainty": "conditional on MAP parameters and training standardization",
+        "task": "missing-block smoothing with other modalities; not forecasting or new-subject prediction"
+      },
+      "derivative_checks": [
+        {
+          "finite_difference": -55.53048886213218,
+          "gradient_projection": -55.53048984168536
+        },
+        {
+          "finite_difference": 65.70587065652944,
+          "gradient_projection": 65.70587125333306
+        },
+        {
+          "finite_difference": 92.57207566406576,
+          "gradient_projection": 92.57206948674575
+        }
+      ],
+      "covariance_error_bound": 8.699464285772311e-07,
+      "source_hashes": {
+        "gp_response_holdout.py": "3aa40a4f9ba2a24662cec486bae288208ba53c6badc4033f10690d322027345b",
+        "compare_gp_response_families.py": "7c6bc8dd72a9894ee573d4fad049920bb3636200973b197d5311a1bc676c26d4"
+      },
+      "raw_source": "local_data/gp-response-holdout-2026-09-22/gaussian-pro6000.json",
+      "starts": [
+        {
+          "objective": 25877.241810806507,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 179,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 3.143633863866846e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 0,
+          "seconds": 152.04352115932852,
+          "total_iterations": 179
+        },
+        {
+          "objective": 25877.24181080647,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 231,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 5.6849483721095606e-05,
+          "boundary_parameters": [
+            [
+              "loading",
+              "s001",
+              "brain",
+              0
+            ],
+            [
+              "filter",
+              "rating",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 1,
+          "seconds": 197.21355313435197,
+          "total_iterations": 231
+        },
+        {
+          "objective": 25923.99141167777,
+          "optimizer_success": true,
+          "status": 0,
+          "iterations": 187,
+          "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+          "physical_projected_gradient": 7.277339608306732e-05,
+          "boundary_parameters": [
+            [
+              "filter",
+              "face",
+              "fwhm"
+            ],
+            [
+              "filter",
+              "rating",
+              "peak"
+            ],
+            [
+              "filter",
+              "eda",
+              "rise"
+            ],
+            [
+              "filter",
+              "eda",
+              "decay"
+            ],
+            [
+              "filter",
+              "eda",
+              "lag"
+            ]
+          ],
+          "meets_gradient_tolerance": true,
+          "start": 2,
+          "seconds": 166.43821177631617,
+          "total_iterations": 187
+        }
+      ],
+      "selected_start": 1,
+      "quadrature_checks": [
+        {
+          "order": 384,
+          "objective_absolute_difference": 3.587047103792429e-08,
+          "gradient_max_absolute_difference": 7.817426406209194e-07
+        }
+      ]
+    }
+  },
+  "scope": {
+    "subjects": "s001,s002",
+    "window": 500,
+    "parcels": 5,
+    "starts": 3,
+    "seed": 722,
+    "latent_factors": 1,
+    "parameters": 180
+  },
+  "performance_checks": {
+    "probe-gamma3-cpu": {
+      "device_kind": "cpu",
+      "state_dimension": 26,
+      "timings": {
+        "first_value_gradient_seconds": 3.750680104829371,
+        "warm_value_gradient_seconds": [
+          0.6998112350702286,
+          0.6773445159196854,
+          0.6745751919224858
+        ]
+      },
+      "status": "probed",
+      "source": "local_data/gp-response-holdout-2026-09-22/probe-gamma3-cpu.json"
+    },
+    "probe-gaussian-cpu": {
+      "device_kind": "cpu",
+      "state_dimension": 60,
+      "timings": {
+        "first_value_gradient_seconds": 8.721982666291296,
+        "warm_value_gradient_seconds": [
+          4.135010180063546,
+          4.217350092716515,
+          4.116964339278638
+        ]
+      },
+      "status": "probed",
+      "source": "local_data/gp-response-holdout-2026-09-22/probe-gaussian-cpu.json"
+    },
+    "probe-gamma3-pro6000": {
+      "device_kind": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "state_dimension": 26,
+      "timings": {
+        "first_value_gradient_seconds": 20.311421731486917,
+        "warm_value_gradient_seconds": [
+          0.5980895748361945,
+          0.5982413236051798,
+          0.6048992974683642
+        ]
+      },
+      "status": "probed",
+      "source": "local_data/gp-response-holdout-2026-09-22/probe-gamma3-pro6000.json"
+    },
+    "parallel-gamma3-map-3090": {
+      "candidate": "gamma3",
+      "device": "NVIDIA GeForce RTX 3090",
+      "state_dimension": 26,
+      "training": {
+        "scalar_observations": 19101,
+        "counts": {
+          "s001/brain": 985,
+          "s001/face": 3880,
+          "s001/rating": 4528,
+          "s001/eda": 255,
+          "s002/brain": 1045,
+          "s002/face": 3880,
+          "s002/rating": 4528
+        },
+        "sha256": "46f9fd269e8ed92cca46fde6b03169a330edc003f86e13bb716b04a1008516b6",
+        "nodes": 942
+      },
+      "status": "finished",
+      "sequential_lowering_seconds": 1.223427701741457,
+      "sequential_compile_seconds": 10.713975031860173,
+      "parallel_lowering_seconds": 1.3876882074400783,
+      "parallel_compile_seconds": 26.12163322791457,
+      "points": [
+        {
+          "objective": 29718.540453444122,
+          "sequential_warm_seconds": [
+            0.716179377399385,
+            0.7160917324945331,
+            0.7159001678228378
+          ],
+          "parallel_warm_seconds": [
+            0.1489224610850215,
+            0.14856549352407455,
+            0.14873228128999472
+          ],
+          "objective_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 2.927524889173583e-11
+        },
+        {
+          "objective": 54163.22880380555,
+          "sequential_warm_seconds": [
+            0.7159944977611303,
+            0.7158416481688619,
+            0.720921135507524
+          ],
+          "parallel_warm_seconds": [
+            0.14893640764057636,
+            0.14849147386848927,
+            0.1492511248216033
+          ],
+          "objective_absolute_difference": 2.9103830456733704e-11,
+          "gradient_max_absolute_difference": 4.0745362639427185e-10
+        },
+        {
+          "objective": 25878.030842487235,
+          "sequential_warm_seconds": [
+            0.715927510522306,
+            0.7154423110187054,
+            0.715493037365377
+          ],
+          "parallel_warm_seconds": [
+            0.14868414867669344,
+            0.14879366848617792,
+            0.14882691111415625
+          ],
+          "objective_absolute_difference": 3.637978807091713e-12,
+          "gradient_max_absolute_difference": 4.615197113366776e-12
+        }
+      ],
+      "source": "local_data/gp-response-holdout-2026-09-22/parallel-gamma3-map-3090.json"
+    },
+    "parallel-gaussian-map-3090": {
+      "candidate": "gaussian",
+      "device": "NVIDIA GeForce RTX 3090",
+      "state_dimension": 60,
+      "training": {
+        "scalar_observations": 19101,
+        "counts": {
+          "s001/brain": 985,
+          "s001/face": 3880,
+          "s001/rating": 4528,
+          "s001/eda": 255,
+          "s002/brain": 1045,
+          "s002/face": 3880,
+          "s002/rating": 4528
+        },
+        "sha256": "46f9fd269e8ed92cca46fde6b03169a330edc003f86e13bb716b04a1008516b6",
+        "nodes": 942
+      },
+      "status": "finished",
+      "sequential_lowering_seconds": 1.6188417710363865,
+      "sequential_compile_seconds": 25.903077132999897,
+      "parallel_lowering_seconds": 1.882437384687364,
+      "parallel_compile_seconds": 81.26242575142533,
+      "points": [
+        {
+          "objective": 29715.714706906183,
+          "sequential_warm_seconds": [
+            1.1594158811494708,
+            1.1690793046727777,
+            1.158083964139223
+          ],
+          "parallel_warm_seconds": [
+            0.5735415546223521,
+            0.5749506978318095,
+            0.5731158070266247
+          ],
+          "objective_absolute_difference": 7.275957614183426e-12,
+          "gradient_max_absolute_difference": 1.9272761164756957e-10
+        },
+        {
+          "objective": 54193.210758282454,
+          "sequential_warm_seconds": [
+            1.1582582732662559,
+            1.1692699072882533,
+            1.158286469988525
+          ],
+          "parallel_warm_seconds": [
+            0.5729263164103031,
+            0.5728270076215267,
+            0.5729614337906241
+          ],
+          "objective_absolute_difference": 4.3655745685100555e-11,
+          "gradient_max_absolute_difference": 7.413092362185125e-10
+        },
+        {
+          "objective": 25877.24181080647,
+          "sequential_warm_seconds": [
+            1.158203641884029,
+            1.1681642103940248,
+            1.158128209412098
+          ],
+          "parallel_warm_seconds": [
+            0.5733861094340682,
+            0.5726203471422195,
+            0.5733904587104917
+          ],
+          "objective_absolute_difference": 0.0,
+          "gradient_max_absolute_difference": 6.135714158972405e-11
+        }
+      ],
+      "source": "local_data/gp-response-holdout-2026-09-22/parallel-gaussian-map-3090.json"
+    }
+  },
+  "implementation_check": {
+    "preprocessing_checks": "held-out perturbation and affine invariance passed",
+    "derivative_checks": [
+      {
+        "parameter": [
+          "filter",
+          "face",
+          "fwhm"
+        ],
+        "absolute_difference": 7.864258377843214e-08
+      },
+      {
+        "parameter": [
+          "filter",
+          "face",
+          "peak"
+        ],
+        "absolute_difference": 2.2405189881169463e-07
+      },
+      {
+        "parameter": [
+          "filter",
+          "rating",
+          "fwhm"
+        ],
+        "absolute_difference": 8.927455880103352e-08
+      },
+      {
+        "parameter": [
+          "filter",
+          "rating",
+          "peak"
+        ],
+        "absolute_difference": 2.3823656380983493e-07
+      },
+      {
+        "parameter": [
+          "filter",
+          "eda",
+          "rise"
+        ],
+        "absolute_difference": 2.6799584773584684e-10
+      },
+      {
+        "parameter": [
+          "filter",
+          "eda",
+          "decay"
+        ],
+        "absolute_difference": 3.6093337207887544e-09
+      },
+      {
+        "parameter": [
+          "filter",
+          "eda",
+          "lag"
+        ],
+        "absolute_difference": 7.285456238292909e-09
+      }
+    ],
+    "production_prediction_max_absolute_difference": 5.551115123125783e-16
+  },
+  "limitations": [
+    "One predeclared missing-block validation fold; no independent final test set.",
+    "Two subjects, five brain parcels, one latent factor; EDA only available for one subject.",
+    "MAP conditional predictive uncertainty omits parameter and preprocessing uncertainty.",
+    "Gamma shape is the same for face and rating within each screened candidate; mixed shape combinations are not screened.",
+    "Marginal NLPD treats scores separately; it is not a joint predictive density or independent sample count.",
+    "CPU and GPU fit times are not a controlled end-to-end speedup comparison."
+  ]
+}
