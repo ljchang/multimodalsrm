@@ -119,6 +119,12 @@ def main():
     parser.add_argument("--features", type=int, default=1)
     parser.add_argument("--fold", choices=BLOCK_FOLDS, default="original")
     parser.add_argument("--starts", type=int, default=3)
+    parser.add_argument(
+        "--start-index", type=int, help="Fit one indexed start from the unchanged seeded design"
+    )
+    parser.add_argument(
+        "--fit-only", action="store_true", help="Save fits without scoring holdouts"
+    )
     parser.add_argument("--maxiter", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=722)
     parser.add_argument("--order", type=int, default=384)
@@ -132,6 +138,10 @@ def main():
     args = parser.parse_args()
     if not jax.config.x64_enabled:
         parser.error("Set JAX_ENABLE_X64=true")
+    if args.starts < 1 or (
+        args.start_index is not None and not 0 <= args.start_index < args.starts
+    ):
+        parser.error("--starts must be positive and --start-index must lie in [0, starts)")
     begun = time.perf_counter()
     split = split_data(split_physiology(load_data(args)), fold=args.fold)
     model, problem = prepare(split, args.candidate, features=args.features)
@@ -167,7 +177,9 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
     def save():
-        args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+        temporary = args.output.with_suffix(".json.tmp")
+        temporary.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+        temporary.replace(args.output)
 
     if args.action in ("score", "validate"):
         saved = json.loads(args.output.read_text())
@@ -224,6 +236,8 @@ def main():
             checks.append(dict(finite_difference=float(fd), gradient_projection=expected))
         result["derivative_checks"] = checks
         for index, point in enumerate(points):
+            if args.start_index is not None and index != args.start_index:
+                continue
             start = time.perf_counter()
             iterations = 0
 
@@ -235,11 +249,17 @@ def main():
                         start=index,
                         iteration=iterations,
                         objective=float(intermediate_result.fun),
+                        parameters=decode(intermediate_result.x).tolist(),
                         seconds=time.perf_counter() - start,
                     )
                     result["status"] = "fitting"
                     save()
-                    print(json.dumps(result["checkpoint"]), flush=True)
+                    print(
+                        json.dumps(
+                            {k: v for k, v in result["checkpoint"].items() if k != "parameters"}
+                        ),
+                        flush=True,
+                    )
 
             fitted = minimize(
                 evaluate,
@@ -293,6 +313,8 @@ def main():
         )
         result["status"] = "fit_finished"
         save()
+        if args.fit_only:
+            return
     if args.action == "validate":
         _, grouped = prepare(split, args.candidate, "grouped", args.order, features=args.features)
         assert observation_summary(grouped.base) == observation_summary(problem.base)

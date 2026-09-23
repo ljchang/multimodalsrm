@@ -5,8 +5,12 @@ through September 23, 2026. It adds reproducible research scripts and aggregate
 results without changing production inference defaults or supported Gaussian
 orders. Empirical observations, loadings, and local data loaders are excluded.
 
-Start with these three reports:
+Start with these four reports:
 
+- [Three-factor, full-parcellation fits](2026-09-23-gp-expanded-response-fits.md):
+  all six MAP fits converge and pass selected-fit numerical checks. Gamma
+  predicts brain and ratings better than Gaussian, but both lose to the
+  training-mean baseline on those modalities in this fold.
 - [Block filtering, transition reuse, and smaller Gaussian banks](2026-09-23-gp-block-filter.md):
   substantial compilation/memory reductions, modest warm gains, and unresolved
   low-noise accuracy limits. Order 16 is promising at the saved MAP but not
@@ -22,8 +26,8 @@ The scientific candidates retain fixed DoubleGamma brain responses and learned
 Bateman EDA responses, and compare gamma versus Gaussian face/rating responses.
 Pulse and respiration are excluded. Physical FWHM/peak coordinates, common
 eligible observations, training-only preprocessing, and independent numerical
-checks make the comparisons explicit. Additional factors, 100 brain parcels,
-and two further holdout schedules are prepared but have not been fitted here.
+checks make the comparisons explicit. The three-factor, 100-parcel original
+fold is complete; two further holdout schedules are prepared but remain unrun.
 
 Earlier reports document how the final protocol was reached:
 
