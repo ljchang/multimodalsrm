@@ -1,0 +1,340 @@
+{
+  "scope": "Matched marginal prediction before/after feature and temporal-covariance reuse; no fitting or sampling timing",
+  "baseline_commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+  "records": [
+    {
+      "label": "Empirical Gaussian / independent",
+      "source_artifact": "empirical-pro6000-gaussian-independent-8.json",
+      "model": {
+        "candidate": "gaussian",
+        "noise": "independent",
+        "factors": 3,
+        "order": 384,
+        "draws": 1,
+        "output_features": 8,
+        "query_times": 16,
+        "include_noise": true
+      },
+      "commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "source_sha256": {
+        "prediction.py": "0b457acaa1e45133e31d06cbd3de39fc17b4197273614be05de18095b620b105",
+        "grouped_prediction.py": "3cf98ef6ccdae91ebb4511aedcbd3110df83ef4f501b119508859ab73245fbf2"
+      },
+      "reference_source_sha256": "4f8774a0b18d1de8c5ed60a0d3b98609ca5b809b35d0516ff0427c2d308aafef",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "openblas_num_threads": "1",
+      "omp_num_threads": "1",
+      "parameter_sha256": "a7974f6c23d638da15c71d0dbdda20b15241bc8d2a597dcc7a9113f6f7e09756",
+      "timing_scope": "Whole marginal prediction calls including any compilation and host/device transfers; repeats create fresh per-call caches; repeated MAP points, not posterior draws",
+      "timings": {
+        "before": {
+          "first_seconds": 54.549302018247545,
+          "repeated_call_seconds": [
+            52.14601554721594,
+            52.2990168184042
+          ]
+        },
+        "after": {
+          "first_seconds": 10.484474449418485,
+          "repeated_call_seconds": [
+            6.589477737434208,
+            6.539690528996289
+          ]
+        }
+      },
+      "first_call_speedup": 5.20286470069781,
+      "repeated_call_speedup": 7.9551903247878935,
+      "mean_max_absolute_error": 2.7711166694643907e-13,
+      "variance_max_absolute_error": 6.150635556423367e-14,
+      "training": {
+        "scalar_observations": 52964,
+        "nodes": 841,
+        "sha256": "fb2d6a0e4eb25ea47853ccb8bc1eded6395b35f8eb76c401eb36f306ffdd1ead"
+      },
+      "reference_commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "absolute_moment_tolerance": 1e-07
+    },
+    {
+      "label": "Empirical gamma / OU",
+      "source_artifact": "empirical-3090-gamma-ou-8.json",
+      "model": {
+        "candidate": "gamma3",
+        "noise": "ou",
+        "factors": 3,
+        "order": 384,
+        "draws": 1,
+        "output_features": 8,
+        "query_times": 16,
+        "include_noise": true
+      },
+      "commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "source_sha256": {
+        "prediction.py": "0b457acaa1e45133e31d06cbd3de39fc17b4197273614be05de18095b620b105",
+        "grouped_prediction.py": "3cf98ef6ccdae91ebb4511aedcbd3110df83ef4f501b119508859ab73245fbf2"
+      },
+      "reference_source_sha256": "4f8774a0b18d1de8c5ed60a0d3b98609ca5b809b35d0516ff0427c2d308aafef",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "device": "NVIDIA GeForce RTX 3090",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "openblas_num_threads": "1",
+      "omp_num_threads": "1",
+      "parameter_sha256": "4c46947e19541b3e2d3f1725929b673d84d5c6855fadcb6863cf1b7cc162f684",
+      "timing_scope": "Whole marginal prediction calls including any compilation and host/device transfers; repeats create fresh per-call caches; repeated MAP points, not posterior draws",
+      "timings": {
+        "before": {
+          "first_seconds": 113.50291476864368,
+          "repeated_call_seconds": [
+            110.24795028194785
+          ],
+          "repeat_max_absolute_errors": [
+            1.8819577007889166e-09
+          ]
+        },
+        "after": {
+          "first_seconds": 9.931540679186583,
+          "repeated_call_seconds": [
+            7.675915319472551
+          ],
+          "repeat_max_absolute_errors": [
+            5.688320925401058e-10
+          ]
+        }
+      },
+      "first_call_speedup": 11.42853041990861,
+      "repeated_call_speedup": 14.362840872184545,
+      "mean_max_absolute_error": 2.2036772406863747e-09,
+      "variance_max_absolute_error": 3.2096975077777756e-10,
+      "training": {
+        "scalar_observations": 52964,
+        "nodes": 841,
+        "sha256": "fb2d6a0e4eb25ea47853ccb8bc1eded6395b35f8eb76c401eb36f306ffdd1ead"
+      },
+      "reference_commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "absolute_moment_tolerance": 1e-07,
+      "benchmark_sha256": "5d2e67cdd389a842881faf942237c8bfdd8be384c1302aed632cb0b9baad2514"
+    },
+    {
+      "label": "Synthetic Gaussian / OU",
+      "source_artifact": "synthetic-cpu-ou-8.json",
+      "model": {
+        "candidate": "gaussian",
+        "noise": "ou",
+        "factors": 3,
+        "order": 384,
+        "draws": 1,
+        "output_features": 8,
+        "query_times": 16,
+        "include_noise": true
+      },
+      "commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "source_sha256": {
+        "prediction.py": "0b457acaa1e45133e31d06cbd3de39fc17b4197273614be05de18095b620b105",
+        "grouped_prediction.py": "3cf98ef6ccdae91ebb4511aedcbd3110df83ef4f501b119508859ab73245fbf2"
+      },
+      "reference_source_sha256": "4f8774a0b18d1de8c5ed60a0d3b98609ca5b809b35d0516ff0427c2d308aafef",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "device": "cpu",
+      "cpu_affinity": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "openblas_num_threads": "1",
+      "omp_num_threads": "1",
+      "parameter_sha256": "3692c752e3f17aec6a6c8640796ca53ac7c14b2c3c3635a1f3cda923646a81c0",
+      "timing_scope": "Whole marginal prediction calls including any compilation and host/device transfers; repeats create fresh per-call caches; repeated MAP points, not posterior draws",
+      "timings": {
+        "before": {
+          "first_seconds": 117.92390654236078,
+          "repeated_call_seconds": [
+            117.23798187170178,
+            116.79764374624938
+          ]
+        },
+        "after": {
+          "first_seconds": 5.219432001002133,
+          "repeated_call_seconds": [
+            5.086948058567941,
+            4.884328360669315
+          ]
+        }
+      },
+      "first_call_speedup": 22.59324511167486,
+      "repeated_call_speedup": 23.47097961966373,
+      "mean_max_absolute_error": 1.4495071809506044e-12,
+      "variance_max_absolute_error": 5.840883332552949e-13,
+      "training": {
+        "scalar_observations": 3017,
+        "nodes": 160,
+        "sha256": "68643ea04ee2994db43ca6cc1406c0dd7dc82a4097a86e1e797cd7cb712466d9"
+      },
+      "reference_commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "absolute_moment_tolerance": 1e-07
+    },
+    {
+      "label": "Synthetic Gaussian / independent, one output",
+      "source_artifact": "synthetic-cpu-independent-1.json",
+      "model": {
+        "candidate": "gaussian",
+        "noise": "independent",
+        "factors": 3,
+        "order": 96,
+        "draws": 1,
+        "output_features": 1,
+        "query_times": 16,
+        "include_noise": true
+      },
+      "commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "source_sha256": {
+        "prediction.py": "0b457acaa1e45133e31d06cbd3de39fc17b4197273614be05de18095b620b105",
+        "grouped_prediction.py": "3cf98ef6ccdae91ebb4511aedcbd3110df83ef4f501b119508859ab73245fbf2"
+      },
+      "reference_source_sha256": "4f8774a0b18d1de8c5ed60a0d3b98609ca5b809b35d0516ff0427c2d308aafef",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "device": "cpu",
+      "cpu_affinity": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ],
+      "openblas_num_threads": "1",
+      "omp_num_threads": "1",
+      "parameter_sha256": "fd26f333e43a422a488e92442924c932cdedeec0143b857d6c7cc2874b772616",
+      "timing_scope": "Whole marginal prediction calls including any compilation and host/device transfers; repeats create fresh per-call caches; repeated MAP points, not posterior draws",
+      "timings": {
+        "before": {
+          "first_seconds": 4.260258024558425,
+          "repeated_call_seconds": [
+            3.713328283280134,
+            3.758570598438382
+          ]
+        },
+        "after": {
+          "first_seconds": 3.5000067641958594,
+          "repeated_call_seconds": [
+            3.0759975062683225,
+            3.140849033370614
+          ]
+        }
+      },
+      "first_call_speedup": 1.2172142260237135,
+      "repeated_call_speedup": 1.2018792540683287,
+      "mean_max_absolute_error": 4.440892098500626e-15,
+      "variance_max_absolute_error": 7.771561172376096e-16,
+      "training": {
+        "scalar_observations": 951,
+        "nodes": 161,
+        "sha256": "09d40694f7fba8e8d5adee40da5757e9a67091327e1672f21637858fcdbd7e68"
+      },
+      "reference_commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "absolute_moment_tolerance": 1e-07
+    },
+    {
+      "label": "Synthetic Gaussian / independent, K=6 / draws=4",
+      "source_artifact": "synthetic-pro6000-k6-d4.json",
+      "model": {
+        "candidate": "gaussian",
+        "noise": "independent",
+        "factors": 6,
+        "order": 96,
+        "draws": 4,
+        "output_features": 8,
+        "query_times": 16,
+        "include_noise": true
+      },
+      "commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "source_sha256": {
+        "prediction.py": "0b457acaa1e45133e31d06cbd3de39fc17b4197273614be05de18095b620b105",
+        "grouped_prediction.py": "3cf98ef6ccdae91ebb4511aedcbd3110df83ef4f501b119508859ab73245fbf2"
+      },
+      "reference_source_sha256": "4f8774a0b18d1de8c5ed60a0d3b98609ca5b809b35d0516ff0427c2d308aafef",
+      "python": "3.12.13",
+      "jax": "0.11.2",
+      "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "cpu_affinity": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "openblas_num_threads": "1",
+      "omp_num_threads": "1",
+      "parameter_sha256": "699ddc8103b825f32d820dd9cc781f4ecf329652170626b9b4a0d6cc54af760b",
+      "timing_scope": "Whole marginal prediction calls including any compilation and host/device transfers; repeats create fresh per-call caches; repeated MAP points, not posterior draws",
+      "timings": {
+        "before": {
+          "first_seconds": 53.5542102009058,
+          "repeated_call_seconds": [
+            51.17450697068125,
+            51.061446224339306
+          ],
+          "repeat_max_absolute_errors": [
+            1.9095836023552692e-14,
+            1.865174681370263e-14
+          ]
+        },
+        "after": {
+          "first_seconds": 10.372906779870391,
+          "repeated_call_seconds": [
+            6.881461353972554,
+            6.822416030801833
+          ],
+          "repeat_max_absolute_errors": [
+            1.9539925233402755e-14,
+            1.7763568394002505e-14
+          ]
+        }
+      },
+      "first_call_speedup": 5.162893231127153,
+      "repeated_call_speedup": 7.460366896496696,
+      "mean_max_absolute_error": 2.3092638912203256e-14,
+      "variance_max_absolute_error": 7.438494264988549e-15,
+      "training": {
+        "scalar_observations": 1232,
+        "nodes": 159,
+        "sha256": "e35b946f13d23db2c170bf1124ef80ed2c69774be9f916d2b555643547cf61c5"
+      },
+      "reference_commit": "16e6574007018bf140b4ddad25b2b8e2d7b02880",
+      "absolute_moment_tolerance": 1e-07,
+      "benchmark_sha256": "5d2e67cdd389a842881faf942237c8bfdd8be384c1302aed632cb0b9baad2514"
+    }
+  ]
+}

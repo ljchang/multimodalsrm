@@ -185,6 +185,10 @@ still evaluates shared covariance at repeated observation rows and refactors
 for individual features. Moving that reuse into the production API is a
 concrete optimization to benchmark and validate separately.
 
+The subsequent [production prediction study](2026-09-23-gp-grouped-prediction.md)
+implements that reuse and measures its effect without changing the fitted
+models or response/noise specification reported here.
+
 For the model, test private temporal variation alongside an independent
 measurement-noise component, rather than replacing all measurement noise with
 OU covariance. That is a hypothesis to evaluate, not a demonstrated fix.

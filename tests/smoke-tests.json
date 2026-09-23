@@ -1,5 +1,8 @@
 {
   "bayesian": [
+    "tests/bayesian/test_grouped_prediction.py::test_multi_feature_draw_and_query_batches_match_dense[noise0-3]",
+    "tests/bayesian/test_grouped_prediction.py::test_multi_feature_draw_and_query_batches_match_dense[noise1-3]",
+    "tests/bayesian/test_grouped_prediction.py::test_draw_aligned_rotations_retain_cross_factor_covariance",
     "tests/bayesian/test_state_space_grouped.py::test_fixed_bateman_density_gradient_and_smoothing[2]",
     "tests/bayesian/test_state_space_grouped_learned.py::test_learned_nodes_preserve_density_gradient_and_exact_clocks[False]",
     "tests/bayesian/test_bayesian_problem.py",

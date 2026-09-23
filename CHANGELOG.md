@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Grouped GP marginal prediction reuses each parameter draw's factorization
+  across output features and evaluates response covariance at unique query
+  times. Query batches and one-draw conditioning state bound temporary memory.
+  White and OU noise, feature masks, and draw-specific latent rotations retain
+  the same conditional moments; run-baseline predictions retain their existing
+  calculation. Caches live only within the current prediction result.
+
 ## [0.2.0] — 2026-09-22
 
 ### Added

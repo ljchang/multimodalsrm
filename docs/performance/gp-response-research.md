@@ -1,12 +1,16 @@
 # GP response and NVIDIA optimization research
 
 This collection records the response-family and computational experiments
-through September 23, 2026. It adds reproducible research scripts and aggregate
-results without changing production inference defaults or supported Gaussian
-orders. Empirical observations, loadings, and caches are excluded. The reviewed
+through September 23, 2026, and the resulting grouped-prediction optimization.
+The prediction path reuses covariance and factorizations across output features;
+inference defaults and supported Gaussian orders are unchanged. Empirical
+observations, loadings, and caches are excluded. The reviewed
 movie-clock adapter requires the separately available historical local loader.
 
-Start with the [temporal-noise refits and matched NVIDIA benchmarks](2026-09-23-gp-temporal-refits.md).
+Start with the [production grouped-prediction optimization](2026-09-23-gp-grouped-prediction.md)
+for the implemented speedup and matched before/after checks, and the
+[temporal-noise refits and matched NVIDIA benchmarks](2026-09-23-gp-temporal-refits.md)
+for the response/noise model comparison.
 The Gaussian grouped gradient is 3.32 times faster than state-space on the same
 RTX 3090 at the checked point. A separate complete gamma/OU MAP fit takes
 40.0 minutes on the tested CPU configuration, 3.6 minutes on the RTX PRO 6000,
@@ -43,7 +47,8 @@ masks and standardization differ from the new refits. The next model experiment
 should address private/shared variation, independent measurement noise, and
 response history. The cached research scorer also identifies a concrete
 production prediction optimization: reuse grouped covariance and factorizations
-across features.
+across features. That optimization is now implemented and benchmarked separately
+in the grouped-prediction report linked above; it does not change these fits.
 
 The earlier reports establish the computational baseline:
 
