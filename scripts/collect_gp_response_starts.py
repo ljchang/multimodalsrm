@@ -34,6 +34,7 @@ def collect(paths):
             assert fit[field] == first[field], field
         for field in ("candidate", "starts", "seed", "features", "fold", "parcels", "window"):
             assert fit["arguments"][field] == first["arguments"][field], field
+        assert fit.get("data_loader_sha256") == first.get("data_loader_sha256")
         assert fit["records"][0]["start"] == fit["arguments"]["start_index"]
     assert sorted(fit["records"][0]["start"] for fit in fits) == list(range(expected))
     selected = min(fits, key=lambda fit: fit["records"][0]["objective"])

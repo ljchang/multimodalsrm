@@ -1,5 +1,12 @@
 # Three-factor, full-parcellation response comparison
 
+**Timing caveat:** the subsequent [clock and calibration audit](2026-09-23-gp-clock-calibration.md)
+found that the research loader compresses brain timestamps after excluding
+splice-marked rows. Independent physiology pause markers support retaining
+the original row times, with differences reaching 16 seconds. The scores below
+describe the historical compressed-clock dataset; their scientific interpretation
+is provisional. See the [repeat with preserved timestamps](2026-09-23-gp-clock-preserved-fits.md).
+
 **All six MAP fits converge, but the larger models still predict brain and
 ratings worse than the training-mean baseline on this fold.** Gamma improves
 over Gaussian on those two modalities, while face predictions barely improve

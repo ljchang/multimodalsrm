@@ -1,5 +1,11 @@
 # Longer-window response-family validation and GPU timings
 
+**Timing caveat:** the later [clock audit](2026-09-23-gp-clock-calibration.md)
+identified accumulating brain timestamp compression in the research loader.
+The predictive results below use that historical clock and should not determine
+response-family selection. The computational measurements still describe their
+stated inputs. See the [three-factor repeat with preserved timestamps](2026-09-23-gp-clock-preserved-fits.md).
+
 All four candidates converged, but their held-out predictions are very
 similar and generally do not beat the training-mean baseline in this small
 one-factor configuration. This fold does not justify selecting a new response

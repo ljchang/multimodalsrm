@@ -156,6 +156,7 @@ def main():
             name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
             for name in ("gp_response_holdout.py", "compare_gp_response_families.py")
         },
+        data_loader_sha256=hashlib.sha256(args.loader.read_bytes()).hexdigest(),
         parameters=len(problem.names),
         parameter_names=[list(n) for n in problem.names],
         training=observation_summary(problem.base),

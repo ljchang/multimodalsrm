@@ -1,5 +1,9 @@
 # Response-bound sensitivity on identical observations
 
+**Historical clock:** the [later timing audit](2026-09-23-gp-clock-calibration.md)
+found accumulating brain timestamp compression in the loader used here. These
+bound/response estimates require reconsideration on the revised movie clock.
+
 Wider bounds resolve the active response constraints at the best solution found:
 face settles at about one second FWHM, and ratings at about thirteen seconds.
 Several different timing solutions remain close in objective, so this does not

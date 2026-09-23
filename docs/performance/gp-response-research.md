@@ -3,14 +3,35 @@
 This collection records the response-family and computational experiments
 through September 23, 2026. It adds reproducible research scripts and aggregate
 results without changing production inference defaults or supported Gaussian
-orders. Empirical observations, loadings, and local data loaders are excluded.
+orders. Empirical observations, loadings, and caches are excluded. The reviewed
+movie-clock adapter requires the separately available historical local loader.
 
-Start with these four reports:
+Start with the [clock and calibration audit](2026-09-23-gp-clock-calibration.md)
+and the [repeat on the original movie clock](2026-09-23-gp-clock-preserved-fits.md).
+The historical loader removed splice-marker rows and compressed the brain clock,
+creating shifts up to 16 seconds. Independent pause markers support original row
+times. The working preprocessing rule now retains the first 252 brain volumes,
+trims the last eight, and keeps uncensored splice-marker observations. Earlier
+empirical response estimates and predictive rankings use the historical clock
+and are provisional; their numerical and timing checks still describe those inputs.
+Use `--loader scripts/clock_preserving_emo_data.py` for new empirical comparisons.
+Historical runners retain their recorded/default loader for reproducing older
+measurements; saved-fit diagnostics restore the loader from the fit metadata.
+
+The revised six-start comparison is complete. Five starts qualify; both selected
+fits pass independent objective, gradient, and prediction checks. Brain and
+ratings still lose to simple baselines. Longer latent timescales reduce brain
+error, and private temporal residuals help rating predictions, but these are
+fixed-parameter probes rather than refitted model rankings. The next step is a
+training-selected timescale profile with full correlated-noise refits, together
+with checks of response history around splice boundaries.
+
+The earlier reports establish the computational baseline:
 
 - [Three-factor, full-parcellation fits](2026-09-23-gp-expanded-response-fits.md):
-  all six MAP fits converge and pass selected-fit numerical checks. Gamma
-  predicts brain and ratings better than Gaussian, but both lose to the
-  training-mean baseline on those modalities in this fold.
+  all six MAP fits converge and pass selected-fit numerical checks, but poor
+  held-out brain/ratings predictions motivate the subsequent clock audit.
+  These predictive results use the historical compressed clock.
 - [Block filtering, transition reuse, and smaller Gaussian banks](2026-09-23-gp-block-filter.md):
   substantial compilation/memory reductions, modest warm gains, and unresolved
   low-noise accuracy limits. Order 16 is promising at the saved MAP but not
@@ -27,7 +48,8 @@ Bateman EDA responses, and compare gamma versus Gaussian face/rating responses.
 Pulse and respiration are excluded. Physical FWHM/peak coordinates, common
 eligible observations, training-only preprocessing, and independent numerical
 checks make the comparisons explicit. The three-factor, 100-parcel original
-fold is complete; two further holdout schedules are prepared but remain unrun.
+fold is repeated with the revised loader; two further holdout schedules are
+prepared but remain unrun.
 
 Earlier reports document how the final protocol was reached:
 

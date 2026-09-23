@@ -1,5 +1,9 @@
 # Four-modality constrained MAP baseline
 
+**Historical clock:** the [later timing audit](2026-09-23-gp-clock-calibration.md)
+found accumulating brain timestamp compression in the loader used here. Numerical
+convergence remains documented, but physiological response estimates are provisional.
+
 The small empirical model now passes the physical projected-gradient convergence
 check from three starts. Two starts reach the same best solution. This supplies
 a numerical baseline for brain double-gamma, face/rating gamma, and EDA Bateman

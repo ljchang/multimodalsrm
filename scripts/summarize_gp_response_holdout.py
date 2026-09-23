@@ -72,6 +72,7 @@ def main():
         latent_factors=fits[0]["arguments"].get("features", 1),
         fold=fits[0]["arguments"].get("fold", "original"),
         parameters=fits[0]["parameters"],
+        data_loader=fits[0]["arguments"].get("loader"),
     )
     for fit, source in zip(fits, args.inputs):
         name = fit["arguments"]["candidate"]
@@ -93,6 +94,8 @@ def main():
             )
         }
         row["raw_source"] = str(source)
+        if "data_loader_sha256" in fit:
+            row["data_loader_sha256"] = fit["data_loader_sha256"]
         row["starts"] = [{k: v for k, v in r.items() if k != "parameters"} for r in fit["records"]]
         row["selected_start"] = fit["best"]["start"]
         row["quadrature_checks"] = fit.get("quadrature_checks", [])
