@@ -129,8 +129,8 @@ class ObservationPreparation(BaseEstimator):
             if response.pooling != "shared":
                 raise ValueError(
                     f"GP-MSRM shares each modality response across participants, but "
-                    f"responses[{modality!r}] has pooling={response.pooling!r} (the Response "
-                    "default is 'partial'). Pass Response(..., pooling='shared')."
+                    f"responses[{modality!r}] has pooling={response.pooling!r}. "
+                    "Pass Response(..., pooling='shared'), which is the default."
                 )
             kernel = response.initial_kernel()
             if isinstance(kernel, DoubleGamma):

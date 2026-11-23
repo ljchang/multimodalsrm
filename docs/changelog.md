@@ -82,6 +82,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`Response(pooling=...)` now defaults to `"shared"`.** The earlier default,
+  `"partial"` with `pooling_strength=1`, already behaved almost like complete
+  pooling, because the penalty is added unscaled to a normalized loss: in a
+  synthetic three-participant fit the participants' lags differed by 0.002 s and
+  the fitted relative delay was the same to 0.001 s under either setting. The
+  default now says what it does, and matches GP-MSRM, which supports shared
+  responses only. To estimate participant responses, pass `pooling="partial"` or
+  `"none"`, preferably with `MultimodalSRM(response_penalty_scaling="likelihood")`
+  so that `pooling_strength` is `1 / sd²` of the spread between participants.
+  `Response.lag_only` changes with it.
 - **Edge observations are scored by default.** `MultimodalSRM` now defaults to
   `edge_observations="include"` and `BayesianMultimodalSRM` to `"auto"`, which
   includes for dense, grouped and state-space algebra and excludes for spectral
