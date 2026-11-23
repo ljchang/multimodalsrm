@@ -19,24 +19,51 @@ def group_kernels(kernels, responses):
     return groups
 
 
-def kernel_penalty(kernels, responses):
+def likelihood_penalty_scale(blocks, residual_variance=1.0):
+    """Per-modality factor that puts a Gaussian prior on the objective's scale.
+
+    The reconstruction term is a weighted mean of squared standardized
+    residuals, not a sum over observations. If modality ``m`` holds a share
+    ``c_m`` of the objective's weight across ``N_m`` scored values, a Gaussian
+    negative log likelihood with residual variance ``v`` equals that term
+    times ``N_m / (2 v c_m)``. Multiplying a prior's negative log density by
+    ``2 v c_m / N_m`` therefore gives it the weight it would have against that
+    likelihood, so a stated standard deviation behaves like one. Observations
+    are counted as independent.
+    """
+    mass, count = {}, {}
+    for b in blocks:
+        mass[b.modality] = mass.get(b.modality, 0.0) + float(b.coefficients.sum())
+        count[b.modality] = count.get(b.modality, 0) + int(np.count_nonzero(b.coefficients))
+    return {m: 2.0 * residual_variance * mass[m] / count[m] for m in mass if count[m]}
+
+
+def kernel_penalty(kernels, responses, scale=None):
+    """Response priors and pooling penalties in objective units.
+
+    With ``scale=None`` every term is a mean over participants added
+    unscaled to the normalized loss (the original convention). A ``scale``
+    from ``likelihood_penalty_scale`` instead sums each participant's negative
+    log prior and multiplies it by that modality's factor.
+    """
     groups = group_kernels(kernels, responses)
     total = 0.0
     for m, response in responses.items():
         local = [mods[m] for mods in kernels.values() if m in mods]
         if not local:
             continue
+        weight = None if scale is None else scale.get(m, 0.0)
         if response.pooling == "partial":
             center = groups[m].to_coordinates()
             total += (
                 0.5
                 * response.pooling_strength
                 * sum(sum((k.to_coordinates()[p] - center[p]) ** 2 for p in center) for k in local)
-                / len(local)
+                * (1 / len(local) if weight is None else weight)
             )
         targets = local if response.pooling == "none" else [groups[m]]
         for k in targets:
-            factor = 1 / len(targets)
+            factor = 1 / len(targets) if weight is None else weight
             if response.lag_prior is not None:
                 prior = response.lag_prior
                 total += factor * 0.5 * ((k.parameters["lag"] - prior.mean) / prior.sd) ** 2
@@ -53,7 +80,7 @@ def kernel_penalty(kernels, responses):
     return float(total)
 
 
-def _kernel_penalty_gradient(kernels, responses):
+def _kernel_penalty_gradient(kernels, responses, scale=None):
     """Prior/pooling derivatives in the same log/physical coordinates as fitting."""
     gradients = {
         (s, m, p): 0.0 for s, mods in kernels.items() for m, k in mods.items() for p in k.parameters
@@ -67,17 +94,24 @@ def _kernel_penalty_gradient(kernels, responses):
             p: np.mean([c[p] for c in coordinates.values()]) for p in coordinates[subjects[0]]
         }
         n = len(subjects)
+        weight = None if scale is None else scale.get(m, 0.0)
+        # Participant-level terms: a mean over participants, or a scaled sum.
+        own = 1 / n if weight is None else weight
+        # A term on the group mean reaches each participant through 1 / n.
+        shared = 1 / n if weight is None else weight / n
         if response.pooling == "partial":
             for s in subjects:
                 for p in center:
                     gradients[s, m, p] += (
-                        response.pooling_strength * (coordinates[s][p] - center[p]) / n
+                        response.pooling_strength * (coordinates[s][p] - center[p]) * own
                     )
         for s in subjects:
-            target = coordinates[s] if response.pooling == "none" else center
+            independent = response.pooling == "none"
+            target = coordinates[s] if independent else center
+            factor = own if independent else shared
             if response.lag_prior is not None:
                 prior = response.lag_prior
-                gradients[s, m, "lag"] += (target["lag"] - prior.mean) / (n * prior.sd**2)
+                gradients[s, m, "lag"] += factor * (target["lag"] - prior.mean) / prior.sd**2
             if response.prior is not None:
                 prior = response.prior
                 ref = (
@@ -87,7 +121,7 @@ def _kernel_penalty_gradient(kernels, responses):
                 )
                 for p, value in ref.items():
                     c = np.log(value) if p in kernels[s][m].positive_parameters else value
-                    gradients[s, m, p] += prior.strength * (target[p] - c) / n
+                    gradients[s, m, p] += factor * prior.strength * (target[p] - c)
     return gradients
 
 
@@ -152,10 +186,15 @@ class KernelObjective:
     finite-difference optimization of this same accelerated loss.
     """
 
-    def __init__(self, kernels, responses, prepared, latents, loadings, full_objective):
+    def __init__(
+        self, kernels, responses, prepared, latents, loadings, full_objective, penalty_scale=None
+    ):
         self.responses, self.prepared = responses, prepared
         self.full_objective = full_objective
-        self.baseline = float(full_objective(kernels)) - kernel_penalty(kernels, responses)
+        self.penalty_scale = penalty_scale
+        self.baseline = float(full_objective(kernels)) - kernel_penalty(
+            kernels, responses, penalty_scale
+        )
         self.gradient_method = (
             "complex_step"
             if any(
@@ -182,8 +221,12 @@ class KernelObjective:
             self.statistics.append((b, z, y, linear, gram))
 
     def _evaluate(self, kernels, gradient):
-        value = self.baseline + kernel_penalty(kernels, self.responses)
-        gradients = _kernel_penalty_gradient(kernels, self.responses) if gradient else None
+        value = self.baseline + kernel_penalty(kernels, self.responses, self.penalty_scale)
+        gradients = (
+            _kernel_penalty_gradient(kernels, self.responses, self.penalty_scale)
+            if gradient
+            else None
+        )
         for b, z, y, linear, gram in self.statistics:
             kernel = kernels[b.subject][b.modality]
             free = self.responses[b.modality].free_parameters

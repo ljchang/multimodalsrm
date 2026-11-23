@@ -22,6 +22,7 @@ from .kernel_optimization import (
     group_kernels,
     kernel_penalty,
     kernel_stationarity,
+    likelihood_penalty_scale,
     optimize_kernels,
 )
 from .kernels import Identity, Response
@@ -126,6 +127,20 @@ class MultimodalSRM(BaseEstimator):
     run's valid domain. Predictions near a run's start then rest on less
     information than interior ones.
 
+    ``response_penalty_scaling`` sets how ``Response.lag_prior``, ``Response.prior`` and
+    ``pooling_strength`` weigh against the data. The reconstruction loss is a
+    normalized mean, not a sum over observations. With ``"objective"``
+    (default, the original behaviour) those penalties are added to it unscaled,
+    which makes them far stronger than their stated values suggest: a
+    ``Normal(0, 1)`` lag prior can act like a standard deviation of a few
+    hundredths of a second, and ``pooling_strength=1`` like complete pooling.
+    ``"likelihood"`` multiplies each by the factor that a Gaussian likelihood
+    over the scored observations would imply, assuming unit residual variance
+    in standardized units, so a lag prior's ``sd`` is in seconds and
+    ``pooling_strength`` is ``1 / sd**2`` of the spread between participants,
+    summed over participants. Residual variance below one makes these priors
+    somewhat tighter than stated. Factors are stored in ``penalty_scale_``.
+
     Penalties and balancing conventions are recorded in ``configuration_``.
     Reaching ``max_iter`` does not constitute convergence. ``init="hybrid"``
     uses one deterministic spectral start followed by paired random starts;
@@ -175,6 +190,7 @@ class MultimodalSRM(BaseEstimator):
         kernel_extrapolation=True,
         lag_init=None,
         edge_observations="exclude",
+        response_penalty_scaling="objective",
     ):
         self.features = features
         self.latent_dt = latent_dt
@@ -200,6 +216,7 @@ class MultimodalSRM(BaseEstimator):
         self.kernel_extrapolation = kernel_extrapolation
         self.lag_init = lag_init
         self.edge_observations = edge_observations
+        self.response_penalty_scaling = response_penalty_scaling
 
     def __setstate__(self, state):
         """Restore pre-policy pickles with the historical pair-scaled ridge."""
@@ -214,6 +231,9 @@ class MultimodalSRM(BaseEstimator):
         state.setdefault("latent_timescale", None)
         state.setdefault("lag_init", None)
         state.setdefault("edge_observations", "exclude")
+        state.setdefault("response_penalty_scaling", "objective")
+        if "configuration_" in state:
+            state.setdefault("penalty_scale_", None)
         if "configuration_" in state:
             state.setdefault("edge_reach_", (0.0, 0.0))
         if "configuration_" in state:
@@ -235,6 +255,8 @@ class MultimodalSRM(BaseEstimator):
             raise ValueError("init must be random, spectral, or hybrid")
         if not isinstance(self.balance_scale, (bool, np.bool_)):
             raise ValueError("balance_scale must be boolean")
+        if self.response_penalty_scaling not in ("objective", "likelihood"):
+            raise ValueError("response_penalty_scaling must be 'objective' or 'likelihood'")
         if self.edge_observations not in ("exclude", "include"):
             raise ValueError("edge_observations must be 'exclude' or 'include'")
         if not (
@@ -465,6 +487,15 @@ class MultimodalSRM(BaseEstimator):
             self.responses_,
         )
 
+        self.penalty_scale_ = (
+            likelihood_penalty_scale(blocks_for.blocks)
+            if self.response_penalty_scaling == "likelihood"
+            else None
+        )
+        self.configuration_["response_penalty_scaling"] = self.response_penalty_scaling
+        self.configuration_["response_penalty_scale"] = (
+            None if self.penalty_scale_ is None else dict(self.penalty_scale_)
+        )
         rng = check_random_state(self.random_state)
         candidates = []
         self.restart_diagnostics_ = []
@@ -583,6 +614,7 @@ class MultimodalSRM(BaseEstimator):
         local_rng = np.random.RandomState(seed)
         kernels = copy.deepcopy(initial)
         blocks = blocks_for(kernels)
+        penalty_scale = self.penalty_scale_
         # Boundary-excluded mappings cannot be fitted by ridge alone.
         used = {(b.subject, b.modality) for b in blocks}
         kernels = {
@@ -614,7 +646,7 @@ class MultimodalSRM(BaseEstimator):
                 self.temporal_strength_,
                 self.loading_ridge,
                 self.affinity_,
-                kernel_penalty(k, self.responses_),
+                kernel_penalty(k, self.responses_, penalty_scale),
                 loading_penalty_scaling=self.loading_penalty_scaling,
             )
 
@@ -663,6 +695,7 @@ class MultimodalSRM(BaseEstimator):
                         z,
                         W,
                         lambda k: objective(z, W, k, blocks_for(k)),
+                        penalty_scale,
                     )
                     if any(r.free_parameters for r in self.responses_.values())
                     else (lambda k: objective(z, W, k, blocks_for(k)))
@@ -702,7 +735,7 @@ class MultimodalSRM(BaseEstimator):
                         self.temporal_strength_,
                         self.loading_ridge,
                         self.affinity_,
-                        kernel_penalty(kernels, self.responses_),
+                        kernel_penalty(kernels, self.responses_, penalty_scale),
                         self.loading_penalty_scaling,
                     )
                 current = objective(z, W, kernels, blocks)
@@ -802,7 +835,7 @@ class MultimodalSRM(BaseEstimator):
                 self.temporal_strength_,
                 self.loading_ridge,
                 self.affinity_,
-                kernel_penalty(kernels, self.responses_),
+                kernel_penalty(kernels, self.responses_, penalty_scale),
                 self.loading_penalty_scaling,
             )
             record["objective_components"] = objective_components(*final_args)

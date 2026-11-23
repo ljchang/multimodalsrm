@@ -9,7 +9,7 @@ from sklearn.utils.validation import check_is_fitted
 from .data import TimeSeries, normalize_data
 from .grouping import complete_affinity, latent_groups
 from .inference import component_support, condition, filter_data, require_support
-from .kernel_optimization import kernel_penalty, optimize_kernels
+from .kernel_optimization import kernel_penalty, likelihood_penalty_scale, optimize_kernels
 from .objective import (
     _validate_loading_penalty_scaling,
     complete_objective,
@@ -277,9 +277,17 @@ def calibrate(model, data, *, reference=None, affinity=None, modality_weights=No
         for m, response in result.responses_.items()
     }
 
+    # Calibration has its own observations and loss normalization, so a
+    # likelihood-scaled penalty takes its factors from the calibration blocks.
+    scale = (
+        likelihood_penalty_scale(blocks)
+        if getattr(result, "response_penalty_scaling", "objective") == "likelihood"
+        else None
+    )
+
     def penalty(k):
         independent = {m: r for m, r in result.responses_.items() if r.pooling == "none"}
-        total = kernel_penalty(k, independent)
+        total = kernel_penalty(k, independent, scale)
         for m, response in result.responses_.items():
             if response.pooling == "partial":
                 center = model.group_kernels_.get(m, response.initial_kernel()).to_coordinates()
@@ -292,7 +300,7 @@ def calibrate(model, data, *, reference=None, affinity=None, modality_weights=No
                             sum((kernel.to_coordinates()[p] - v) ** 2 for p, v in center.items())
                             for kernel in local
                         )
-                        / len(local)
+                        * (1 / len(local) if scale is None else scale.get(m, 0.0))
                     )
         return total
 
