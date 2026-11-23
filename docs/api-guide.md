@@ -77,7 +77,7 @@ Three tools follow from this:
 | `LagScan.seed_responses(responses, margin=2.0)` | Returns responses whose free lags start at the scanned delays, with bounds of that lag ± `margin`. `MultimodalSRM(lag_init="scan")` does both steps at fit time. |
 | `model.timing_report(reference=None)` | Reports fitted **peak delays**, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. By default delays are relative to the only modality without an estimated lag; several such modalities fix the clock themselves; with every lag estimated, delays are centred on the across-modality mean. Available on both estimators with the same convention. |
 
-Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow, and observations whose envelope reaches outside the run are not scored. Wide bounds on a short run can discard most of it.
+Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow. Observations whose envelope reaches outside the run rest on latent that R-MSRM must estimate beyond the run, and with `edge_observations="exclude"` they are not scored at all, so wide bounds on a short run can discard most of it.
 
 For GP-MSRM, the MAP search starts each lag from its prior, not from the kernel's own lag, so seed the prior as well:
 
