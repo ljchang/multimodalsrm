@@ -16,7 +16,7 @@ from .posterior_updates import (
 def prepare_calibration(model, data, *, search=None, sampler=None, random_state=None):
     """Prepare one new mapping against frozen original support and statistics."""
     reference = reference_state(model)
-    adapter = restore_adapter(reference["adapter"])
+    adapter = restore_adapter(reference["adapter"], reference["specification"]["linear_algebra"])
     data = normalize_data(data)
     if len(data) != 1:
         raise ValueError("calibrate exactly one new participant at a time")
@@ -81,7 +81,7 @@ def calibrate_posterior(
 def prepare_participant(model, data, *, participant, sampler=None, random_state=None):
     """Select a participant before validating, copying or preprocessing payloads."""
     reference = reference_state(model)
-    adapter = restore_adapter(reference["adapter"])
+    adapter = restore_adapter(reference["adapter"], reference["specification"]["linear_algebra"])
     if not isinstance(data, Mapping) or not data:
         raise ValueError("data must be a nonempty participant mapping")
     if participant not in adapter._training_data:

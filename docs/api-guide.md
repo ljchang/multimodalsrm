@@ -57,6 +57,7 @@ Import `MultimodalSRM` from `multimodalsrm`. `latent_dt` is required. The estima
 | `init="random"` | Also `"spectral"` or `"hybrid"`. Hybrid uses a spectral first start and random remaining starts. Repeated spectral starts are redundant. |
 | `n_init=1`, `n_jobs=1`, `random_state=None` | Restart count, process workers (`-1` uses available CPUs, capped by restarts), and seed. An integer seed makes starts reproducible across worker counts. |
 | `max_iter=100`, `kernel_max_iter=50`, `tol=1e-5` | Outer optimization budget, response optimization budget, and stopping tolerance. Inspect `converged_` and `restart_diagnostics_`. |
+| `kernel_tol=1e-4`, `kernel_extrapolation=True` | Convergence also requires that no free response coordinate moved further than `kernel_tol` in the last iteration (seconds for lags, log units for positive parameters); `None` restores the objective-only rule. Extrapolation follows each response step further while the complete objective keeps decreasing; it changes the path, not the objective. |
 | `gap_threshold=None` | Default splits integration support above twice the median usable interval. A positive explicit threshold uses timestamp units. |
 
 ## GP-MSRM settings
@@ -76,7 +77,7 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `search=None`, `sampler=None` | Use default `SearchConfig()` and `SamplerConfig()`; see below. |
 | `sample_blocks=None` | Full target by default. A nonempty unique subset of `"filter"`, `"loading"`, `"offset"`, `"noise"`, `"gp"` samples conditional on remaining parameters; this is not the full posterior. |
 | `random_state=0` | Reproducibility seed, or `None`. |
-| `max_observations=800` | Per-run eligible scalar-observation guard, retained by grouped and state-space paths. Raising it permits a larger problem but does not guarantee feasible runtime. |
+| `max_observations=800` | Per-run size guard on what the backend factorizes: eligible scalars for dense and spectral algebra, exact modality/time nodes times factors for grouped algebra, and nodes for grouped state-space filtering. Run baselines, correlated noise and noise priors admitting zero keep the scalar count. Raising it permits a larger problem but does not guarantee feasible runtime. |
 | `covariance_tolerance=1e-7` | Error tolerance for supported analytic/response approximation checks. Does **not** certify response quadrature or spectral accuracy. |
 | `response_quadrature_order=None` | Explicit integer order 8–1024 per panel for dense/grouped structured response integrals. Needed for Gamma, DoubleGamma and BatemanSCR on those paths. Compare orders for numerical qualification. |
 | `state_space_gaussian="auto"` | Also `"rational"` or `"laguerre"`; selects a Gaussian response approximation for state-space MAP. |
@@ -93,7 +94,7 @@ Fixed- and learned-response state-space filtering and smoothing automatically gr
 | Object | Main choices | Interpretation |
 | --- | --- | --- |
 | `SearchConfig` | `starts=16`, `maxiter=1200`, `n_jobs=1` | Independent MAP starts; positive thread count. |
-| `SearchConfig` | `ftol=1e-12`, `gtol=1e-6`, `physical_gradient_tolerance=1e-3` | Objective/optimizer stopping and physical-gradient diagnostic thresholds. |
+| `SearchConfig` | `ftol=1e-12`, `gtol=1e-6`, `physical_gradient_tolerance=1e-3`, `relative_gradient_tolerance=1e-6` | Objective/optimizer stopping and physical-gradient diagnostic thresholds. A MAP point passes when its largest projected gradient meets the absolute limit or the relative limit times `abs(objective)`; `relative_gradient_tolerance=0` keeps the absolute gate only. |
 | `SearchConfig` | `refine_maxiter=0`, `polish_max_parameters=256` | Optional serial refinement budget and dimension limit for polishing. |
 | `SearchConfig` | `conditioning="none"` or `"diagonal"` | Optional coordinate scaling for supported full multifactor dense/grouped MAP targets. |
 | `SamplerConfig` | `chains=4`, `warmup=1000`, `draws=1200` | Chain count, warmup transitions, retained draws per chain. These are budgets, not convergence guarantees. |

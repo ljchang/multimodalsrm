@@ -21,6 +21,7 @@ SearchConfig(
     n_jobs=1,
     conditioning="none",
     r_init=False,
+    relative_gradient_tolerance=1e-06,
 )
 ```
 
@@ -37,6 +38,7 @@ SearchConfig(
 | `n_jobs` | `int` | `1` |
 | `conditioning` | `str` | `"none"` |
 | `r_init` | `bool` | `False` |
+| `relative_gradient_tolerance` | `float` | `1e-06` |
 
 MAP budgets; n_jobs runs independent restarts in shared-memory threads.
 
@@ -50,9 +52,16 @@ It is opt-in: the default is the historical data-based first start. The
 measured benefit is scale-dependent and has not been shown to transfer to
 empirical recordings, so enabling it is a per-analysis decision.
 
+A MAP point meets the gradient tolerance when its largest physical projected
+gradient is at most `physical_gradient_tolerance`, or at most
+`relative_gradient_tolerance * abs(objective)`. The marginal likelihood
+and its gradients sum over observations, so the absolute threshold alone
+sits below double-precision gradient noise for large recordings. Set
+`relative_gradient_tolerance=0` for the historical absolute-only gate.
+
 ## SamplerConfig
 
-`from multimodalsrm.bayesian import SamplerConfig` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/fitting.py#L69)
+`from multimodalsrm.bayesian import SamplerConfig` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/fitting.py#L84)
 
 ```python
 SamplerConfig(

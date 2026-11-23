@@ -228,7 +228,13 @@ def test_operator_cache_equivalence():
         for a, b in zip(baseline, cached):
             np.testing.assert_array_equal(a.H.toarray(), b.H.toarray())
             np.testing.assert_array_equal(a.coefficients, b.coefficients)
-    assert len(cache) == len(baseline)
+    # One operator per distinct clock: participants on identical timestamps share it.
+    clocks = {(b.run, b.modality, b.times.tobytes()) for b in baseline}
+    assert len(cache) == len(clocks)
+    for a in cached:
+        for b in cached:
+            if (a.run, a.modality, a.times.tobytes()) == (b.run, b.modality, b.times.tobytes()):
+                assert a.H is b.H
 
 
 def test_refit_clears_population_trajectory():

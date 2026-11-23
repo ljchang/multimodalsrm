@@ -11,7 +11,7 @@ from . import _archive
 from .fitting import SamplerConfig, SearchConfig
 from .model import BayesianMultimodalSRM
 from .multifactor import orientation
-from .observation_adapter import BayesianObservationAdapter
+from .observation_adapter import BayesianObservationAdapter, capacity_unit
 from .problem import BayesianProblem
 from .workflow import TrainingStandardizer
 
@@ -30,17 +30,33 @@ def _search_for_validation(config):
     """Compare legacy search provenance without rewriting the saved record."""
     expected = asdict(SearchConfig())
     expected["r_init"] = False  # Historical fits never ran the R initializer.
-    optional = {"polish_max_parameters", "n_jobs", "conditioning", "r_init"}
+    # Historical fits were gated by the absolute gradient threshold alone.
+    expected["relative_gradient_tolerance"] = 0.0
+    optional = {
+        "polish_max_parameters",
+        "n_jobs",
+        "conditioning",
+        "r_init",
+        "relative_gradient_tolerance",
+    }
     if isinstance(config, dict) and set(expected) - optional <= set(config) <= set(expected):
         return {**expected, **config}
     return config
 
 
 def _restore_search_default(constructor, fit):
-    """Make an implicit pre-R-init search explicit without rewriting fit evidence."""
+    """Make an implicit historical search explicit without rewriting fit evidence.
+
+    Archives written before the relative gradient criterion keep the
+    absolute-only gate that produced their saved diagnostics.
+    """
     search = fit.get("configuration", {}).get("search", {})
-    if constructor.get("search") is None and isinstance(search, dict) and "r_init" not in search:
-        constructor["search"] = SearchConfig(r_init=False)
+    if (
+        constructor.get("search") is None
+        and isinstance(search, dict)
+        and "relative_gradient_tolerance" not in search
+    ):
+        constructor["search"] = SearchConfig(r_init=False, relative_gradient_tolerance=0.0)
     return constructor
 
 
@@ -123,6 +139,12 @@ def _prepare(model, training, *, conventions_from=None):
         standardize=False,
         max_observations=model.max_observations,
         covariance_tolerance=model.covariance_tolerance,
+    )
+    adapter.capacity_unit = capacity_unit(
+        model.linear_algebra,
+        noise_prior=model.priors.noise,
+        run_baseline_sd=model.run_baseline_sd,
+        noise_timescales=model.noise_timescales,
     )
     adapter._prepare(training)
     problem = BayesianProblem(

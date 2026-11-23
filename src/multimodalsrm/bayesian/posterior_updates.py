@@ -58,11 +58,18 @@ def adapter_state(adapter):
     )
 
 
-def restore_adapter(state):
-    """Restore supplied units and frozen preprocessing, without estimating it."""
+def restore_adapter(state, linear_algebra):
+    """Restore supplied units and frozen preprocessing, without estimating it.
+
+    Posterior updates support dense/grouped algebra with independent noise and
+    no run baselines, so the algebra alone fixes the capacity unit.
+    """
+    from .observation_adapter import capacity_unit
+
     if set(state) != {"constructor", "fitted"} or set(state["fitted"]) != set(ADAPTER_FIELDS):
         raise ValueError("invalid posterior update adapter state")
     adapter = BayesianObservationAdapter(**copy.deepcopy(state["constructor"]))
+    adapter.capacity_unit = capacity_unit(linear_algebra)
     for name, value in state["fitted"].items():
         setattr(adapter, name, copy.deepcopy(value))
     return adapter
@@ -240,7 +247,7 @@ def rebuild_target(state):
         or specification["linear_algebra"] != state["linear_algebra"]
     ):
         raise ValueError("posterior update specification differs from reference")
-    adapter = restore_adapter(ref["adapter"])
+    adapter = restore_adapter(ref["adapter"], specification["linear_algebra"])
     from .gp_hyperparameters import length_scale_settings
 
     length_scale, length_scale_prior = length_scale_settings(specification["length_scale"])

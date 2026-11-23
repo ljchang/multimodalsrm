@@ -151,8 +151,22 @@ def observation_operator(grid, times, kernel, support=None):
         from .bateman_operators import bateman_operator
 
         return bateman_operator(grid, times, kernel, valid)
+    selected = np.flatnonzero(valid)
+    shape = (len(times), len(grid))
+    if isinstance(kernel, Identity):
+        positions = np.clip(times[selected], grid[0], grid[-1])
+        left = np.clip(np.searchsorted(grid, positions, side="right") - 1, 0, len(grid) - 2)
+        fraction = (positions - grid[left]) / (grid[left + 1] - grid[left])
+        op = csr_matrix(
+            (
+                np.column_stack([1 - fraction, fraction]).ravel(),
+                (np.repeat(selected, 2), np.column_stack([left, left + 1]).ravel()),
+            ),
+            shape=shape,
+        )
+        op.eliminate_zeros()
+        return op, valid
     lo, hi = kernel.support
-    rows, cols, values = [], [], []
     nodes, weights = np.polynomial.legendre.leggauss(3)
     # Resolve the response itself even when much narrower than a latent cell.
     # This is integration accuracy, not an assertion of recoverable bandwidth.
@@ -162,35 +176,55 @@ def observation_operator(grid, times, kernel, support=None):
         resolution = min(kernel.peak_scale, kernel.undershoot_scale) / 2
     else:
         resolution = None
-    shape_knots = (
-        np.linspace(lo, hi, max(2, int(np.ceil((hi - lo) / resolution)) + 1))
-        if resolution
-        else np.array([])
-    )
-    for row in np.flatnonzero(valid):
-        t = times[row]
-        if isinstance(kernel, Identity):
-            positions = np.array([np.clip(t, grid[0], grid[-1])])
-            mass = np.array([1.0])
-        else:
-            # Integration variable is lag; every knot of z(t-lag) is a split.
-            knots = t - grid
-            interior = knots[(knots > lo) & (knots < hi)]
-            splits = [np.array([lo, hi]), interior, shape_knots]
-            if isinstance(kernel, SampledKernel):
-                splits.append(kernel.lags)
-            breaks = np.unique(np.concatenate(splits))
-            half = np.diff(breaks) / 2
-            mid = (breaks[:-1] + breaks[1:]) / 2
-            lags = (mid[:, None] + half[:, None] * nodes).ravel()
-            mass = (half[:, None] * weights).ravel() * kernel.evaluate(lags)
-            positions = np.clip(t - lags, grid[0], grid[-1])
-        left = np.searchsorted(grid, positions, side="right") - 1
-        left = np.clip(left, 0, len(grid) - 2)
+    fixed = [np.array([lo, hi])]
+    if resolution:
+        fixed.append(np.linspace(lo, hi, max(2, int(np.ceil((hi - lo) / resolution)) + 1)))
+    if isinstance(kernel, SampledKernel):
+        fixed.append(kernel.lags)
+    fixed = np.unique(np.concatenate(fixed))
+    # Integration variable is lag; every knot of z(t-lag) is a split. Each row
+    # has the same response splits plus its own latent knots inside the
+    # support. Rows are padded to a common width with repeated upper endpoints:
+    # those panels have zero width and zero mass, so every row integrates over
+    # exactly its own sorted distinct breaks.
+    dt = grid[1] - grid[0]
+    width = int(np.ceil((hi - lo) / dt)) + 3
+    panels = len(fixed) + width - 1
+    chunk = max(1, 400_000 // (3 * panels))
+    rows, cols, values = [], [], []
+    for begin in range(0, len(selected), chunk):
+        index = selected[begin : begin + chunk]
+        t = times[index, None]
+        first = np.searchsorted(grid, t[:, 0] - hi, side="left") - 1
+        candidates = first[:, None] + np.arange(width)
+        knots = t - grid[np.clip(candidates, 0, len(grid) - 1)]
+        interior = (candidates >= 0) & (candidates < len(grid)) & (knots > lo) & (knots < hi)
+        breaks = np.sort(
+            np.concatenate(
+                [np.broadcast_to(fixed, (len(index), len(fixed))), np.where(interior, knots, hi)],
+                axis=1,
+            ),
+            axis=1,
+        )
+        half = np.diff(breaks, axis=1) / 2
+        mid = (breaks[:, :-1] + breaks[:, 1:]) / 2
+        lags = mid[:, :, None] + half[:, :, None] * nodes
+        mass = np.where(half[:, :, None] > 0, half[:, :, None] * weights * kernel.evaluate(lags), 0)
+        positions = np.clip(t[:, :, None] - lags, grid[0], grid[-1])
+        left = np.clip(np.searchsorted(grid, positions, side="right") - 1, 0, len(grid) - 2)
         fraction = (positions - grid[left]) / (grid[left + 1] - grid[left])
-        rows.extend(np.repeat(row, len(left) * 2))
-        cols.extend(np.column_stack([left, left + 1]).ravel())
-        values.extend(np.column_stack([mass * (1 - fraction), mass * fraction]).ravel())
-    op = csr_matrix((values, (rows, cols)), shape=(len(times), len(grid)))
+        keep = mass != 0
+        rows.append(np.repeat(np.broadcast_to(index[:, None, None], mass.shape)[keep], 2))
+        cols.append(np.column_stack([left[keep], left[keep] + 1]).ravel())
+        values.append(
+            np.column_stack(
+                [mass[keep] * (1 - fraction[keep]), mass[keep] * fraction[keep]]
+            ).ravel()
+        )
+    if not rows:
+        return csr_matrix(shape), valid
+    op = csr_matrix(
+        (np.concatenate(values), (np.concatenate(rows), np.concatenate(cols))), shape=shape
+    )
     op.eliminate_zeros()
     return op, valid

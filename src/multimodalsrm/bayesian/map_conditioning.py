@@ -3,6 +3,8 @@
 import numpy as np
 from scipy.optimize import OptimizeResult, minimize
 
+from .fitting import gradient_gate
+
 
 def validate(problem):
     """Limit this experimental solver to the validated full multifactor model."""
@@ -131,7 +133,7 @@ def minimize_conditioned(
     if not np.isfinite(value) or not np.isfinite(gradient).all():
         raise FloatingPointError("conditioning requires a finite initial point")
     best = [value, x.copy(), gradient.copy()]
-    qualified = _projected_gradient(x, gradient, bounds) <= config.physical_gradient_tolerance
+    qualified = gradient_gate(_projected_gradient(x, gradient, bounds), value, config)[0]
     result = OptimizeResult(success=qualified, status=0, message="Initial point checked")
     for stage in range(30):
         if qualified or iterations >= maxiter:
@@ -204,7 +206,7 @@ def minimize_conditioned(
         )
         evaluations += int(result.nfev)
         projected = _projected_gradient(best[1], best[2], bounds)
-        qualified = projected <= config.physical_gradient_tolerance
+        qualified = gradient_gate(projected, best[0], config)[0]
         stages.append(
             dict(
                 stage=stage,

@@ -159,6 +159,7 @@ def decode(value, arrays, used):
                 "n_jobs": 1,
                 "conditioning": "none",
                 "r_init": False,
+                "relative_gradient_tolerance": 0.0,
             }
             if expected - defaults.keys() <= record_fields.keys() <= expected:
                 record_fields = {**defaults, **record_fields}

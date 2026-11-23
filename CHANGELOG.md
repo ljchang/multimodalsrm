@@ -7,7 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `MultimodalSRM(kernel_tol=1e-4)` adds a response-step condition to convergence:
+  no free response coordinate may have moved further than `kernel_tol` in the last
+  iteration (seconds for lags, log units for positive parameters). Alternating
+  updates can move a response by a small, nearly constant step for hundreds of
+  iterations while every objective decrement stays below `tol`. In a synthetic
+  eight-participant fit the objective-only rule reported convergence at iteration
+  65 with a response width of 0.669 that later settled at 0.75. `kernel_tol=None`
+  restores the objective-only rule, and earlier pickles load with it.
+- `MultimodalSRM(kernel_extrapolation=True)` follows each iteration's response step
+  further while refitted latents and maps keep lowering the complete objective. The
+  objective and its stationary points are unchanged. The same synthetic fit reached
+  the new criterion in 99 iterations instead of 373. Per-iteration `kernel_step` and
+  `kernel_extrapolation` records are in `restart_diagnostics_`.
+- `SearchConfig(relative_gradient_tolerance=1e-6)` adds an objective-relative MAP
+  gradient criterion. `meets_gradient_tolerance` is now true when the largest
+  physical projected gradient is at most `physical_gradient_tolerance` or at most
+  `relative_gradient_tolerance * abs(objective)`. Diagnostics add
+  `relative_projected_gradient` and `gradient_criterion`. The absolute threshold
+  alone could not separate a converged large fit (gradient 0.037 at objective
+  858,992) from a stalled start (gradient 60,800 at objective 1,195,617).
+  `relative_gradient_tolerance=0` restores the absolute-only gate, and archives
+  written before this option keep it.
+
 ### Changed
+
+- R-MSRM response operators are shared across participants whose timestamps are
+  identical within a run and modality, instead of being rebuilt per participant.
+  The quadrature operator for Gamma, DoubleGamma, sampled and Identity responses
+  integrates rows in chunks rather than one at a time and returns the same
+  matrices. A synthetic eight-participant fit with a learned Gamma response fell
+  from 482 s to 21 s, and its Gaussian counterpart from 34 s to 12 s, with
+  identical objectives.
+- `max_observations` now bounds what each GP backend factorizes per run: eligible
+  scalars for dense and spectral algebra, exact modality/time nodes times factors
+  for grouped algebra, and nodes for grouped state-space filtering. Run baselines,
+  correlated noise and scalar state-space updates keep the scalar count. The error
+  reports the measured size and the alternatives.
+- The GP error for a non-shared response names the modality and the fix, and the
+  MAP convergence warning reports the gradient, objective and both limits.
 
 - Grouped GP marginal prediction reuses each parameter draw's factorization
   across output features and evaluates response covariance at unique query

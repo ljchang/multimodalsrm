@@ -16,6 +16,9 @@ from .grouping import complete_affinity, latent_groups
 from .initialization import spectral_latents
 from .kernel_optimization import (
     KernelObjective,
+    coordinate_step,
+    extrapolated_kernels,
+    free_coordinates,
     group_kernels,
     kernel_penalty,
     kernel_stationarity,
@@ -89,6 +92,17 @@ class MultimodalSRM(BaseEstimator):
     -1 uses available CPUs, capped by ``n_init``). Integer ``random_state``
     preserves restart seeds and selection across worker counts. Native parallel
     cross-validation suppresses inner restart workers to avoid oversubscription.
+
+    Convergence requires a small objective decrement, a successful response
+    optimizer and, with ``kernel_tol`` (default 1e-4), that no free response
+    coordinate moved further than it in the last iteration: seconds for lags,
+    log units for positive parameters. Alternating updates can move a response
+    by a small, nearly constant step for hundreds of iterations while each
+    objective decrement stays below ``tol``; ``kernel_tol=None`` restores the
+    objective-only rule. ``kernel_extrapolation`` (default True) follows each
+    iteration's response step further while refitted latents and maps keep
+    lowering the complete objective, which shortens that slow phase without
+    changing the objective or its stationary points.
     """
 
     def __init__(
@@ -113,6 +127,8 @@ class MultimodalSRM(BaseEstimator):
         gap_threshold=None,
         kernel_max_iter=50,
         balance_scale=True,
+        kernel_tol=1e-4,
+        kernel_extrapolation=True,
     ):
         self.features = features
         self.latent_dt = latent_dt
@@ -133,6 +149,8 @@ class MultimodalSRM(BaseEstimator):
         self.gap_threshold = gap_threshold
         self.kernel_max_iter = kernel_max_iter
         self.balance_scale = balance_scale
+        self.kernel_tol = kernel_tol
+        self.kernel_extrapolation = kernel_extrapolation
 
     def __setstate__(self, state):
         """Restore pre-policy pickles with the historical pair-scaled ridge."""
@@ -140,6 +158,9 @@ class MultimodalSRM(BaseEstimator):
         if "n_jobs" not in state:
             state["_legacy_n_jobs_default"] = True
         state.setdefault("n_jobs", 1)
+        # Earlier fits used the objective-only stopping rule without extrapolation.
+        state.setdefault("kernel_tol", None)
+        state.setdefault("kernel_extrapolation", False)
         configuration = state.get("configuration_")
         legacy = "loading_penalty_scaling" not in state and (
             not isinstance(configuration, dict) or "loading_penalty_scaling" not in configuration
@@ -156,6 +177,15 @@ class MultimodalSRM(BaseEstimator):
             raise ValueError("init must be random, spectral, or hybrid")
         if not isinstance(self.balance_scale, (bool, np.bool_)):
             raise ValueError("balance_scale must be boolean")
+        if not isinstance(self.kernel_extrapolation, (bool, np.bool_)):
+            raise ValueError("kernel_extrapolation must be boolean")
+        if self.kernel_tol is not None and (
+            isinstance(self.kernel_tol, (bool, np.bool_))
+            or not isinstance(self.kernel_tol, (int, float, np.number))
+            or not np.isfinite(self.kernel_tol)
+            or self.kernel_tol <= 0
+        ):
+            raise ValueError("kernel_tol must be None or positive finite")
         for name in ["features", "max_iter", "n_init", "kernel_max_iter"]:
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < 1:
@@ -251,7 +281,10 @@ class MultimodalSRM(BaseEstimator):
             "restart_selection": "minimum_finite_training_objective",
             "balance_scale": bool(self.balance_scale),
             "init": self.init,
-            "stopping_rule": "objective_decrement_and_kernel_optimizer_success",
+            "stopping_rule": "objective_decrement_and_kernel_optimizer_success"
+            + ("" if self.kernel_tol is None else "_and_kernel_step"),
+            "kernel_tol": self.kernel_tol,
+            "kernel_extrapolation": bool(self.kernel_extrapolation),
         }
 
         blocks_for = PreparedBlocks(
@@ -454,6 +487,7 @@ class MultimodalSRM(BaseEstimator):
             history.append(objective(z, W, kernels, blocks))
             for iteration in range(self.max_iter):
                 previous = history[-1]
+                coordinates_before = free_coordinates(kernels, self.responses_)
                 new_W = solve_loadings(blocks, z, self.loading_ridge, self.loading_penalty_scaling)
                 if objective(z, new_W, kernels, blocks) <= previous + 1e-12:
                     W = new_W
@@ -508,12 +542,68 @@ class MultimodalSRM(BaseEstimator):
                         self.loading_penalty_scaling,
                     )
                 current = objective(z, W, kernels, blocks)
+                extrapolation = {"accepted_steps": 0, "scale": 0.0}
+                direction = free_coordinates(kernels, self.responses_)
+                for key, value in coordinates_before.items():
+                    direction[key] -= value
+                if self.kernel_extrapolation and any(direction.values()):
+                    # Each accepted candidate is a complete refit of latents and
+                    # maps at the moved responses, scored by the full objective.
+                    scale = 1.0
+                    for _ in range(12):
+                        candidate_k = extrapolated_kernels(
+                            kernels, self.responses_, direction, scale
+                        )
+                        if candidate_k is None:
+                            break
+                        try:
+                            candidate_blocks = blocks_for(candidate_k)
+                            candidate_z, candidate_solver = solve_latents(
+                                candidate_blocks,
+                                self.run_grids_,
+                                self.subjects_,
+                                W,
+                                self.features,
+                                self.latent_pooling,
+                                self.latent_strength,
+                                self.latent_ridge,
+                                self.temporal_strength,
+                                self.affinity_,
+                            )
+                            candidate_W = solve_loadings(
+                                candidate_blocks,
+                                candidate_z,
+                                self.loading_ridge,
+                                self.loading_penalty_scaling,
+                            )
+                            value = objective(
+                                candidate_z, candidate_W, candidate_k, candidate_blocks
+                            )
+                        except (RuntimeError, ValueError, np.linalg.LinAlgError):
+                            break
+                        if not np.isfinite(value) or value >= current:
+                            break
+                        kernels, blocks, z, W = (
+                            candidate_k,
+                            candidate_blocks,
+                            candidate_z,
+                            candidate_W,
+                        )
+                        solver, current = candidate_solver, value
+                        extrapolation["accepted_steps"] += 1
+                        extrapolation["scale"] += scale
+                        scale *= 2
+                kernel_step = coordinate_step(
+                    coordinates_before, free_coordinates(kernels, self.responses_)
+                )
                 diagnostics.append(
                     {
                         "iteration": iteration + 1,
                         "latent_solver": solver,
                         "kernel_optimizer": kdiag,
                         "scale_balance": scale_diagnostic,
+                        "kernel_step": kernel_step,
+                        "kernel_extrapolation": extrapolation,
                     }
                 )
                 if not np.isfinite(current) or current > previous + 1e-10:
@@ -522,6 +612,7 @@ class MultimodalSRM(BaseEstimator):
                 if (
                     abs(previous - current) <= self.tol * max(1.0, abs(previous))
                     and kdiag["success"]
+                    and (self.kernel_tol is None or kernel_step <= self.kernel_tol)
                 ):
                     converged = True
                     break

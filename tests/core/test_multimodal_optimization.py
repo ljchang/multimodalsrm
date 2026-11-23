@@ -107,7 +107,7 @@ def test_scale_and_final_state_diagnostics_are_exposed_without_candidate_arrays(
     assert d["components"]["total"] == pytest.approx(model.objective_history_[-1])
     assert d["stationarity"]["relative_scale_imbalance"] < 1e-10
     assert d["stationarity"]["scope"] == "fixed_kernel_training_quadratic"
-    assert d["stopping_rule"] == "objective_decrement_and_kernel_optimizer_success"
+    assert d["stopping_rule"] == "objective_decrement_and_kernel_optimizer_success_and_kernel_step"
     assert model.selection_diagnostics_["policy"] == "minimum_finite_training_objective"
     assert not any("candidates" in key for key in vars(model))
     assert np.max(np.diff(model.objective_history_)) <= 1e-10

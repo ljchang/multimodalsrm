@@ -35,6 +35,13 @@ class SearchConfig:
     It is opt-in: the default is the historical data-based first start. The
     measured benefit is scale-dependent and has not been shown to transfer to
     empirical recordings, so enabling it is a per-analysis decision.
+
+    A MAP point meets the gradient tolerance when its largest physical projected
+    gradient is at most ``physical_gradient_tolerance``, or at most
+    ``relative_gradient_tolerance * abs(objective)``. The marginal likelihood
+    and its gradients sum over observations, so the absolute threshold alone
+    sits below double-precision gradient noise for large recordings. Set
+    ``relative_gradient_tolerance=0`` for the historical absolute-only gate.
     """
 
     starts: int = 16
@@ -47,6 +54,7 @@ class SearchConfig:
     n_jobs: int = 1
     conditioning: str = "none"
     r_init: bool = False
+    relative_gradient_tolerance: float = 1e-6
 
     def __post_init__(self):
         if type(self.r_init) is not bool:
@@ -63,6 +71,13 @@ class SearchConfig:
             or min(self.ftol, self.gtol, self.physical_gradient_tolerance) <= 0
         ):
             raise ValueError("search tolerances must be positive finite")
+        if (
+            isinstance(self.relative_gradient_tolerance, (bool, np.bool_))
+            or not isinstance(self.relative_gradient_tolerance, (int, float, np.number))
+            or not np.isfinite(self.relative_gradient_tolerance)
+            or self.relative_gradient_tolerance < 0
+        ):
+            raise ValueError("relative_gradient_tolerance must be nonnegative finite")
 
 
 @dataclass(frozen=True)
@@ -178,6 +193,21 @@ def initial_points(problem, count, seed):
     return points
 
 
+def gradient_gate(norm, objective, config):
+    """Return (meets tolerance, gradient relative to objective, deciding criterion).
+
+    The absolute criterion is checked first, so a point that met the historical
+    gate reports it unchanged. ``criterion`` is None when neither is met.
+    """
+    scale = abs(float(objective))
+    relative = float(norm / scale) if scale > 0 else float("inf")
+    if norm <= config.physical_gradient_tolerance:
+        return True, relative, "absolute"
+    if norm <= config.relative_gradient_tolerance * scale:
+        return True, relative, "relative_to_objective"
+    return False, relative, None
+
+
 def _map_diagnostics(problem, x, config, result):
     value, gradient = problem.value_gradient(x)
     if not np.isfinite(value) or not np.isfinite(gradient).all():
@@ -192,6 +222,7 @@ def _map_diagnostics(problem, x, config, result):
         if (at_lo and gradient[j] > 0) or (at_hi and gradient[j] < 0):
             projected[j] = 0.0
     norm = float(np.max(np.abs(projected)))
+    meets, relative, criterion = gradient_gate(norm, value, config)
     return dict(
         parameters=x.tolist(),
         objective=value,
@@ -201,7 +232,9 @@ def _map_diagnostics(problem, x, config, result):
         message=str(result.message),
         physical_projected_gradient=norm,
         boundary_parameters=boundary,
-        meets_gradient_tolerance=norm <= config.physical_gradient_tolerance,
+        relative_projected_gradient=relative,
+        gradient_criterion=criterion,
+        meets_gradient_tolerance=meets,
     )
 
 
@@ -361,6 +394,8 @@ def _refine(problem, record, config, evaluate, *, progress=None):
                 "parameters",
                 "objective",
                 "physical_projected_gradient",
+                "relative_projected_gradient",
+                "gradient_criterion",
                 "meets_gradient_tolerance",
                 "optimizer_success",
                 "status",

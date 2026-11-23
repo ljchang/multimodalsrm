@@ -123,9 +123,15 @@ class ObservationPreparation(BaseEstimator):
             )
             for m in self.modalities_
         }
-        for response in self.responses_.values():
-            if not isinstance(response, Response) or response.pooling != "shared":
-                raise ValueError("ProbabilisticMultimodalSRM requires Response(pooling='shared')")
+        for modality, response in self.responses_.items():
+            if not isinstance(response, Response):
+                raise ValueError(f"responses[{modality!r}] must be a Response")
+            if response.pooling != "shared":
+                raise ValueError(
+                    f"GP-MSRM shares each modality response across participants, but "
+                    f"responses[{modality!r}] has pooling={response.pooling!r} (the Response "
+                    "default is 'partial'). Pass Response(..., pooling='shared')."
+                )
             kernel = response.initial_kernel()
             if isinstance(kernel, DoubleGamma):
                 bounds = response.parameter_bounds()
@@ -300,10 +306,48 @@ class NativeObservationPreparation(ObservationPreparation):
         self._systems(result, self.domains_)  # Guard before initialization or covariance.
         return result
 
+    # What max_observations bounds for each run. "scalars" counts eligible feature
+    # values, the dimension of a dense observation covariance. "functionals"
+    # counts exact (modality, timestamp) nodes times latent factors, the dense
+    # dimension of grouped algebra. "nodes" counts those nodes alone, the number
+    # of grouped state-space filter updates. The Bayesian model selects the unit.
+    capacity_unit = "scalars"
+
+    def _capacity(self, node_times):
+        """Size bounded by max_observations for one run's {modality: [times]}."""
+        nodes = sum(len(np.unique(np.concatenate(t))) for t in node_times.values() if t)
+        return nodes * (self.features if self.capacity_unit == "functionals" else 1)
+
+    def _capacity_error(self, run, count):
+        if self.capacity_unit == "scalars":
+            size = f"at least {count} eligible scalar observations"
+            advice = (
+                "Dense algebra factorizes a matrix of that dimension; "
+                "linear_algebra='grouped' or 'state_space' bound exact "
+                "(modality, timestamp) nodes instead, or raise max_observations."
+            )
+        elif self.capacity_unit == "functionals":
+            size = f"{count} grouped functionals (modality/time nodes x {self.features} factors)"
+            advice = (
+                "Grouped algebra factorizes a matrix of that dimension; "
+                "linear_algebra='state_space' scales linearly in nodes, "
+                "or raise max_observations."
+            )
+        else:
+            size = f"{count} modality/time nodes"
+            advice = "Raise max_observations to filter a run of this length."
+        return ValueError(
+            f"run {run} has {size}, exceeding max_observations={self.max_observations}. {advice}"
+        )
+
     def _systems(self, data, domains):
         blocks = []
         parts = {r: [] for r in domains}
         counts = {r: 0 for r in domains}
+        if self.capacity_unit not in ("scalars", "functionals", "nodes"):
+            raise ValueError("capacity_unit must be scalars, functionals, or nodes")
+        scalars = self.capacity_unit == "scalars"
+        node_times = {r: {} for r in domains}
         for s, runs in data.items():
             for r, mods in runs.items():
                 for m, ts in mods.items():
@@ -320,12 +364,17 @@ class NativeObservationPreparation(ObservationPreparation):
                         rows = valid & ts.mask[:, f]
                         count = int(rows.sum())
                         counts[r] += count
-                        if counts[r] > self.max_observations:
-                            raise ValueError(
-                                f"run {r} exceeds max_observations={self.max_observations}"
-                            )
+                        if scalars and counts[r] > self.max_observations:
+                            raise self._capacity_error(r, counts[r])
                         if count:
                             parts[r].append((ts.times[rows], [(s, m, f)] * count, values[rows, f]))
+                    if not scalars:
+                        node_times[r].setdefault(m, []).append(ts.times[valid])
+        if not scalars:
+            for r in domains:
+                count = self._capacity(node_times[r])
+                if count > self.max_observations:
+                    raise self._capacity_error(r, count)
         systems = {}
         for r, chunks in parts.items():
             if not chunks:

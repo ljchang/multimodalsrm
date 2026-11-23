@@ -7,7 +7,7 @@ R-MSRM and GP-MSRM have different inference and prediction contracts. Start with
 
 ## MultimodalSRM
 
-`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L75)
+`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L78)
 
 ```python
 MultimodalSRM(
@@ -31,6 +31,8 @@ MultimodalSRM(
     gap_threshold=None,
     kernel_max_iter=50,
     balance_scale=True,
+    kernel_tol=0.0001,
+    kernel_extrapolation=True,
 )
 ```
 
@@ -50,6 +52,17 @@ uses one deterministic spectral start followed by paired random starts;
 -1 uses available CPUs, capped by `n_init`). Integer `random_state`
 preserves restart seeds and selection across worker counts. Native parallel
 cross-validation suppresses inner restart workers to avoid oversubscription.
+
+Convergence requires a small objective decrement, a successful response
+optimizer and, with `kernel_tol` (default 1e-4), that no free response
+coordinate moved further than it in the last iteration: seconds for lags,
+log units for positive parameters. Alternating updates can move a response
+by a small, nearly constant step for hundreds of iterations while each
+objective decrement stays below `tol`; `kernel_tol=None` restores the
+objective-only rule. `kernel_extrapolation` (default True) follows each
+iteration's response step further while refitted latents and maps keep
+lowering the complete objective, which shortens that slow phase without
+changing the objective or its stationary points.
 
 ### MultimodalSRM.fit
 
@@ -158,7 +171,8 @@ Sampling diagnostics do not establish calibration or complete mode coverage.
 
 `linear_algebra="grouped"` opts into an exact reduction over repeated
 modality/time functionals. `"dense"` remains the default reference.
-Both paths retain the original scalar-observation capacity guard.
+The capacity guard counts scalars for dense algebra and nodes times factors
+for grouped algebra.
 
 `linear_algebra="state_space"` uses exact Matérn-3/2 Kalman inference
 with stationary initialization and native observation times. It groups
@@ -176,7 +190,7 @@ can be requested explicitly. BatemanSCR learns rise, decay and lag with two
 response states and an explicit bound for the restored 90-second tail.
 SampledKernel remains unsupported.
 Prediction uses an RTS smoother; no dense observation covariance is built.
-The explicit max_observations guard still applies and can be raised.
+max_observations then bounds modality/time nodes per run and can be raised.
 
 `linear_algebra="spectral", spectral=SpectralConfig(rank, padding)`
 explicitly approximates the GP with a padded sine basis. Its finite rank
