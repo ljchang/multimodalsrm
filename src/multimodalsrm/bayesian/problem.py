@@ -237,13 +237,20 @@ class BayesianProblem:
         group_indices = {key: i for i, key in enumerate(self.groups)}
         modality_indices = {key: i for i, key in enumerate(self.modalities)}
         for run, system in self.systems.items():
-            if len(system.times) > adapter.max_observations:
-                raise ValueError("run exceeds max_observations")
             self._packed[run] = (
                 np.array([key_indices[k] for k in system.keys]),
                 np.array([group_indices[k[:2]] for k in system.keys]),
                 np.array([modality_indices[k[1]] for k in system.keys]),
             )
+            if adapter.capacity_unit == "scalars":
+                count = len(system.times)
+            else:
+                packed = self._packed[run][2]
+                count = adapter._capacity(
+                    {m: [system.times[packed == m]] for m in np.unique(packed)}
+                )
+            if count > adapter.max_observations:
+                raise adapter._capacity_error(run, count)
             if linear_algebra == "state_space":
                 from .state_space import StateSpaceSystem
 

@@ -304,6 +304,9 @@ def test_equal_rounded_objective_keeps_more_stationary_point(monkeypatch):
         return OptimizeResult(x=point, nit=1, nfev=2, success=True, status=0, message="step")
 
     monkeypatch.setattr(c, "minimize", one_step)
-    result, _ = c.minimize_conditioned(p, x, SearchConfig(), maxiter=1)
+    # The inflated constant makes any gradient negligible relative to the objective,
+    # so isolate the absolute criterion this rounding case is about.
+    config = SearchConfig(relative_gradient_tolerance=0.0)
+    result, _ = c.minimize_conditioned(p, x, config, maxiter=1)
     assert result.fun == objective(x)[0]
     assert np.max(np.abs(result.jac)) < np.max(np.abs(objective(x)[1]))

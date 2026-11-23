@@ -251,5 +251,6 @@ def test_legacy_implicit_search_default_is_restored():
     constructor = dict(search=None)
     fit = dict(configuration=dict(search={}))
     _restore_search_default(constructor, fit)
-    assert constructor["search"] == SearchConfig(r_init=False)
+    # Historical fits ran neither the R initializer nor the relative gradient gate.
+    assert constructor["search"] == SearchConfig(r_init=False, relative_gradient_tolerance=0.0)
     assert fit == dict(configuration=dict(search={}))

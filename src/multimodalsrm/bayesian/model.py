@@ -72,7 +72,8 @@ class BayesianMultimodalSRM(BaseEstimator):
 
     ``linear_algebra="grouped"`` opts into an exact reduction over repeated
     modality/time functionals. ``"dense"`` remains the default reference.
-    Both paths retain the original scalar-observation capacity guard.
+    The capacity guard counts scalars for dense algebra and nodes times factors
+    for grouped algebra.
 
     ``linear_algebra="state_space"`` uses exact Matérn-3/2 Kalman inference
     with stationary initialization and native observation times. It groups
@@ -90,7 +91,7 @@ class BayesianMultimodalSRM(BaseEstimator):
     response states and an explicit bound for the restored 90-second tail.
     SampledKernel remains unsupported.
     Prediction uses an RTS smoother; no dense observation covariance is built.
-    The explicit max_observations guard still applies and can be raised.
+    max_observations then bounds modality/time nodes per run and can be raised.
 
     ``linear_algebra="spectral", spectral=SpectralConfig(rank, padding)``
     explicitly approximates the GP with a padded sine basis. Its finite rank
@@ -324,7 +325,7 @@ class BayesianMultimodalSRM(BaseEstimator):
                 "with independent noise and no baselines"
             )
         check_environment_once()
-        from .observation_adapter import BayesianObservationAdapter
+        from .observation_adapter import BayesianObservationAdapter, capacity_unit
 
         length_scale, length_scale_prior = length_scale_settings(self.length_scale)
         adapter = BayesianObservationAdapter(
@@ -335,6 +336,12 @@ class BayesianMultimodalSRM(BaseEstimator):
             standardize=False,
             max_observations=self.max_observations,
             covariance_tolerance=self.covariance_tolerance,
+        )
+        adapter.capacity_unit = capacity_unit(
+            self.linear_algebra,
+            noise_prior=self.priors.noise,
+            run_baseline_sd=self.run_baseline_sd,
+            noise_timescales=self.noise_timescales,
         )
         adapter._prepare(data)
         self.adapter_ = adapter
@@ -468,7 +475,11 @@ class BayesianMultimodalSRM(BaseEstimator):
             )
         if not best["meets_gradient_tolerance"]:
             warnings.warn(
-                "Bayesian SRM MAP physical gradient threshold was not met; inspect map_diagnostics_",
+                "Bayesian SRM MAP gradient tolerance was not met: largest physical projected "
+                f"gradient {best['physical_projected_gradient']:.3g} at objective "
+                f"{best['objective']:.6g} (absolute limit "
+                f"{self.search_config_.physical_gradient_tolerance:g}, relative limit "
+                f"{self.search_config_.relative_gradient_tolerance:g}); inspect map_diagnostics_",
                 ConvergenceWarning,
                 stacklevel=2,
             )
