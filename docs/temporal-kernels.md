@@ -98,10 +98,10 @@ print(lag_only.free_parameters)  # ('lag',)
 
 | `Response` option | Meaning |
 | --- | --- |
-| `pooling="shared"` | One response per modality shared across participants |
-| `pooling="partial"` (default) | R participant responses penalized toward a population response |
-| `pooling="none"` | Separate R participant responses |
-| `pooling_strength=1.0` | Strength of the R partial-pooling penalty |
+| `pooling="shared"` (default) | One response per modality shared across participants |
+| `pooling="partial"` | R-MSRM only. Each participant has their own response parameters, penalized toward the group's: a random effect around the group response |
+| `pooling="none"` | R-MSRM only. Separate participant responses with no penalty between them |
+| `pooling_strength=1.0` | Strength of the partial-pooling penalty. With `MultimodalSRM(response_penalty_scaling="likelihood")` it is `1 / sd²` of the spread between participants; under the default scaling a value of 1 is close to complete pooling |
 | `lag_prior=None` | Optional R `Normal(mean, sd)` lag penalty |
 | `prior=None` | Optional R `KernelPrior(reference, strength)` parameter penalty |
 

@@ -293,11 +293,19 @@ class Response:
     ``estimate=True`` learns parameters not listed in ``fixed``. For example,
     a Gaussian with ``fixed={"width": 0.4}`` learns only its lag, while omitting
     ``fixed`` learns both width and lag. ``estimate=False`` fixes the full
-    response. ``pooling="shared"`` shares a modality's response across people.
+    response.
+
+    ``pooling="shared"`` (default) gives a modality one response for everyone.
+    ``"partial"`` gives each participant their own parameters, penalized toward
+    the group's by ``pooling_strength``, and ``"none"`` leaves them
+    independent; both are R-MSRM only and need enough data per participant to
+    determine a response for each. ``pooling_strength`` is only interpretable
+    as ``1 / sd**2`` of the spread between participants with
+    ``MultimodalSRM(response_penalty_scaling="likelihood")``.
     """
 
     kernel: Kernel
-    pooling: str = "partial"
+    pooling: str = "shared"
     estimate: bool = True
     fixed: dict | None = None
     bounds: dict | None = None
@@ -310,7 +318,7 @@ class Response:
         cls,
         kernel,
         *,
-        pooling="partial",
+        pooling="shared",
         bounds=None,
         pooling_strength=1.0,
         lag_prior=None,

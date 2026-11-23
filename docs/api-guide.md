@@ -14,7 +14,7 @@ Start here when you know what you want to estimate but are unsure which argument
 | What makes the latent response smooth? | R: `latent_timescale`; GP: `length_scale` | The correlation time of a derivative penalty, or the Matérn-3/2 prior timescale |
 | How does a modality respond to that signal? | `responses={name: Response(...)}` | Identity, Gaussian, Gamma, DoubleGamma, BatemanSCR, or a fixed sampled curve where supported |
 | Which response parameters are learned? | `estimate`, `fixed`, `bounds` | Learn unfixed parameters within their bounds, or fix the entire response |
-| Who shares a response filter? | `Response.pooling` | Shared across people, partially pooled, or separate; GP requires `"shared"` |
+| Who shares a response filter? | `Response.pooling` | Shared across people by default. R-MSRM can also estimate participant responses, partially pooled toward the group or separate; that needs enough data per participant to determine each response. GP requires `"shared"` |
 | Who shares the latent trajectory? | R: `latent_pooling` | Default `"shared"` is exact equality; extensions change the model |
 | Do I want GP MAP or posterior sampling? | `inference="map"` / `"posterior"` | Point parameter estimate or parameter draws; **default is `"posterior"`** |
 | Which GP computation? | `linear_algebra` | Dense, grouped, state-space, or spectral; separate from inference |

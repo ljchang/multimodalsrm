@@ -210,3 +210,11 @@ def test_validation_and_earlier_pickles():
     restored = MultimodalSRM.__new__(MultimodalSRM)
     restored.__setstate__(state)
     assert restored.response_penalty_scaling == "objective" and restored.penalty_scale_ is None
+
+
+def test_responses_are_shared_across_participants_by_default():
+    from multimodalsrm import Gaussian, Response
+
+    assert Response(Gaussian()).pooling == "shared"
+    assert Response.lag_only(Gaussian()).pooling == "shared"
+    assert Response(Gaussian(), pooling="partial").pooling == "partial"

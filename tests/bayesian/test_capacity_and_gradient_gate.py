@@ -102,9 +102,11 @@ def test_scalar_state_space_and_baselines_keep_the_scalar_guard():
         _prepare(model("grouped", run_baseline_sd={"brain": 1.0}), recording())
 
 
-def test_default_response_pooling_error_names_the_modality_and_fix():
-    responses = {"brain": Response(Identity(), estimate=False)}
+def test_default_response_is_accepted_and_participant_pooling_error_names_the_fix():
     data = {s: {"run": {"brain": runs["run"]["brain"]}} for s, runs in recording().items()}
+    # The Response default is shared, so no pooling argument is needed.
+    _prepare(model("grouped", responses={"brain": Response(Identity(), estimate=False)}), data)
+    responses = {"brain": Response(Identity(), estimate=False, pooling="partial")}
     with pytest.raises(ValueError, match=r"responses\['brain'\].*pooling='shared'"):
         _prepare(model("grouped", responses=responses), data)
 
