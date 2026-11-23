@@ -60,6 +60,7 @@ Import `MultimodalSRM` from `multimodalsrm`. `latent_dt` is required. The estima
 | `n_init=1`, `n_jobs=1`, `random_state=None` | Restart count, process workers (`-1` uses available CPUs, capped by restarts), and seed. An integer seed makes starts reproducible across worker counts. |
 | `max_iter=100`, `kernel_max_iter=50`, `tol=1e-5` | Outer optimization budget, response optimization budget, and stopping tolerance. Inspect `converged_` and `restart_diagnostics_`. |
 | `lag_init=None` | `"scan"` estimates relative modality delays from the training observations before fitting, starts every free response lag there and narrows its bounds to that lag ± 2. Use it whenever lags are estimated and the delays between modalities are not already known to within the lag bounds: otherwise a fit can settle in a wrong optimum without any bound being flagged. A precomputed `LagScan` is also accepted. See [response timing](#response-timing-lags-and-what-is-identified). |
+| `edge_observations="exclude"` | `"include"` scores every observed row by extending each latent grid before and after its run by the reach of the response support envelope. By default a row is scored only if that envelope lies inside the run. See [edge observations](#edge-observations-and-response-support). |
 | `kernel_tol=1e-4`, `kernel_extrapolation=True` | Convergence also requires that no free response coordinate moved further than `kernel_tol` in the last iteration (seconds for lags, log units for positive parameters); `None` restores the objective-only rule. Extrapolation follows each response step further while the complete objective keeps decreasing; it changes the path, not the objective. |
 | `gap_threshold=None` | Default splits integration support above twice the median usable interval. A positive explicit threshold uses timestamp units. |
 
@@ -96,6 +97,25 @@ The scan locates a basin; it is not itself a timing estimate. It needs modalitie
 
 The evidence is mixed and should set expectations. On synthetic recordings with large relative delays the scan turned silent wrong-optimum fits into correct ones. On the one empirical recording tested (five participants, one 8-minute film, 2 s sampling; brain parcels, facial action units and emotion ratings) it found no reliable delay for any pair of modalities, and ordinary fits reached the same lag from starts 12 s apart, so the scan was neither usable nor needed there. In that recording the fitted brain lag also changed with the number of factors (about 1.2 s after the face and rating streams at two, 6.9 s at four) while the objective differed by under 1% across lags from 0 to 12 s: report such lags with their sensitivity to model settings.
 
+## Edge observations and response support
+
+A response reads the latent over its **support envelope**: every lag its bounds allow, plus the response's full tail. By default both models use an observation only when that envelope lies inside the run, because the latent outside the run is not informed by other observations. The cost grows with long responses, wide lag bounds and short runs:
+
+| Response (default bounds) | Envelope | Rows scored in a 60 s run | 120 s | 300 s |
+| --- | --- | --- | --- | --- |
+| Gaussian, width 1.2 fixed, lag free ± 2 | (−9.2, 9.2) s | 69% | 84% | 94% |
+| Gaussian, width 1.2 and lag free | (−12.8, 12.8) s | 57% | 79% | 91% |
+| Gamma(3, 1), shape fixed, scale and lag free | (−2, 38.3) s | 33% | 66% | 87% |
+| DoubleGamma, fixed | (0, 49.4) s | 18% | 59% | 84% |
+| BatemanSCR, fixed | (0, 90) s | 0% | 25% | 70% |
+
+`edge_observations="include"` uses every observation in the run instead:
+
+- **R-MSRM** extends each latent grid before and after its run by the envelope's reach. The extra latent is constrained only by the edge observations and the smoothness penalty, and is reported outside the valid domain of the latent. Predictions are valid for every time inside the run.
+- **GP-MSRM** simply drops the exclusion: the latent process is stationary and defined outside the run. Supported for dense and grouped algebra.
+
+Rows near the start of a run rest on less information than interior rows, so expect them to be predicted less well; without this option they are not predicted at all. Narrow lag bounds remain worthwhile under either setting, since they shrink the envelope. `model.configuration_` records the setting and, for R-MSRM, the reach.
+
 ## GP-MSRM settings
 
 Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsrm.bayesian`. The GP consumes supplied units without internal standardization. Set `JAX_ENABLE_X64=true` before starting Python/JAX for fitting.
@@ -113,6 +133,7 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `search=None`, `sampler=None` | Use default `SearchConfig()` and `SamplerConfig()`; see below. |
 | `sample_blocks=None` | Full target by default. A nonempty unique subset of `"filter"`, `"loading"`, `"offset"`, `"noise"`, `"gp"` samples conditional on remaining parameters; this is not the full posterior. |
 | `random_state=0` | Reproducibility seed, or `None`. |
+| `edge_observations="exclude"` | `"include"` scores every observation in a run instead of only those whose response support envelope lies inside it; dense and grouped algebra. See [edge observations](#edge-observations-and-response-support). |
 | `max_observations=800` | Per-run size guard on what the backend factorizes: eligible scalars for dense and spectral algebra, exact modality/time nodes times factors for grouped algebra, and nodes for grouped state-space filtering. Run baselines, correlated noise and noise priors admitting zero keep the scalar count. Raising it permits a larger problem but does not guarantee feasible runtime. |
 | `covariance_tolerance=1e-7` | Error tolerance for supported analytic/response approximation checks. Does **not** certify response quadrature or spectral accuracy. |
 | `response_quadrature_order=None` | Explicit integer order 8–1024 per panel for dense/grouped structured response integrals. Needed for Gamma, DoubleGamma and BatemanSCR on those paths. Compare orders for numerical qualification. |

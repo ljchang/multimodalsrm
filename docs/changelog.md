@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`edge_observations="include"` on both estimators.** By default an observation
+  is scored only if its response support envelope (every lag the bounds allow plus
+  the response's full tail) lies inside the run: a fixed `DoubleGamma` scores 18% of
+  a 60 s run and a fixed `BatemanSCR` none of it. `"include"` scores every
+  observation in the run. R-MSRM extends each latent grid by the envelope's reach
+  and reports the added latent as outside the valid domain; GP-MSRM drops the
+  exclusion, which a stationary latent process does not need (dense and grouped
+  algebra). On an empirical recording split into a 320 s training run and a 184 s
+  test run, the brain rows scored in training rose from 662 to 784 of 784 with a
+  fixed `DoubleGamma`, and predictable held-out brain rows from 329 to 454. The
+  default is unchanged.
 - **Lag scan and scan-seeded response lags.** `scan_lags(data)` estimates relative
   modality delays from the observations before fitting, by lagged canonical
   correlation between every pair of modalities, and returns a `LagScan` with
