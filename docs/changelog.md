@@ -23,17 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as its standard deviation fell, and partial pooling kept more than 80% of the
   participant spread. Calibration uses the same scaling. The default `"objective"`
   keeps the original behaviour.
-- **`edge_observations="include"` on both estimators.** By default an observation
-  is scored only if its response support envelope (every lag the bounds allow plus
-  the response's full tail) lies inside the run: a fixed `DoubleGamma` scores 18% of
-  a 60 s run and a fixed `BatemanSCR` none of it. `"include"` scores every
-  observation in the run. R-MSRM extends each latent grid by the envelope's reach
-  and reports the added latent as outside the valid domain; GP-MSRM drops the
-  exclusion, which a stationary latent process does not need (dense and grouped
-  algebra). On an empirical recording split into a 320 s training run and a 184 s
-  test run, the brain rows scored in training rose from 662 to 784 of 784 with a
-  fixed `DoubleGamma`, and predictable held-out brain rows from 329 to 454. The
-  default is unchanged.
+- **`edge_observations` on both estimators.** An observation used to be scored
+  only if its response support envelope (every lag the bounds allow plus the
+  response's full tail) lay inside the run: a fixed `DoubleGamma` scored 18% of a
+  60 s run and a fixed `BatemanSCR` none of it. `"include"` scores every
+  observation in the run, like a "same" convolution; `"exclude"` keeps the earlier
+  "valid" behaviour. R-MSRM extends each latent grid by the envelope's reach in
+  whole grid cells and drops the extension from reported latents; GP-MSRM drops
+  the exclusion, which a stationary latent process does not need (dense, grouped
+  and state-space algebra; not spectral). On an empirical recording split into a 320 s training run and a
+  184 s test run, the brain rows scored in training rose from 662 to 784 of 784
+  with a fixed `DoubleGamma`, and predictable held-out brain rows from 329 to 454.
 - **Lag scan and scan-seeded response lags.** `scan_lags(data)` estimates relative
   modality delays from the observations before fitting, by lagged canonical
   correlation between every pair of modalities, and returns a `LagScan` with
@@ -80,6 +80,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Edge observations are scored by default.** `MultimodalSRM` now defaults to
+  `edge_observations="include"` and `BayesianMultimodalSRM` to `"auto"`, which
+  includes for dense, grouped and state-space algebra and excludes for spectral
+  algebra. Fits with a non-`Identity` response therefore score more rows than
+  before and give different numbers; pass `edge_observations="exclude"` to
+  reproduce earlier fits. Saved R-MSRM pickles and GP-MSRM archives keep the
+  setting they were fitted with. In held-out synthetic runs with a 25 s causal
+  response, error on the rows both settings predict was 0.054 against 0.055 for
+  120 s and 300 s runs, and in 60 s runs exclusion left too few rows for a stable
+  fit in one of six recordings; the rows only `"include"` predicts had an error
+  near 0.18, where predicting the mean scores 1. The GP showed the same pattern
+  (0.114 against 0.143 on shared rows over five recordings). On the empirical
+  recording, where cross-modal prediction is near chance under either setting,
+  the two did not differ beyond noise.
 - **R-MSRM latent smoothness is now specified as a correlation time, with stronger
   defaults.** `MultimodalSRM(latent_timescale=2.0)` (timestamp units, normally
   seconds) replaces `temporal_strength`. The latent penalty is

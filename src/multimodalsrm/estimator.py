@@ -31,6 +31,7 @@ from .objective import (
     PreparedBlocks,
     build_grids,
     complete_objective,
+    core_slice,
     fit_preprocessing,
     make_blocks,
     response_reach,
@@ -118,14 +119,15 @@ class MultimodalSRM(BaseEstimator):
 
     A response reads the latent over its whole support envelope, which covers
     every lag its bounds allow and the response's full tail. With
-    ``edge_observations="exclude"`` (default) an observation is scored only if
-    that envelope lies inside the run, so long responses, wide lag bounds and
-    short runs can discard much of a recording. ``"include"`` instead extends
-    each latent grid before and after its run by the envelope's reach, so every
-    observed row is scored. The added latent is constrained only by those edge
-    observations and the smoothness penalty, and is reported as outside the
-    run's valid domain. Predictions near a run's start then rest on less
-    information than interior ones.
+    ``edge_observations="include"`` (default) each latent grid is extended
+    before and after its run by the envelope's reach, so every observed row is
+    scored, and the extension is then dropped: reported latents cover the run
+    only. This is the "same" mode of a convolution. The added latent is
+    constrained only by the edge observations and the smoothness penalty, so
+    predictions near a run's start rest on less information than interior
+    ones. ``"exclude"`` is the "valid" mode: an observation is scored only if
+    its envelope lies inside the run, so long responses, wide lag bounds and
+    short runs can discard much of a recording.
 
     ``response_penalty_scaling`` sets how ``Response.lag_prior``, ``Response.prior`` and
     ``pooling_strength`` weigh against the data. The reconstruction loss is a
@@ -189,7 +191,7 @@ class MultimodalSRM(BaseEstimator):
         kernel_tol=1e-4,
         kernel_extrapolation=True,
         lag_init=None,
-        edge_observations="exclude",
+        edge_observations="include",
         response_penalty_scaling="objective",
     ):
         self.features = features
@@ -561,7 +563,9 @@ class MultimodalSRM(BaseEstimator):
         for subject, runs in z.items():
             self.training_latents_[subject] = {}
             for run, values in runs.items():
-                grid = self.run_grids_[run]
+                # Padding added to score edge observations is not reported.
+                core = core_slice(self.run_grids_[run], self.run_domains_[run], self.latent_dt)
+                grid, values = self.run_grids_[run][core], values[core]
                 local, domain = component_support(
                     self,
                     active,
@@ -585,22 +589,23 @@ class MultimodalSRM(BaseEstimator):
         self._training_latent_arrays_ = z
         self._refresh_latent_groups()
         if self.latent_pooling not in ("neighborhood", "components"):
-            self.population_latents_ = {
-                r: SeriesResult(
-                    np.mean([z[s][r] for s in self.subjects_], axis=0),
-                    self.run_grids_[r],
-                    (self.run_grids_[r] >= self.run_domains_[r][0] - 1e-10)
-                    & (self.run_grids_[r] <= self.run_domains_[r][1] + 1e-10),
+            self.population_latents_ = {}
+            for r, padded in self.run_grids_.items():
+                core = core_slice(padded, self.run_domains_[r], self.latent_dt)
+                grid = padded[core]
+                self.population_latents_[r] = SeriesResult(
+                    np.mean([z[s][r][core] for s in self.subjects_], axis=0),
+                    grid,
+                    (grid >= self.run_domains_[r][0] - 1e-10)
+                    & (grid <= self.run_domains_[r][1] + 1e-10),
                     metadata=coverage_metadata(
                         self.observation_blocks_,
                         r,
-                        self.run_grids_[r],
+                        grid,
                         self.run_domains_[r],
                         gap_threshold=self.gap_threshold,
                     ),
                 )
-                for r in self.run_grids_
-            }
         if not self.converged_:
             warnings.warn(
                 "MultimodalSRM did not converge; returning best finite restart",

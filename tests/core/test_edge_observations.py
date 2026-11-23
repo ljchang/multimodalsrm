@@ -74,7 +74,7 @@ def merged(*recordings):
 @pytest.fixture(scope="module")
 def models():
     train = merged(recording(1)[0], recording(2)[0])
-    return fit(train), fit(train, edge_observations="include")
+    return fit(train, edge_observations="exclude"), fit(train)
 
 
 def scored(model, modality):
@@ -94,8 +94,10 @@ def test_reach_follows_the_support_envelope():
     )
 
 
-def test_default_excludes_edge_rows_and_include_scores_every_row(models):
+def test_default_scores_every_row_and_exclude_drops_edge_rows(models):
     excluded, included = models
+    assert MultimodalSRM(latent_dt=1.0).edge_observations == "include"
+    assert included.configuration_["edge_observations"] == "include"
     assert excluded.edge_reach_ == (0.0, 0.0)
     assert excluded.configuration_["edge_observations"] == "exclude"
     used, total = scored(excluded, "slow")
@@ -107,25 +109,32 @@ def test_default_excludes_edge_rows_and_include_scores_every_row(models):
     assert included.configuration_["edge_reach"] == reach
 
 
-def test_padding_extends_the_grid_but_not_the_reported_domain(models):
+def test_padding_extends_the_solve_grid_and_is_cropped_from_reported_latents(models):
     excluded, included = models
     for run, domain in included.run_domains_.items():
         assert domain == excluded.run_domains_[run]
-        grid = included.run_grids_[run]
-        assert grid[0] == pytest.approx(domain[0] - included.edge_reach_[0])
+        grid, reach = included.run_grids_[run], included.edge_reach_[0]
+        # Whole cells of padding: at least the reach, less than one cell more.
+        assert domain[0] - reach - included.latent_dt < grid[0] <= domain[0] - reach
         assert grid[-1] >= domain[1]
-        for result in (included.training_latents_["a"][run], included.population_latents_[run]):
-            np.testing.assert_array_equal(
-                result.valid, (grid >= domain[0] - 1e-10) & (grid <= domain[1] + 1e-10)
+        # Like a "same" convolution, results cover the run on its own grid.
+        for name in ("training_latents_", "population_latents_"):
+            padded, plain = getattr(included, name), getattr(excluded, name)
+            padded, plain = (
+                (padded["a"][run], plain["a"][run]) if name[0] == "t" else (padded[run], plain[run])
             )
-        assert not included.training_latents_["a"][run].valid[0]
+            np.testing.assert_array_equal(padded.times, plain.times)
+            np.testing.assert_array_equal(padded.valid, plain.valid)
+            assert padded.values.shape == plain.values.shape
+            assert np.isfinite(padded.values[padded.valid]).all()
+        assert len(included._training_latent_arrays_["a"][run]) == len(grid)
 
 
 def test_identity_responses_are_unaffected():
     data = merged(recording(1)[0], recording(2)[0])
     identity = {m: Response(Identity(), estimate=False) for m in ("direct", "slow")}
-    a = fit(data, responses=identity)
-    b = fit(data, responses=identity, edge_observations="include")
+    a = fit(data, responses=identity, edge_observations="exclude")
+    b = fit(data, responses=identity)
     np.testing.assert_array_equal(a.objective_history_, b.objective_history_)
     for run in a.run_grids_:
         np.testing.assert_array_equal(a.run_grids_[run], b.run_grids_[run])
@@ -178,17 +187,19 @@ def test_calibration_and_latent_inference_work_with_padding(models):
         warnings.simplefilter("ignore")
         calibrated = included.calibrate(data)
     assert set(calibrated.loadings_["new"]) == {"direct", "slow"}
+    excluded, _ = models
     latent = included.infer_latent(recording(5)[0])["a"]["run5"]
-    domain_rows = (latent.times >= 0.0) & (latent.times <= 59.5 + 1e-9)
-    np.testing.assert_array_equal(latent.valid, domain_rows)
-    assert latent.times[0] == pytest.approx(-included.edge_reach_[0])
+    np.testing.assert_array_equal(
+        latent.times, excluded.infer_latent(recording(5)[0])["a"]["run5"].times
+    )
+    assert latent.times[0] == 0.0 and latent.valid.all()
 
 
 def test_validation_and_earlier_pickles():
     data = recording(1)[0]
     with pytest.raises(ValueError, match="edge_observations"):
         MultimodalSRM(latent_dt=0.5, edge_observations="pad").fit(data)
-    model = fit(data, max_iter=3)
+    model = fit(data, max_iter=3, edge_observations="exclude")
     state = dict(model.__getstate__())
     for name in ("edge_observations", "edge_reach_"):
         state.pop(name)

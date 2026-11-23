@@ -113,8 +113,18 @@ def response_reach(responses, weights=None):
     )
 
 
+def core_slice(grid, domain, dt):
+    """The part of a padded latent grid that an unpadded grid would hold."""
+    before = int(round((domain[0] - grid[0]) / dt))
+    return slice(before, before + int(np.ceil((domain[1] - domain[0]) / dt)) + 1)
+
+
 def build_grids(data, dt, reach=(0.0, 0.0)):
-    """Latent grids and observed domains; ``reach`` pads each grid, not its domain."""
+    """Latent grids and observed domains; ``reach`` pads each grid, not its domain.
+
+    Padding is a whole number of cells, so the grid points inside a run are
+    the same with and without it.
+    """
     domains = {}
     for runs in data.values():
         for r, mods in runs.items():
@@ -126,8 +136,9 @@ def build_grids(data, dt, reach=(0.0, 0.0)):
     for r, (a, b) in domains.items():
         if b <= a:
             raise ValueError(f"run {r} needs positive observed duration")
-        start, stop = a - reach[0], b + reach[1]
-        grids[r] = start + dt * np.arange(int(np.ceil((stop - start) / dt)) + 1)
+        before = int(np.ceil(reach[0] / dt - 1e-12))
+        after = int(np.ceil((b + reach[1] - a) / dt - 1e-12))
+        grids[r] = a + dt * np.arange(-before, max(after, int(np.ceil((b - a) / dt))) + 1)
     return grids, domains
 
 

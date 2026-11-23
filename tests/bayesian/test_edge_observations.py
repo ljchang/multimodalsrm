@@ -140,5 +140,47 @@ def test_archive_round_trip_preserves_the_edge_setting(fits, tmp_path: Path):
 def test_validation():
     with pytest.raises(ValueError, match="edge_observations"):
         model("pad").fit(recording())
-    with pytest.raises(ValueError, match="dense/grouped"):
-        model("include", algebra="state_space").fit(recording())
+    with pytest.raises(ValueError, match="spectral"):
+        model("include", algebra="spectral").fit(recording())
+
+
+def test_auto_includes_except_for_spectral_algebra():
+    from multimodalsrm.bayesian import BayesianMultimodalSRM
+
+    assert BayesianMultimodalSRM(priors=None).edge_observations == "auto"
+    for algebra, expected in (
+        ("dense", "include"),
+        ("grouped", "include"),
+        ("state_space", "include"),
+        ("spectral", "exclude"),
+    ):
+        assert model("auto", algebra=algebra)._edge_mode() == expected
+    assert model("exclude")._edge_mode() == "exclude"
+
+
+def test_state_space_agrees_with_dense_on_edge_observations():
+    data = recording()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        dense = model("include", algebra="dense").fit(data)
+        state = model("include", algebra="state_space")
+        state._config()
+        _, problem = _prepare(state, data)
+    assert len(problem.systems["train"].times) == len(dense.problem_.systems["train"].times)
+    np.testing.assert_allclose(
+        problem.objective(dense.map_parameters_),
+        dense.problem_.objective(dense.map_parameters_),
+        rtol=1e-6,
+    )
+
+
+def test_archives_from_before_the_option_restore_as_excluding(fits):
+    import copy
+
+    from multimodalsrm.bayesian.persistence import _model_state, _restore_model
+
+    state = copy.deepcopy(_model_state(fits["exclude"]))
+    del state["constructor"]["edge_observations"]
+    restored, _ = _restore_model(state)
+    assert restored.edge_observations == "exclude" and restored.edge_observations_ == "exclude"
+    assert restored.adapter_.edge_observations == "exclude"

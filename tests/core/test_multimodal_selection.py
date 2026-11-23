@@ -119,7 +119,9 @@ def test_compare_preserves_native_common_support_and_full_target_exclusion():
             responses={
                 "brain": mm.Response(mm.Gaussian(width=0.3), estimate=False),
                 "rating": mm.Response(mm.Identity(), estimate=False),
-            }
+            },
+            # Gives this candidate a narrower valid support than the other.
+            edge_observations="exclude",
         ).fit(subset(data, ["film-A", "film-B"])),
     }
     evaluation = subset(data, ["film-C"])

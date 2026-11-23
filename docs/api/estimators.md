@@ -7,7 +7,7 @@ R-MSRM and GP-MSRM have different inference and prediction contracts. Start with
 
 ## MultimodalSRM
 
-`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L81)
+`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L82)
 
 ```python
 MultimodalSRM(
@@ -35,7 +35,7 @@ MultimodalSRM(
     kernel_tol=0.0001,
     kernel_extrapolation=True,
     lag_init=None,
-    edge_observations="exclude",
+    edge_observations="include",
     response_penalty_scaling="objective",
 )
 ```
@@ -79,14 +79,15 @@ delays relative to a reference modality or to their mean.
 
 A response reads the latent over its whole support envelope, which covers
 every lag its bounds allow and the response's full tail. With
-`edge_observations="exclude"` (default) an observation is scored only if
-that envelope lies inside the run, so long responses, wide lag bounds and
-short runs can discard much of a recording. `"include"` instead extends
-each latent grid before and after its run by the envelope's reach, so every
-observed row is scored. The added latent is constrained only by those edge
-observations and the smoothness penalty, and is reported as outside the
-run's valid domain. Predictions near a run's start then rest on less
-information than interior ones.
+`edge_observations="include"` (default) each latent grid is extended
+before and after its run by the envelope's reach, so every observed row is
+scored, and the extension is then dropped: reported latents cover the run
+only. This is the "same" mode of a convolution. The added latent is
+constrained only by the edge observations and the smoothness penalty, so
+predictions near a run's start rest on less information than interior
+ones. `"exclude"` is the "valid" mode: an observation is scored only if
+its envelope lies inside the run, so long responses, wide lag bounds and
+short runs can discard much of a recording.
 
 `response_penalty_scaling` sets how `Response.lag_prior`, `Response.prior` and
 `pooling_strength` weigh against the data. The reconstruction loss is a
@@ -201,7 +202,7 @@ BayesianMultimodalSRM(
     noise_timescales=None,
     response_quadrature_order=None,
     state_space_gaussian="auto",
-    edge_observations="exclude",
+    edge_observations="auto",
 )
 ```
 
@@ -283,13 +284,17 @@ norms are approximate. `covariance_tolerance` does not certify this path:
 compare higher orders and independent integrals for the declared bounds.
 Approximation metadata is retained in configuration, queries and archives.
 
-`edge_observations="include"` scores every observation in a run. By
-default an observation is used only if its response's support envelope,
-which covers every lag the bounds allow and the response's full tail, lies
-inside the run, so long responses and wide lag bounds can discard much of
-a short recording. The latent GP is stationary and defined outside the
-run, so the exclusion is a convention rather than a requirement. Supported
-for dense/grouped algebra; queries are then valid anywhere inside the run.
+`edge_observations="include"` scores every observation in a run, and
+queries are valid anywhere inside it. The latent GP is stationary and
+defined outside the run, so nothing is added to the model. `"exclude"`
+uses an observation only if its response's support envelope, which covers
+every lag the bounds allow and the response's full tail, lies inside the
+run; long responses and wide lag bounds can then discard much of a short
+recording. The default `"auto"` includes for dense, grouped and
+state-space algebra, which agree with one another on edge observations,
+and excludes for spectral algebra: its basis lives on the padded run, so a
+response reaching beyond the padding would read an extrapolated latent.
+The resolved choice is `edge_observations_` after fitting.
 
 `run_baseline_sd={modality: sd}` optionally adds independent zero-mean
 Gaussian offsets per participant/run/feature, in supplied observation units.
