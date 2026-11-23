@@ -56,6 +56,10 @@ model.set_params(
 )
 ```
 
+## Run length and `max_observations`
+
+With grouped updates, `max_observations` bounds the number of observation nodes in a run, not the number of feature values. Three participants with 200 samples of 50 features on one clock are 30,000 scalars but 200 nodes. A long run or several modality clocks can still exceed the default of 800 nodes; the error reports the count, and the limit can be raised. Noise priors whose support includes zero use scalar updates and keep the scalar count.
+
 ## Numerical contract
 
 Each exact `(modality, native timestamp)` pair is one observation node. All

@@ -27,6 +27,8 @@ Noise and the model's preprocessing or offset terms account for the remaining ob
 
 The regularization controls the fitted representation. Multiple initializations can explore different optimization outcomes, but a low objective alone does not establish convergence or correct response-filter recovery. Inspect `converged_` and the fitted diagnostics.
 
+Training alternates between latent values, mappings and response parameters. `converged_` requires a small objective decrement, a successful response optimizer and a settled response: no free response parameter moved by more than `kernel_tol` in the last iteration. The last condition matters because a response width or lag can keep moving by a small, steady step while each objective decrement already looks negligible. Fits with free response parameters can therefore need more iterations than `max_iter=100`; raise it if `converged_` is false, and read `restart_diagnostics_` for the per-iteration `kernel_step`.
+
 Once trained, the model can infer latent responses and predict excluded targets on new runs using learned mappings and response parameters. Separate calibration data can estimate a new participant's mapping. R-MSRM does not provide Bayesian posterior uncertainty.
 
 Start with the [R tutorial](tutorials.md#r-msrm-fit-and-held-out-prediction).
