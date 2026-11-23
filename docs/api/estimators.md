@@ -7,7 +7,7 @@ R-MSRM and GP-MSRM have different inference and prediction contracts. Start with
 
 ## MultimodalSRM
 
-`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L79)
+`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L80)
 
 ```python
 MultimodalSRM(
@@ -35,6 +35,7 @@ MultimodalSRM(
     kernel_tol=0.0001,
     kernel_extrapolation=True,
     lag_init=None,
+    edge_observations="exclude",
 )
 ```
 
@@ -74,6 +75,17 @@ configured and a warning says so: weakly coupled modalities often give no
 usable scan, and then the configured lags and bounds are the better start.
 Only relative timing is identified: `timing_report()` states fitted peak
 delays relative to a reference modality or to their mean.
+
+A response reads the latent over its whole support envelope, which covers
+every lag its bounds allow and the response's full tail. With
+`edge_observations="exclude"` (default) an observation is scored only if
+that envelope lies inside the run, so long responses, wide lag bounds and
+short runs can discard much of a recording. `"include"` instead extends
+each latent grid before and after its run by the envelope's reach, so every
+observed row is scored. The added latent is constrained only by those edge
+observations and the smoothness penalty, and is reported as outside the
+run's valid domain. Predictions near a run's start then rest on less
+information than interior ones.
 
 Penalties and balancing conventions are recorded in `configuration_`.
 Reaching `max_iter` does not constitute convergence. `init="hybrid"`
@@ -174,6 +186,7 @@ BayesianMultimodalSRM(
     noise_timescales=None,
     response_quadrature_order=None,
     state_space_gaussian="auto",
+    edge_observations="exclude",
 )
 ```
 
@@ -254,6 +267,14 @@ remains continuous; response integrals and L2
 norms are approximate. `covariance_tolerance` does not certify this path:
 compare higher orders and independent integrals for the declared bounds.
 Approximation metadata is retained in configuration, queries and archives.
+
+`edge_observations="include"` scores every observation in a run. By
+default an observation is used only if its response's support envelope,
+which covers every lag the bounds allow and the response's full tail, lies
+inside the run, so long responses and wide lag bounds can discard much of
+a short recording. The latent GP is stationary and defined outside the
+run, so the exclusion is a convention rather than a requirement. Supported
+for dense/grouped algebra; queries are then valid anywhere inside the run.
 
 `run_baseline_sd={modality: sd}` optionally adds independent zero-mean
 Gaussian offsets per participant/run/feature, in supplied observation units.

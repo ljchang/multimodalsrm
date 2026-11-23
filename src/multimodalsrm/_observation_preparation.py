@@ -146,10 +146,18 @@ class ObservationPreparation(BaseEstimator):
                         "DoubleGamma bounds must preserve peak/undershoot mean ordering throughout the parameter box; narrow bounds or use Response.lag_only(..., pooling='shared')"
                     )
 
+    # "exclude" scores an observation only when its response support envelope
+    # lies inside the run. "include" scores every observation in the run: a
+    # stationary latent process is defined before and after the run, so no
+    # observation needs its support to be covered by other observations.
+    edge_observations = "exclude"
+
     def _support(self, times, modality, domain):
         lo, hi = self.responses_[modality].support_envelope()
         a, b = domain
         tolerance = 1e-10 * max(1.0, abs(a), abs(b))
+        if self.edge_observations == "include":
+            return (times >= a - tolerance) & (times <= b + tolerance)
         return (
             (times >= a - tolerance)
             & (times <= b + tolerance)

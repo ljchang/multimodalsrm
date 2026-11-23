@@ -246,6 +246,7 @@ def calibrate(model, data, *, reference=None, affinity=None, modality_weights=No
             result.responses_,
             result.modality_weights_,
             result.gap_threshold,
+            reach=getattr(result, "edge_reach_", (0.0, 0.0)),
         )
 
     blocks = blocks_for(kernels)
