@@ -55,6 +55,8 @@ An Identity response uses the latent signal directly. A Gaussian response can sm
 
 For example, fixing a Gaussian width while estimating lag asks a different question from estimating both. A broad latent GP timescale and a broad response filter can both smooth observations, making their separate interpretation difficult. A chosen reference or factor anchor supplies a coordinate convention; it does not establish physiological timing.
 
+Only the *differences* between modality delays are estimated: delaying every response by the same amount is the same model with the latent shifted in time. You therefore do not need to fix one modality's lag. What you do need is a sensible starting point, because a lag that starts far from the true relative delay can settle in a wrong optimum without any warning. `scan_lags` estimates relative delays directly from the observations before fitting, `MultimodalSRM(lag_init="scan")` uses it automatically, and `timing_report()` on either model states fitted peak delays relative to a reference modality or to their mean. See [response timing](api-guide.md#response-timing-lags-and-what-is-identified).
+
 Learned FIR responses are deferred. The presence of an internal kernel type does not imply it supports every inference method.
 
 ## Evaluate the claim you want to make

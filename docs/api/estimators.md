@@ -7,7 +7,7 @@ R-MSRM and GP-MSRM have different inference and prediction contracts. Start with
 
 ## MultimodalSRM
 
-`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L78)
+`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L79)
 
 ```python
 MultimodalSRM(
@@ -34,6 +34,7 @@ MultimodalSRM(
     balance_scale=True,
     kernel_tol=0.0001,
     kernel_extrapolation=True,
+    lag_init=None,
 )
 ```
 
@@ -61,6 +62,16 @@ time unit. Both are tuning choices; compare values by held-out prediction.
 `latent_ridge * mean z**2 + temporal_strength * mean (dz/dt)**2`. Passing
 it reproduces earlier fits, including the earlier `latent_ridge` default
 of 1e-4, and cannot be combined with `latent_timescale`.
+
+`lag_init="scan"` estimates relative modality delays from the training
+observations before fitting (see `scan_lags`), starts every free response
+lag there and narrows its bounds to that lag plus or minus two timestamp
+units. Without it, lags start at the configured kernels and a true relative
+delay outside the bounds, or far from the start, can end in a wrong optimum
+with no bound flagged. A precomputed `LagScan` is also accepted. The scan
+is stored as `lag_scan_` and a warning reports when it is unreliable.
+Only relative timing is identified: `timing_report()` states fitted peak
+delays relative to a reference modality or to their mean.
 
 Penalties and balancing conventions are recorded in `configuration_`.
 Reaching `max_iter` does not constitute convergence. `init="hybrid"`
@@ -107,6 +118,20 @@ MultimodalSRM.predict(data, *, targets, source="within", times=None)
 MultimodalSRM.calibrate(data, **kwargs)
 ```
 
+### MultimodalSRM.timing_report
+
+```python
+MultimodalSRM.timing_report(reference=None)
+```
+
+Fitted response timing relative to a reference modality or the mean.
+
+Reports each modality's peak delay, pairwise differences, the clock
+origin that was subtracted, lags resting at a bound, and agreement
+with the lag scan when one was used. `reference` names the modality
+at zero; by default it is the only modality without an estimated lag,
+or the across-modality mean when there is none or several.
+
 ### MultimodalSRM.kernel
 
 ```python
@@ -121,7 +146,7 @@ MultimodalSRM.plot_kernels(modality, show_subjects=True, ax=None)
 
 ## BayesianMultimodalSRM
 
-`from multimodalsrm.bayesian import BayesianMultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/model.py#L33)
+`from multimodalsrm.bayesian import BayesianMultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/model.py#L34)
 
 ```python
 BayesianMultimodalSRM(
@@ -294,6 +319,24 @@ the across-modality mean separately for each draw, preserving all
 pairwise differences. This centers summaries only: latent query times
 and lag priors remain in model coordinates. It does not establish
 absolute timing identification or calibrated uncertainty.
+
+### BayesianMultimodalSRM.timing_report
+
+```python
+BayesianMultimodalSRM.timing_report(reference=None, *, max_draws=200)
+```
+
+Peak response delays relative to a reference modality or their mean.
+
+The same convention as `MultimodalSRM.timing_report`. Each retained
+parameter draw gives one peak delay per modality, so posterior fits
+report a mean, standard deviation and the draws; MAP gives one value.
+For Gamma, DoubleGamma and BatemanSCR the peak is far better
+determined than the `lag` parameter that `relative_lag_draws`
+reports, which is their onset. `reference` names the modality at
+zero; by default it is the only modality without an estimated lag, or
+the across-modality mean. `max_draws=None` uses every draw. This
+centres summaries only and does not establish physiological timing.
 
 ### BayesianMultimodalSRM.predict
 

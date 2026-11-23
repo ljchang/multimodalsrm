@@ -50,6 +50,10 @@ Multifactor posterior fits require explicit training `factor_anchors`, one obser
 
 Existing `.calibrate` and `.transform` APIs retain their MAP meanings. Do not interpret them as the joint posterior methods above. New run IDs must be distinct from reference training IDs where a new independent run is required.
 
+## Response timing
+
+Both models estimate relative, not absolute, modality timing. `scan_lags` proposes starting lags and narrow bounds from the observations; `timing_report()` reports peak delays relative to a reference modality or to the across-modality mean, with the subtracted clock origin. The scan can fail at very low signal-to-noise and can alias by one period on a near-periodic signal; it reports both conditions, and its thresholds come from synthetic data. A reported delay is a relative model quantity, not a physiological latency.
+
 ## Interpreting outputs
 
 Inspect `converged_` for R fits and `map_diagnostics_` for GP MAP fits. R convergence requires a settled response (`kernel_tol`) as well as a small objective decrement. A GP MAP point meets its gradient tolerance when the largest physical projected gradient is below `physical_gradient_tolerance`, or below `relative_gradient_tolerance` times the objective's magnitude; `gradient_criterion` records which applied, and `relative_projected_gradient` lets you compare starts on recordings of different size. Posterior fits require `sampling_diagnostics_`, including raw parameters, reporting orientation, divergences, tree depth and BFMI. A successful API call, archive replay or test run does not establish convergence. Marginal intervals do not automatically form simultaneous trajectory bands.

@@ -28,6 +28,10 @@ PAGES = {
             "KernelPrior",
             "Prior",
             "BayesianPriors",
+            "scan_lags",
+            "LagScan",
+            "peak_delay",
+            "lag_priors",
         ],
     ),
     "configuration": (
