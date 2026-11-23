@@ -66,7 +66,7 @@ $$
 \sum_{\ell=1}^{L_r-1}\lVert z_{r,\ell+1}-z_{r\ell}\rVert^2.
 $$
 
-Here $\Delta$ is `latent_dt`, $d_r=(L_r-1)\Delta$ is the numerical grid duration, and $a_{r\ell}$ are duration-normalized trapezoid weights. Pair loading scaling uses $s_{im}=1$; feature scaling uses $s_{im}=P_{im}$. The three strengths correspond to `loading_ridge`, `latent_ridge` and `temporal_strength`. $\mathcal P_h$ contains any configured response penalties. Exact shared latent trajectories add no graph penalty.
+Here $\Delta$ is `latent_dt`, $d_r=(L_r-1)\Delta$ is the numerical grid duration, and $a_{r\ell}$ are duration-normalized trapezoid weights. Pair loading scaling uses $s_{im}=1$; feature scaling uses $s_{im}=P_{im}$. The strengths are $\lambda_W=$ `loading_ridge`, $\lambda_Z=$ `latent_ridge` and $\lambda_T=\lambda_Z\tau^2$, where $\tau$ is `latent_timescale`. The latent terms therefore combine into $\lambda_Z\left(\mathcal P_Z+\tau^2\mathcal P_T\right)$: a sinusoid of angular frequency $\omega$ costs $1+\tau^2\omega^2$ times a constant of equal amplitude, which is the penalty form of a prior with correlation time $\tau$. The deprecated `temporal_strength` sets $\lambda_T$ directly. $\mathcal P_h$ contains any configured response penalties. Exact shared latent trajectories add no graph penalty.
 
 Training alternates latent, loading and response updates. Predictions invert the stored preprocessing to return supplied data units. These are point estimates; the regularizers do not make this a posterior sampler. See [R settings](api-guide.md#r-msrm-settings).
 
@@ -131,7 +131,7 @@ MAP adds the negative log prior and finds a parameter point. Posterior inference
 | --- | --- | --- |
 | Latent dimension | `features` | Number of columns in $Z$ and $W$ |
 | R grid resolution | `latent_dt` | Latent interpolation basis and numerical grid |
-| R temporal regularization | `temporal_strength` | Penalty on squared latent derivatives |
+| R latent smoothness | `latent_timescale` | Correlation time of the penalty on squared latent derivatives |
 | GP latent timescale | `length_scale` | Prior correlation $c_\ell$ |
 | Modality lag and smoothing | `Response(kernel, ...)` | Filtering operator $H$ or filtered covariance $\kappa$ |
 | Fixed versus learned response | `estimate`, `fixed`, `bounds` | Which response parameters enter optimization/sampling |

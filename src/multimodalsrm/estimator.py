@@ -83,6 +83,24 @@ class MultimodalSRM(BaseEstimator):
     ``affinity_`` represents this sharing as a complete graph with unit edges;
     exact equality is enforced independently of ``latent_strength``.
 
+    ``latent_timescale`` (default 2.0, in timestamp units, normally seconds)
+    sets how smooth the latent response is assumed to be. The latent penalty is
+    ``latent_ridge * (mean z**2 + latent_timescale**2 * mean (dz/dt)**2)``: a
+    fluctuation with period ``2 * pi * latent_timescale`` costs twice as much
+    as a constant of the same amplitude, and faster fluctuations cost more.
+    Increase it for a smoother latent, decrease it to follow faster changes;
+    zero removes the link between neighbouring latent nodes, which leaves
+    nodes without an observation unconstrained. It is a prior correlation time,
+    like the GP model's ``length_scale``, not a hard cutoff: strong, clean data
+    can still express faster structure. ``latent_ridge`` (default 0.1) sets the
+    weight of that whole penalty. Rescale ``latent_timescale`` with the data's
+    time unit. Both are tuning choices; compare values by held-out prediction.
+
+    ``temporal_strength`` is the deprecated previous parameterization,
+    ``latent_ridge * mean z**2 + temporal_strength * mean (dz/dt)**2``. Passing
+    it reproduces earlier fits, including the earlier ``latent_ridge`` default
+    of 1e-4, and cannot be combined with ``latent_timescale``.
+
     Penalties and balancing conventions are recorded in ``configuration_``.
     Reaching ``max_iter`` does not constitute convergence. ``init="hybrid"``
     uses one deterministic spectral start followed by paired random starts;
@@ -116,8 +134,9 @@ class MultimodalSRM(BaseEstimator):
         modality_weights=None,
         loading_ridge=1e-3,
         loading_penalty_scaling="pair",
-        latent_ridge=1e-4,
-        temporal_strength=1e-2,
+        latent_ridge=None,
+        latent_timescale=None,
+        temporal_strength=None,
         max_iter=100,
         tol=1e-5,
         n_init=1,
@@ -139,6 +158,7 @@ class MultimodalSRM(BaseEstimator):
         self.loading_ridge = loading_ridge
         self.loading_penalty_scaling = loading_penalty_scaling
         self.latent_ridge = latent_ridge
+        self.latent_timescale = latent_timescale
         self.temporal_strength = temporal_strength
         self.max_iter = max_iter
         self.tol = tol
@@ -161,6 +181,11 @@ class MultimodalSRM(BaseEstimator):
         # Earlier fits used the objective-only stopping rule without extrapolation.
         state.setdefault("kernel_tol", None)
         state.setdefault("kernel_extrapolation", False)
+        # Earlier estimators stored the penalty strengths directly.
+        state.setdefault("latent_timescale", None)
+        if "configuration_" in state:
+            state.setdefault("latent_ridge_", state.get("latent_ridge"))
+            state.setdefault("temporal_strength_", state.get("temporal_strength"))
         configuration = state.get("configuration_")
         legacy = "loading_penalty_scaling" not in state and (
             not isinstance(configuration, dict) or "loading_penalty_scaling" not in configuration
@@ -191,12 +216,12 @@ class MultimodalSRM(BaseEstimator):
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < 1:
                 raise ValueError(f"{name} must be a positive integer")
         worker_count(self.n_jobs, self.n_init)
-        for name in ["latent_dt", "loading_ridge", "latent_ridge", "tol"]:
+        for name in ["latent_dt", "loading_ridge", "tol"]:
             if not np.isfinite(getattr(self, name)) or getattr(self, name) <= 0:
                 raise ValueError(f"{name} must be positive finite")
-        for name in ["latent_strength", "temporal_strength"]:
-            if not np.isfinite(getattr(self, name)) or getattr(self, name) < 0:
-                raise ValueError(f"{name} must be nonnegative finite")
+        if not np.isfinite(self.latent_strength) or self.latent_strength < 0:
+            raise ValueError("latent_strength must be nonnegative finite")
+        self.latent_ridge_, self.temporal_strength_ = self._latent_penalty()
         if self.gap_threshold is not None and (
             not np.isfinite(self.gap_threshold) or self.gap_threshold <= 0
         ):
@@ -241,6 +266,32 @@ class MultimodalSRM(BaseEstimator):
         else:
             self.affinity_ = None
 
+    def _latent_penalty(self):
+        """Resolve (ridge, derivative strength) from either parameterization."""
+
+        def number(name, positive):
+            value = getattr(self, name)
+            if (
+                isinstance(value, (bool, np.bool_))
+                or not isinstance(value, (int, float, np.number))
+                or not np.isfinite(value)
+                or value < 0
+                or (positive and value == 0)
+            ):
+                kind = "positive" if positive else "nonnegative"
+                raise ValueError(f"{name} must be {kind} finite")
+            return float(value)
+
+        legacy = self.temporal_strength is not None
+        if legacy and self.latent_timescale is not None:
+            raise ValueError("pass latent_timescale or the deprecated temporal_strength, not both")
+        ridge = (1e-4 if legacy else 0.1) if self.latent_ridge is None else None
+        ridge = number("latent_ridge", True) if ridge is None else ridge
+        if legacy:
+            return ridge, number("temporal_strength", False)
+        timescale = 2.0 if self.latent_timescale is None else number("latent_timescale", False)
+        return ridge, ridge * timescale**2
+
     def fit(self, data, y=None, *, affinity=None):
         data = normalize_data(data)
         self.__dict__.pop("_legacy_loading_penalty_scaling_default", None)
@@ -249,6 +300,13 @@ class MultimodalSRM(BaseEstimator):
             if name.endswith("_"):
                 delattr(self, name)
         self._validate_configuration(data, affinity)
+        if self.temporal_strength is not None:
+            warnings.warn(
+                "temporal_strength is deprecated; use latent_timescale, where "
+                "temporal_strength = latent_ridge * latent_timescale**2",
+                FutureWarning,
+                stacklevel=2,
+            )
         active = {
             s: {
                 r: {m: ts for m, ts in mods.items() if self.modality_weights_[m] > 0}
@@ -268,6 +326,15 @@ class MultimodalSRM(BaseEstimator):
             "responses": {m: r.metadata for m, r in self.responses_.items()},
             "run_domains": copy.deepcopy(self.run_domains_),
             "latent_dt": self.latent_dt,
+            "latent_penalty": {
+                "form": "latent_ridge * mean z**2 + temporal_strength * mean (dz/dt)**2",
+                "latent_ridge": self.latent_ridge_,
+                "temporal_strength": self.temporal_strength_,
+                "latent_timescale": float(np.sqrt(self.temporal_strength_ / self.latent_ridge_)),
+                "parameterization": "temporal_strength"
+                if self.temporal_strength is not None
+                else "latent_timescale",
+            },
             "gap_policy": "split above twice median usable interval; singleton median cell"
             if self.gap_threshold is None
             else self.gap_threshold,
@@ -446,8 +513,8 @@ class MultimodalSRM(BaseEstimator):
                 w,
                 self.latent_pooling,
                 self.latent_strength,
-                self.latent_ridge,
-                self.temporal_strength,
+                self.latent_ridge_,
+                self.temporal_strength_,
                 self.loading_ridge,
                 self.affinity_,
                 kernel_penalty(k, self.responses_),
@@ -480,8 +547,8 @@ class MultimodalSRM(BaseEstimator):
                 self.features,
                 self.latent_pooling,
                 self.latent_strength,
-                self.latent_ridge,
-                self.temporal_strength,
+                self.latent_ridge_,
+                self.temporal_strength_,
                 self.affinity_,
             )
             history.append(objective(z, W, kernels, blocks))
@@ -519,8 +586,8 @@ class MultimodalSRM(BaseEstimator):
                     self.features,
                     self.latent_pooling,
                     self.latent_strength,
-                    self.latent_ridge,
-                    self.temporal_strength,
+                    self.latent_ridge_,
+                    self.temporal_strength_,
                     self.affinity_,
                 )
                 if objective(new_z, W, kernels, blocks) <= objective(z, W, kernels, blocks) + 1e-12:
@@ -534,8 +601,8 @@ class MultimodalSRM(BaseEstimator):
                         W,
                         self.latent_pooling,
                         self.latent_strength,
-                        self.latent_ridge,
-                        self.temporal_strength,
+                        self.latent_ridge_,
+                        self.temporal_strength_,
                         self.loading_ridge,
                         self.affinity_,
                         kernel_penalty(kernels, self.responses_),
@@ -566,8 +633,8 @@ class MultimodalSRM(BaseEstimator):
                                 self.features,
                                 self.latent_pooling,
                                 self.latent_strength,
-                                self.latent_ridge,
-                                self.temporal_strength,
+                                self.latent_ridge_,
+                                self.temporal_strength_,
                                 self.affinity_,
                             )
                             candidate_W = solve_loadings(
@@ -634,8 +701,8 @@ class MultimodalSRM(BaseEstimator):
                 W,
                 self.latent_pooling,
                 self.latent_strength,
-                self.latent_ridge,
-                self.temporal_strength,
+                self.latent_ridge_,
+                self.temporal_strength_,
                 self.loading_ridge,
                 self.affinity_,
                 kernel_penalty(kernels, self.responses_),

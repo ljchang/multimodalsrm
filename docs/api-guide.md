@@ -11,7 +11,7 @@ Start here when you know what you want to estimate but are unsure which argument
 | --- | --- | --- |
 | How is the common response represented? | `MultimodalSRM` or `BayesianMultimodalSRM` | A regularized latent grid, or a continuous latent GP |
 | How many common factors? | `features=K` | Dimension of the shared response, not an inferred count of biological processes |
-| What makes the latent response smooth? | R: `temporal_strength`; GP: `length_scale` | A derivative penalty, or the Matérn-3/2 prior timescale |
+| What makes the latent response smooth? | R: `latent_timescale`; GP: `length_scale` | The correlation time of a derivative penalty, or the Matérn-3/2 prior timescale |
 | How does a modality respond to that signal? | `responses={name: Response(...)}` | Identity, Gaussian, Gamma, DoubleGamma, BatemanSCR, or a fixed sampled curve where supported |
 | Which response parameters are learned? | `estimate`, `fixed`, `bounds` | Learn unfixed parameters within their bounds, or fix the entire response |
 | Who shares a response filter? | `Response.pooling` | Shared across people, partially pooled, or separate; GP requires `"shared"` |
@@ -52,7 +52,9 @@ Import `MultimodalSRM` from `multimodalsrm`. `latent_dt` is required. The estima
 | `latent_strength=1.0` | Coupling penalty for soft pooling. Does not relax exact equality under `"shared"`. Pass a symmetric nonnegative named graph to `fit(..., affinity=...)` for neighborhood/components. |
 | `modality_weights=None` | Equal weights across configured modalities. Explicit nonnegative weights must cover those modalities and sum to one. These control the training objective, not evaluation weights. |
 | `loading_ridge=1e-3`, `loading_penalty_scaling="pair"` | Loading shrinkage, averaged by pair. `"feature"` additionally divides each pair's loading penalty by its fitted feature count. |
-| `latent_ridge=1e-4`, `temporal_strength=1e-2` | Latent magnitude and temporal derivative penalties. The ridge must be positive; temporal strength may be zero. |
+| `latent_timescale=2.0` | How smooth the latent is assumed to be, in timestamp units (normally seconds). The latent penalty is `latent_ridge * (mean z² + latent_timescale² * mean (dz/dt)²)`, so a fluctuation with period `2π * latent_timescale` costs twice a constant of the same amplitude and faster ones cost more. Raise it for a smoother latent, lower it to follow faster changes. It is a prior correlation time, not a hard cutoff, and must be rescaled with the time unit. Zero unlinks neighbouring grid nodes, which leaves nodes without an observation at zero: avoid it when `latent_dt` is finer than a stream's sampling, clocks differ, or a response smooths. Compare candidate values by held-out prediction. |
+| `latent_ridge=0.1` | Weight of the whole latent penalty; must be positive. Latents and maps trade scale, so its effect depends on its product with `loading_ridge`. |
+| `temporal_strength` | Deprecated. The earlier direct derivative strength, `latent_ridge * latent_timescale²`. Passing it reproduces earlier fits, including the earlier `latent_ridge=1e-4` default, and cannot be combined with `latent_timescale`. |
 | `balance_scale=True` | Balances loading/latent scale under the regularized objective; does not identify physiological amplitude. |
 | `init="random"` | Also `"spectral"` or `"hybrid"`. Hybrid uses a spectral first start and random remaining starts. Repeated spectral starts are redundant. |
 | `n_init=1`, `n_jobs=1`, `random_state=None` | Restart count, process workers (`-1` uses available CPUs, capped by restarts), and seed. An integer seed makes starts reproducible across worker counts. |

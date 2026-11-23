@@ -20,8 +20,9 @@ MultimodalSRM(
     modality_weights=None,
     loading_ridge=0.001,
     loading_penalty_scaling="pair",
-    latent_ridge=0.0001,
-    temporal_strength=0.01,
+    latent_ridge=None,
+    latent_timescale=None,
+    temporal_strength=None,
     max_iter=100,
     tol=1e-05,
     n_init=1,
@@ -42,6 +43,24 @@ By default, one latent response per run is shared exactly across participants
 and modalities, with separate participant–modality maps and response kernels.
 `affinity_` represents this sharing as a complete graph with unit edges;
 exact equality is enforced independently of `latent_strength`.
+
+`latent_timescale` (default 2.0, in timestamp units, normally seconds)
+sets how smooth the latent response is assumed to be. The latent penalty is
+`latent_ridge * (mean z**2 + latent_timescale**2 * mean (dz/dt)**2)`: a
+fluctuation with period `2 * pi * latent_timescale` costs twice as much
+as a constant of the same amplitude, and faster fluctuations cost more.
+Increase it for a smoother latent, decrease it to follow faster changes;
+zero removes the link between neighbouring latent nodes, which leaves
+nodes without an observation unconstrained. It is a prior correlation time,
+like the GP model's `length_scale`, not a hard cutoff: strong, clean data
+can still express faster structure. `latent_ridge` (default 0.1) sets the
+weight of that whole penalty. Rescale `latent_timescale` with the data's
+time unit. Both are tuning choices; compare values by held-out prediction.
+
+`temporal_strength` is the deprecated previous parameterization,
+`latent_ridge * mean z**2 + temporal_strength * mean (dz/dt)**2`. Passing
+it reproduces earlier fits, including the earlier `latent_ridge` default
+of 1e-4, and cannot be combined with `latent_timescale`.
 
 Penalties and balancing conventions are recorded in `configuration_`.
 Reaching `max_iter` does not constitute convergence. `init="hybrid"`

@@ -123,6 +123,9 @@ def r_initial_point(problem, seed):
             features=problem.features,
             latent_dt=report["latent_dt"],
             responses=responses,
+            # Keep the penalty this initializer was measured with.
+            latent_ridge=1e-4,
+            latent_timescale=10.0,
             max_iter=40,
             kernel_max_iter=20,
             n_init=1,

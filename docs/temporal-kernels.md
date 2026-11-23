@@ -134,7 +134,13 @@ $$
 
 The middle panel shows **prior draws**, not estimates. It uses the same underlying random normal vector for the three examples to illustrate the covariance change. The bottom panel changes a response filter instead. Both can make an observed signal smoother, so strong held-out prediction alone cannot identify their separate contributions.
 
-R-MSRM uses a latent derivative penalty controlled by `temporal_strength`; it does not expose this GP prior. See [model mathematics](model-mathematics.md) for how the response enters each objective.
+R-MSRM does not expose this GP prior. Its counterpart is `latent_timescale`, the correlation time of a penalty on the latent's rate of change:
+
+$$
+\lambda_Z\left(\overline{z^2}+\tau^2\,\overline{(dz/dt)^2}\right).
+$$
+
+Here $\tau$ is `latent_timescale`, $\lambda_Z$ is `latent_ridge`, and bars denote averages over the run. A sinusoid of period $T$ costs $1+(2\pi\tau/T)^2$ times a constant of the same amplitude. With the default $\tau=2$ s, a 60 s fluctuation costs 1.04 times a constant, a 12.6 s one costs twice as much, and a 2 s one costs about 40 times as much. As with the GP timescale and the response filters above, a longer latent timescale and a wider response both smooth the fitted signal, so a free response width is only interpretable alongside a deliberately chosen `latent_timescale`. See [model mathematics](model-mathematics.md) for how the response enters each objective.
 
 ## Legacy Bach analyses
 

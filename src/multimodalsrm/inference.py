@@ -67,8 +67,8 @@ def condition(model, data):
         model.features,
         model.latent_pooling,
         model.latent_strength,
-        model.latent_ridge,
-        model.temporal_strength,
+        model.latent_ridge_,
+        model.temporal_strength_,
         model.affinity_,
     )
     return z, grids, domains, blocks, diagnostics
