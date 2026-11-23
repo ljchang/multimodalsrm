@@ -32,6 +32,7 @@ from .objective import (
     complete_objective,
     fit_preprocessing,
     make_blocks,
+    response_reach,
     solve_latents,
     solve_loadings,
 )
@@ -114,6 +115,17 @@ class MultimodalSRM(BaseEstimator):
     Only relative timing is identified: ``timing_report()`` states fitted peak
     delays relative to a reference modality or to their mean.
 
+    A response reads the latent over its whole support envelope, which covers
+    every lag its bounds allow and the response's full tail. With
+    ``edge_observations="exclude"`` (default) an observation is scored only if
+    that envelope lies inside the run, so long responses, wide lag bounds and
+    short runs can discard much of a recording. ``"include"`` instead extends
+    each latent grid before and after its run by the envelope's reach, so every
+    observed row is scored. The added latent is constrained only by those edge
+    observations and the smoothness penalty, and is reported as outside the
+    run's valid domain. Predictions near a run's start then rest on less
+    information than interior ones.
+
     Penalties and balancing conventions are recorded in ``configuration_``.
     Reaching ``max_iter`` does not constitute convergence. ``init="hybrid"``
     uses one deterministic spectral start followed by paired random starts;
@@ -162,6 +174,7 @@ class MultimodalSRM(BaseEstimator):
         kernel_tol=1e-4,
         kernel_extrapolation=True,
         lag_init=None,
+        edge_observations="exclude",
     ):
         self.features = features
         self.latent_dt = latent_dt
@@ -186,6 +199,7 @@ class MultimodalSRM(BaseEstimator):
         self.kernel_tol = kernel_tol
         self.kernel_extrapolation = kernel_extrapolation
         self.lag_init = lag_init
+        self.edge_observations = edge_observations
 
     def __setstate__(self, state):
         """Restore pre-policy pickles with the historical pair-scaled ridge."""
@@ -199,6 +213,9 @@ class MultimodalSRM(BaseEstimator):
         # Earlier estimators stored the penalty strengths directly.
         state.setdefault("latent_timescale", None)
         state.setdefault("lag_init", None)
+        state.setdefault("edge_observations", "exclude")
+        if "configuration_" in state:
+            state.setdefault("edge_reach_", (0.0, 0.0))
         if "configuration_" in state:
             state.setdefault("latent_ridge_", state.get("latent_ridge"))
             state.setdefault("temporal_strength_", state.get("temporal_strength"))
@@ -218,6 +235,8 @@ class MultimodalSRM(BaseEstimator):
             raise ValueError("init must be random, spectral, or hybrid")
         if not isinstance(self.balance_scale, (bool, np.bool_)):
             raise ValueError("balance_scale must be boolean")
+        if self.edge_observations not in ("exclude", "include"):
+            raise ValueError("edge_observations must be 'exclude' or 'include'")
         if not (
             self.lag_init is None or self.lag_init == "scan" or isinstance(self.lag_init, LagScan)
         ):
@@ -382,7 +401,12 @@ class MultimodalSRM(BaseEstimator):
             "lag" in r.free_parameters for r in self.responses_.values()
         ):
             lag_init = self._seed_lags(active)
-        self.run_grids_, self.run_domains_ = build_grids(active, self.latent_dt)
+        self.edge_reach_ = (
+            response_reach(self.responses_, self.modality_weights_)
+            if self.edge_observations == "include"
+            else (0.0, 0.0)
+        )
+        self.run_grids_, self.run_domains_ = build_grids(active, self.latent_dt, self.edge_reach_)
         self.preprocessing_ = fit_preprocessing(active, self.modality_weights_)
         initial = {
             s: {m: self.responses_[m].initial_kernel() for m in stats}
@@ -410,7 +434,9 @@ class MultimodalSRM(BaseEstimator):
                 + (" / fitted feature count" if self.loading_penalty_scaling == "feature" else "")
                 + "; latent: mean subject/run trapezoid duration; graph: edge sum / subject/run count; kernel: mean participant deviations; independent priors: mean participant"
             ),
-            "grid_policy": "observed positive-weight domain, ceil duration/dt; actual-domain support exclusion",
+            "grid_policy": "observed positive-weight domain, ceil duration/dt; actual-domain support exclusion"
+            if self.edge_observations == "exclude"
+            else "observed positive-weight domain padded by the response reach; every observed row scored",
             "restart_selection": "minimum_finite_training_objective",
             "balance_scale": bool(self.balance_scale),
             "init": self.init,
@@ -419,6 +445,8 @@ class MultimodalSRM(BaseEstimator):
             "kernel_tol": self.kernel_tol,
             "kernel_extrapolation": bool(self.kernel_extrapolation),
             "lag_init": lag_init,
+            "edge_observations": self.edge_observations,
+            "edge_reach": tuple(self.edge_reach_),
         }
 
         blocks_for = PreparedBlocks(
@@ -431,6 +459,7 @@ class MultimodalSRM(BaseEstimator):
                 self.responses_,
                 self.modality_weights_,
                 self.gap_threshold,
+                reach=self.edge_reach_,
             ),
             self.run_grids_,
             self.responses_,
@@ -529,7 +558,8 @@ class MultimodalSRM(BaseEstimator):
                 r: SeriesResult(
                     np.mean([z[s][r] for s in self.subjects_], axis=0),
                     self.run_grids_[r],
-                    self.run_grids_[r] <= self.run_domains_[r][1] + 1e-10,
+                    (self.run_grids_[r] >= self.run_domains_[r][0] - 1e-10)
+                    & (self.run_grids_[r] <= self.run_domains_[r][1] + 1e-10),
                     metadata=coverage_metadata(
                         self.observation_blocks_,
                         r,

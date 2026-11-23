@@ -93,7 +93,28 @@ class PreparedBlocks:
         ]
 
 
-def build_grids(data, dt):
+def response_reach(responses, weights=None):
+    """How far the latent must extend (before, after) a run to score every row.
+
+    A response reads the latent over its support envelope. A positive upper
+    envelope edge reaches before the first observation; a negative lower edge
+    reaches after the last one.
+    """
+    envelopes = [
+        r.support_envelope()
+        for m, r in responses.items()
+        if weights is None or weights.get(m, 0) > 0
+    ]
+    if not envelopes:
+        return (0.0, 0.0)
+    return (
+        float(max(0.0, max(hi for _, hi in envelopes))),
+        float(max(0.0, -min(lo for lo, _ in envelopes))),
+    )
+
+
+def build_grids(data, dt, reach=(0.0, 0.0)):
+    """Latent grids and observed domains; ``reach`` pads each grid, not its domain."""
     domains = {}
     for runs in data.values():
         for r, mods in runs.items():
@@ -105,7 +126,8 @@ def build_grids(data, dt):
     for r, (a, b) in domains.items():
         if b <= a:
             raise ValueError(f"run {r} needs positive observed duration")
-        grids[r] = a + dt * np.arange(int(np.ceil((b - a) / dt)) + 1)
+        start, stop = a - reach[0], b + reach[1]
+        grids[r] = start + dt * np.arange(int(np.ceil((stop - start) / dt)) + 1)
     return grids, domains
 
 
@@ -156,12 +178,15 @@ def make_blocks(
     weights,
     gap_threshold=None,
     operator_cache=None,
+    reach=(0.0, 0.0),
 ):
     """Build scored blocks. Optional cache must be scoped to fixed data/grids/responses.
 
     Cache holds at most 256 native observation operators; it never changes scores.
     Participants with bytewise identical timestamps in a run and modality share
-    one operator, which callers must treat as read-only.
+    one operator, which callers must treat as read-only. ``reach`` is the
+    latent padding before and after each run's observed domain: a row is scored
+    when its support envelope fits inside the padded latent grid.
     """
     envelopes = {m: response.support_envelope() for m, response in responses.items()}
     blocks = []
@@ -183,8 +208,8 @@ def make_blocks(
                 else:
                     H, valid = cached
                     valid = valid.copy()
-                valid &= (ts.times - support[1] >= domains[r][0] - 1e-10) & (
-                    ts.times - support[0] <= domains[r][1] + 1e-10
+                valid &= (ts.times - support[1] >= domains[r][0] - reach[0] - 1e-10) & (
+                    ts.times - support[0] <= domains[r][1] + reach[1] + 1e-10
                 )
                 valid &= ts.mask.any(1)
                 if not valid.any():

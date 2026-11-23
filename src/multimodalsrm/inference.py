@@ -46,7 +46,8 @@ def condition(model, data):
                     raise ValueError(
                         f"conditioning mapping {s}/{m} is unavailable; calibrate it first"
                     )
-    grids, domains = build_grids(data, model.latent_dt)
+    reach = getattr(model, "edge_reach_", (0.0, 0.0))
+    grids, domains = build_grids(data, model.latent_dt, reach)
     blocks = make_blocks(
         data,
         grids,
@@ -56,6 +57,7 @@ def condition(model, data):
         model.responses_,
         model.modality_weights_,
         model.gap_threshold,
+        reach=reach,
     )
     if not blocks:
         raise ValueError("no usable conditioning observations within kernel support")
@@ -273,9 +275,13 @@ def predict(model, data, *, targets, source="within", times=None):
                 H, valid = observation_operator(
                     grid, query, model.subject_kernels_[target][m], support
                 )
-                valid &= (query - support[1] >= domain[0] - 1e-10) & (
-                    query - support[0] <= domain[1] + 1e-10
+                reach = getattr(model, "edge_reach_", (0.0, 0.0))
+                valid &= (query - support[1] >= domain[0] - reach[0] - 1e-10) & (
+                    query - support[0] <= domain[1] + reach[1] + 1e-10
                 )
+                if any(reach):
+                    # Padding makes every in-run row predictable, not times beyond the run.
+                    valid &= (query >= domain[0] - 1e-10) & (query <= domain[1] + 1e-10)
                 stats = model.preprocessing_[target][m]
                 values = (H @ z[target][r]) @ model.loadings_[target][m].T
                 values = values * stats["scale"] + stats["mean"]
