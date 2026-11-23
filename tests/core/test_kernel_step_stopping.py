@@ -53,7 +53,7 @@ def fit(**settings):
         features=1,
         latent_dt=0.5,
         responses=responses(),
-        temporal_strength=0.1,
+        latent_timescale=1.0,
         max_iter=400,
         random_state=0,
     )

@@ -134,7 +134,7 @@ $$
 
 The middle panel shows **prior draws**, not estimates. It uses the same underlying random normal vector for the three examples to illustrate the covariance change. The bottom panel changes a response filter instead. Both can make an observed signal smoother, so strong held-out prediction alone cannot identify their separate contributions.
 
-R-MSRM uses a latent derivative penalty controlled by `temporal_strength`; it does not expose this GP prior. See [model mathematics](model-mathematics.md) for how the response enters each objective.
+R-MSRM uses a latent derivative penalty whose correlation time is `latent_timescale`; it does not expose this GP prior. See [model mathematics](model-mathematics.md) for how the response enters each objective.
 
 ## Legacy Bach analyses
 

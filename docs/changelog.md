@@ -36,13 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- R-MSRM response operators are shared across participants whose timestamps are
-  identical within a run and modality, instead of being rebuilt per participant.
-  The quadrature operator for Gamma, DoubleGamma, sampled and Identity responses
-  integrates rows in chunks rather than one at a time and returns the same
-  matrices. A synthetic eight-participant fit with a learned Gamma response fell
-  from 482 s to 21 s, and its Gaussian counterpart from 34 s to 12 s, with
-  identical objectives.
+- **R-MSRM latent smoothness is now specified as a correlation time, with stronger
+  defaults.** `MultimodalSRM(latent_timescale=2.0)` (timestamp units, normally
+  seconds) replaces `temporal_strength`. The latent penalty is
+  `latent_ridge * (mean z² + latent_timescale² * mean (dz/dt)²)`, and
+  `latent_ridge` now defaults to 0.1. The earlier defaults (`latent_ridge=1e-4`,
+  `temporal_strength=1e-2`) left latent nodes between observations nearly
+  unconstrained. In synthetic sweeps over four sampling layouts and three noise
+  levels the new defaults were much better when noise was moderate or high or one
+  stream predicted another, and up to 0.03 R² worse at the lowest noise level.
+  They are tuned on synthetic data only. Fits that relied on the old defaults will change; pass
+  `temporal_strength=1e-2` to reproduce them.
 - `max_observations` now bounds what each GP backend factorizes per run: eligible
   scalars for dense and spectral algebra, exact modality/time nodes times factors
   for grouped algebra, and nodes for grouped state-space filtering. Run baselines,
@@ -50,13 +54,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reports the measured size and the alternatives.
 - The GP error for a non-shared response names the modality and the fix, and the
   MAP convergence warning reports the gradient, objective and both limits.
-
 - Grouped GP marginal prediction reuses each parameter draw's factorization
   across output features and evaluates response covariance at unique query
   times. Query batches and one-draw conditioning state bound temporary memory.
   White and OU noise, feature masks, and draw-specific latent rotations retain
   the same conditional moments; run-baseline predictions retain their existing
   calculation. Caches live only within the current prediction result.
+
+### Deprecated
+
+- `MultimodalSRM(temporal_strength=...)`. It still works, warns, keeps the earlier
+  `latent_ridge=1e-4` default, and equals `latent_ridge * latent_timescale**2`.
+
+### Performance
+
+- R-MSRM response operators are shared across participants whose timestamps are
+  identical within a run and modality, instead of being rebuilt per participant.
+  The quadrature operator for Gamma, DoubleGamma, sampled and Identity responses
+  integrates rows in chunks rather than one at a time and returns the same
+  matrices. A synthetic eight-participant fit with a learned Gamma response fell
+  from 482 s to 21 s, and its Gaussian counterpart from 34 s to 12 s, with
+  identical objectives.
 
 ## [0.2.0] — 2026-09-22
 
