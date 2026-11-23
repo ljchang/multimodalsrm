@@ -137,10 +137,10 @@ The middle panel shows **prior draws**, not estimates. It uses the same underlyi
 R-MSRM does not expose this GP prior. Its counterpart is `latent_timescale`, the correlation time of a penalty on the latent's rate of change:
 
 $$
-\lambda_Z\left(\overline{z^2}+\tau^2\,\overline{(dz/dt)^2}\right),\qquad \tau=\texttt{latent\_timescale}.
+\lambda_Z\left(\overline{z^2}+\tau^2\,\overline{(dz/dt)^2}\right).
 $$
 
-A sinusoid of period $T$ costs $1+(2\pi\tau/T)^2$ times a constant of the same amplitude. With the default $\tau=2$ s, a 60 s fluctuation costs 1.04 times a constant, a 12.6 s one costs twice as much, and a 2 s one costs about 40 times as much. As with the GP timescale and the response filters above, a longer latent timescale and a wider response both smooth the fitted signal, so a free response width is only interpretable alongside a deliberately chosen `latent_timescale`. See [model mathematics](model-mathematics.md) for how the response enters each objective.
+Here $\tau$ is `latent_timescale`, $\lambda_Z$ is `latent_ridge`, and bars denote averages over the run. A sinusoid of period $T$ costs $1+(2\pi\tau/T)^2$ times a constant of the same amplitude. With the default $\tau=2$ s, a 60 s fluctuation costs 1.04 times a constant, a 12.6 s one costs twice as much, and a 2 s one costs about 40 times as much. As with the GP timescale and the response filters above, a longer latent timescale and a wider response both smooth the fitted signal, so a free response width is only interpretable alongside a deliberately chosen `latent_timescale`. See [model mathematics](model-mathematics.md) for how the response enters each objective.
 
 ## Legacy Bach analyses
 
