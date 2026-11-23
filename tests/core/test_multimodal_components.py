@@ -235,6 +235,8 @@ def span_fixture(nonidentity=False):
             random_state=4,
             responses={m: Response(response, estimate=False) for m in ["x", "y", "unused"]},
             modality_weights={"x": 0.5, "y": 0.5, "unused": 0},
+            # These tests check how support exclusion composes with components.
+            edge_observations="exclude",
         ).fit(data, affinity=graph())
     return model, data
 

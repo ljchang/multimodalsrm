@@ -140,7 +140,7 @@ def _prepare(model, training, *, conventions_from=None):
         max_observations=model.max_observations,
         covariance_tolerance=model.covariance_tolerance,
     )
-    adapter.edge_observations = model.edge_observations
+    adapter.edge_observations = model._edge_mode()
     adapter.capacity_unit = capacity_unit(
         model.linear_algebra,
         noise_prior=model.priors.noise,
@@ -388,7 +388,10 @@ def _restore_model(state):
                 "qualified_Gaussian_Laguerre_and_restored_gamma_tails"
             ):
                 constructor["state_space_gaussian"] = "laguerre"
+        # Archives written before the option existed excluded edge observations.
+        constructor.setdefault("edge_observations", "exclude")
         model = BayesianMultimodalSRM(**constructor)
+        model.edge_observations_ = model._edge_mode()
         fit = state["fit"]
         _fit_metadata(fit, len(state["parameter_names"]), state["phase_seconds"])
         if model.inference != "map" or fit["inference"] != "map":

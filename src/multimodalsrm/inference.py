@@ -8,7 +8,7 @@ from sklearn.utils.validation import check_is_fitted
 from .data import TimeSeries, normalize_data, validate_times
 from .grouping import latent_groups
 from .kernels import Identity
-from .objective import build_grids, make_blocks, solve_latents
+from .objective import build_grids, core_slice, make_blocks, solve_latents
 from .operators import observation_operator
 from .results import SeriesResult
 
@@ -204,11 +204,13 @@ def infer_latent(model, data, *, times=None):
             if nested
             else {s: list(times) for s in selected}
         )
+    # Without explicit times, report the run's own grid, not its edge padding.
+    default = {r: grid[core_slice(grid, domains[r], model.latent_dt)] for r, grid in grids.items()}
     output = {}
     for s, runs in output_runs.items():
         for r in runs:
             require_support(model, s, r, blocks)
-            query = query_times(times, s, r, None, grids, grids[r])
+            query = query_times(times, s, r, None, grids, default[r])
             if query is None:
                 continue
             H, valid = observation_operator(grids[r], query, Identity())
@@ -268,7 +270,9 @@ def predict(model, data, *, targets, source="within", times=None):
             require_support(model, target, r, blocks)
             local, domain = component_support(model, selected, blocks, target, r, domains[r])
             for m in modalities:
-                query = query_times(times, target, r, m, grids, grid)
+                query = query_times(
+                    times, target, r, m, grids, grid[core_slice(grid, domains[r], model.latent_dt)]
+                )
                 if query is None:
                     continue
                 support = model.responses_[m].support_envelope()

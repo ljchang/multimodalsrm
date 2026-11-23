@@ -199,6 +199,8 @@ def test_zero_weight_cannot_extend_domain_and_unusable_pair_excluded():
                 "a": Response(Identity()),
                 "b": Response(Gaussian(), estimate=False),
             },
+            # Support exclusion is what leaves this pair without usable rows.
+            edge_observations="exclude",
         ).fit(data)
     assert "b" not in m.loadings_["s"]
     assert "b" not in m.subject_kernels_["s"]

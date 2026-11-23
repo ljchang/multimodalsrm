@@ -60,7 +60,7 @@ Import `MultimodalSRM` from `multimodalsrm`. `latent_dt` is required. The estima
 | `n_init=1`, `n_jobs=1`, `random_state=None` | Restart count, process workers (`-1` uses available CPUs, capped by restarts), and seed. An integer seed makes starts reproducible across worker counts. |
 | `max_iter=100`, `kernel_max_iter=50`, `tol=1e-5` | Outer optimization budget, response optimization budget, and stopping tolerance. Inspect `converged_` and `restart_diagnostics_`. |
 | `lag_init=None` | `"scan"` estimates relative modality delays from the training observations before fitting, starts every free response lag there and narrows its bounds to that lag ± 2. Use it whenever lags are estimated and the delays between modalities are not already known to within the lag bounds: otherwise a fit can settle in a wrong optimum without any bound being flagged. A precomputed `LagScan` is also accepted. See [response timing](#response-timing-lags-and-what-is-identified). |
-| `edge_observations="exclude"` | `"include"` scores every observed row by extending each latent grid before and after its run by the reach of the response support envelope. By default a row is scored only if that envelope lies inside the run. See [edge observations](#edge-observations-and-response-support). |
+| `edge_observations="include"` | Scores every observed row by extending each latent grid before and after its run by the reach of the response support envelope; the extension is dropped from reported latents, as in a "same" convolution. `"exclude"` scores a row only if that envelope lies inside the run ("valid"), which was the behaviour before this option existed. See [edge observations](#edge-observations-and-response-support). |
 | `response_penalty_scaling="objective"` | How `Response.lag_prior`, `Response.prior` and `pooling_strength` weigh against the data. The default adds them unscaled to a normalized loss, which makes them far stronger than their stated values: a `Normal(0, 1)` lag prior can pull a one-second delay most of the way to zero, and `pooling_strength=1` behaves like complete pooling. `"likelihood"` gives each the weight a Gaussian likelihood over the scored observations would imply, so a lag prior's `sd` is in seconds and `pooling_strength` is `1 / sd²` of the spread between participants. It assumes unit residual variance in standardized units, so priors are somewhat tighter than stated when the model explains much of the data, and it counts observations as independent. Prefer it for new analyses that use these penalties; existing tuned values need converting. Factors are recorded in `penalty_scale_`. |
 | `kernel_tol=1e-4`, `kernel_extrapolation=True` | Convergence also requires that no free response coordinate moved further than `kernel_tol` in the last iteration (seconds for lags, log units for positive parameters); `None` restores the objective-only rule. Extrapolation follows each response step further while the complete objective keeps decreasing; it changes the path, not the objective. |
 | `gap_threshold=None` | Default splits integration support above twice the median usable interval. A positive explicit threshold uses timestamp units. |
@@ -77,7 +77,7 @@ Three tools follow from this:
 | `LagScan.seed_responses(responses, margin=2.0)` | Returns responses whose free lags start at the scanned delays, with bounds of that lag ± `margin`. `MultimodalSRM(lag_init="scan")` does both steps at fit time. |
 | `model.timing_report(reference=None)` | Reports fitted **peak delays**, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. By default delays are relative to the only modality without an estimated lag; several such modalities fix the clock themselves; with every lag estimated, delays are centred on the across-modality mean. Available on both estimators with the same convention. |
 
-Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow, and observations whose envelope reaches outside the run are not scored. Wide bounds on a short run can discard most of it.
+Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow. Observations whose envelope reaches outside the run rest on latent that R-MSRM must estimate beyond the run, and with `edge_observations="exclude"` they are not scored at all, so wide bounds on a short run can discard most of it.
 
 For GP-MSRM, the MAP search starts each lag from its prior, not from the kernel's own lag, so seed the prior as well:
 
@@ -100,9 +100,23 @@ The evidence is mixed and should set expectations. On synthetic recordings with 
 
 ## Edge observations and response support
 
-A response reads the latent over its **support envelope**: every lag its bounds allow, plus the response's full tail. By default both models use an observation only when that envelope lies inside the run, because the latent outside the run is not informed by other observations. The cost grows with long responses, wide lag bounds and short runs:
+A response reads the latent over its **support envelope**: every lag its bounds allow, plus the response's full tail. Near the start or end of a run that envelope reaches outside the run. The two settings correspond to the modes of a convolution:
 
-| Response (default bounds) | Envelope | Rows scored in a 60 s run | 120 s | 300 s |
+| `edge_observations` | Convolution mode | What is scored | Reported latent |
+| --- | --- | --- | --- |
+| `"include"` (default) | "same" | Every observation in the run | The run, on its own grid |
+| `"exclude"` | "valid" | Only observations whose envelope lies inside the run | The run, on its own grid |
+
+How `"include"` works:
+
+- **R-MSRM** extends each latent grid before and after its run by the envelope's reach, in whole grid cells, fits with that longer latent, and then drops the extension. `training_latents_`, `population_latents_` and `infer_latent` cover the run only, on the same grid as `"exclude"`. `run_grids_` keeps the extended solve grid and `edge_reach_` records the reach.
+- **GP-MSRM** simply does not exclude: the latent process is stationary and already defined outside the run. Dense, grouped and state-space algebra agree with one another on edge observations, so the default `"auto"` includes for all three. Spectral algebra represents the latent on the padded run only, so a response reaching past the padding would read an extrapolated latent; `"auto"` excludes there and `"include"` is rejected.
+
+Unlike a convolution, the padding is not zeros. It is latent that the model estimates from the edge observations and the smoothness penalty alone, so rows near the start of a run rest on less information than interior rows and are predicted less well. In synthetic recordings with a 25 s causal response, held-out error on rows that both settings predict was the same or slightly lower with `"include"`, and the rows only `"include"` predicts had about three times the interior error, still far below predicting the mean.
+
+`"exclude"` costs more as responses lengthen, lag bounds widen and runs shorten:
+
+| Response (default bounds) | Envelope | Rows scored by `"exclude"` in a 60 s run | 120 s | 300 s |
 | --- | --- | --- | --- | --- |
 | Gaussian, width 1.2 fixed, lag free ± 2 | (−9.2, 9.2) s | 69% | 84% | 94% |
 | Gaussian, width 1.2 and lag free | (−12.8, 12.8) s | 57% | 79% | 91% |
@@ -110,12 +124,7 @@ A response reads the latent over its **support envelope**: every lag its bounds 
 | DoubleGamma, fixed | (0, 49.4) s | 18% | 59% | 84% |
 | BatemanSCR, fixed | (0, 90) s | 0% | 25% | 70% |
 
-`edge_observations="include"` uses every observation in the run instead:
-
-- **R-MSRM** extends each latent grid before and after its run by the envelope's reach. The extra latent is constrained only by the edge observations and the smoothness penalty, and is reported outside the valid domain of the latent. Predictions are valid for every time inside the run.
-- **GP-MSRM** simply drops the exclusion: the latent process is stationary and defined outside the run. Supported for dense and grouped algebra.
-
-Rows near the start of a run rest on less information than interior rows, so expect them to be predicted less well; without this option they are not predicted at all. Narrow lag bounds remain worthwhile under either setting, since they shrink the envelope. `model.configuration_` records the setting and, for R-MSRM, the reach.
+Narrow lag bounds remain worthwhile under either setting: they shrink the envelope, and with it the latent R-MSRM must estimate outside the run. Use `"exclude"` to reproduce fits made before this option existed, or when only fully supported observations should inform the fit. Saved models keep the setting they were fitted with, and `model.configuration_` records it.
 
 ## GP-MSRM settings
 
@@ -134,7 +143,7 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `search=None`, `sampler=None` | Use default `SearchConfig()` and `SamplerConfig()`; see below. |
 | `sample_blocks=None` | Full target by default. A nonempty unique subset of `"filter"`, `"loading"`, `"offset"`, `"noise"`, `"gp"` samples conditional on remaining parameters; this is not the full posterior. |
 | `random_state=0` | Reproducibility seed, or `None`. |
-| `edge_observations="exclude"` | `"include"` scores every observation in a run instead of only those whose response support envelope lies inside it; dense and grouped algebra. See [edge observations](#edge-observations-and-response-support). |
+| `edge_observations="auto"` | `"include"` scores every observation in a run; `"exclude"` only those whose response support envelope lies inside it. `"auto"` includes for dense, grouped and state-space algebra and excludes for spectral algebra, where `"include"` is not supported. The resolved choice is `edge_observations_`. See [edge observations](#edge-observations-and-response-support). |
 | `max_observations=800` | Per-run size guard on what the backend factorizes: eligible scalars for dense and spectral algebra, exact modality/time nodes times factors for grouped algebra, and nodes for grouped state-space filtering. Run baselines, correlated noise and noise priors admitting zero keep the scalar count. Raising it permits a larger problem but does not guarantee feasible runtime. |
 | `covariance_tolerance=1e-7` | Error tolerance for supported analytic/response approximation checks. Does **not** certify response quadrature or spectral accuracy. |
 | `response_quadrature_order=None` | Explicit integer order 8–1024 per panel for dense/grouped structured response integrals. Needed for Gamma, DoubleGamma and BatemanSCR on those paths. Compare orders for numerical qualification. |

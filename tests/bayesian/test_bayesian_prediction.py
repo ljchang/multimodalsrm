@@ -106,7 +106,7 @@ def test_shared_latent_has_one_result_per_run_and_native_masks():
     values = ts.values.copy()
     values[2] = np.nan
     data["a"]["train"]["ref"] = TimeSeries(values, ts.times, mask)
-    model.fit(data)
+    model.set_params(edge_observations="exclude").fit(data)
     assert len(model.problem_.systems["train"].times) == 8 + 3  # signal fixed support envelope
     q = np.array([0.0, 1.7, 11.3, 20.0])
     out = model.infer_latent(times={"train": q})

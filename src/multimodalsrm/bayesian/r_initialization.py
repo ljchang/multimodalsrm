@@ -126,6 +126,8 @@ def r_initial_point(problem, seed):
             # Keep the penalty this initializer was measured with.
             latent_ridge=1e-4,
             latent_timescale=10.0,
+            # Score the rows the GP scores.
+            edge_observations=getattr(problem.adapter, "edge_observations", "exclude"),
             max_iter=40,
             kernel_max_iter=20,
             n_init=1,

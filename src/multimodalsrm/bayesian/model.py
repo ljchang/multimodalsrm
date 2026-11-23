@@ -110,13 +110,17 @@ class BayesianMultimodalSRM(BaseEstimator):
     compare higher orders and independent integrals for the declared bounds.
     Approximation metadata is retained in configuration, queries and archives.
 
-    ``edge_observations="include"`` scores every observation in a run. By
-    default an observation is used only if its response's support envelope,
-    which covers every lag the bounds allow and the response's full tail, lies
-    inside the run, so long responses and wide lag bounds can discard much of
-    a short recording. The latent GP is stationary and defined outside the
-    run, so the exclusion is a convention rather than a requirement. Supported
-    for dense/grouped algebra; queries are then valid anywhere inside the run.
+    ``edge_observations="include"`` scores every observation in a run, and
+    queries are valid anywhere inside it. The latent GP is stationary and
+    defined outside the run, so nothing is added to the model. ``"exclude"``
+    uses an observation only if its response's support envelope, which covers
+    every lag the bounds allow and the response's full tail, lies inside the
+    run; long responses and wide lag bounds can then discard much of a short
+    recording. The default ``"auto"`` includes for dense, grouped and
+    state-space algebra, which agree with one another on edge observations,
+    and excludes for spectral algebra: its basis lives on the padded run, so a
+    response reaching beyond the padding would read an extrapolated latent.
+    The resolved choice is ``edge_observations_`` after fitting.
 
     ``run_baseline_sd={modality: sd}`` optionally adds independent zero-mean
     Gaussian offsets per participant/run/feature, in supplied observation units.
@@ -149,7 +153,7 @@ class BayesianMultimodalSRM(BaseEstimator):
         noise_timescales=None,
         response_quadrature_order=None,
         state_space_gaussian="auto",
-        edge_observations="exclude",
+        edge_observations="auto",
     ):
         self.priors = priors
         self.anchor = anchor
@@ -187,10 +191,10 @@ class BayesianMultimodalSRM(BaseEstimator):
         )
         if self.state_space_gaussian not in ("auto", "laguerre", "rational"):
             raise ValueError("state_space_gaussian must be auto, laguerre, or rational")
-        if self.edge_observations not in ("exclude", "include"):
-            raise ValueError("edge_observations must be 'exclude' or 'include'")
-        if self.edge_observations == "include" and self.linear_algebra not in ("dense", "grouped"):
-            raise ValueError("edge_observations='include' supports dense/grouped algebra only")
+        if self.edge_observations not in ("auto", "exclude", "include"):
+            raise ValueError("edge_observations must be 'auto', 'exclude' or 'include'")
+        if self.edge_observations == "include" and self.linear_algebra == "spectral":
+            raise ValueError("edge_observations='include' is not supported for spectral algebra")
 
         if self.linear_algebra == "state_space" and self.inference != "map":
             raise ValueError("state_space currently requires MAP inference")
@@ -257,6 +261,12 @@ class BayesianMultimodalSRM(BaseEstimator):
             else np.random.SeedSequence().generate_state(1)[0]
         )
 
+    def _edge_mode(self):
+        """Resolve ``"auto"``: include unless the backend is spectral."""
+        if self.edge_observations != "auto":
+            return self.edge_observations
+        return "exclude" if self.linear_algebra == "spectral" else "include"
+
     def _anchor_choice(self):
         """Keep requested constructor values intact for cloning/persistence."""
         if self.anchor is not None:
@@ -293,8 +303,8 @@ class BayesianMultimodalSRM(BaseEstimator):
                     else {}
                 ),
                 **(
-                    {"edge_observations": self.edge_observations}
-                    if self.edge_observations != "exclude"
+                    {"edge_observations": self._edge_mode()}
+                    if self._edge_mode() != "exclude"
                     else {}
                 ),
                 **({"noise_timescales": self.noise_timescales} if self.noise_timescales else {}),
@@ -357,7 +367,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             max_observations=self.max_observations,
             covariance_tolerance=self.covariance_tolerance,
         )
-        adapter.edge_observations = self.edge_observations
+        adapter.edge_observations = self._edge_mode()
         adapter.capacity_unit = capacity_unit(
             self.linear_algebra,
             noise_prior=self.priors.noise,
@@ -556,9 +566,10 @@ class BayesianMultimodalSRM(BaseEstimator):
             else "conditional_on_MAP",
             calibration_established=False,
         )
-        if self.edge_observations != "exclude":
+        self.edge_observations_ = self._edge_mode()
+        if self.edge_observations_ != "exclude":
             # Recorded only when used, so earlier archives still validate.
-            self.configuration_["edge_observations"] = self.edge_observations
+            self.configuration_["edge_observations"] = self.edge_observations_
         if self.problem_.length_scale_prior is not None:
             self.configuration_["gp_hyperparameters"] = {
                 "length_scale": {

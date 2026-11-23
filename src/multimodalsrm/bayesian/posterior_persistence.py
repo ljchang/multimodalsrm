@@ -501,7 +501,10 @@ def restore(saved, *, updated=False):
         from .persistence import _restore_search_default
 
         constructor = _restore_search_default(_copy_readonly(saved["constructor"]), saved["fit"])
+        # Archives written before the option existed excluded edge observations.
+        constructor.setdefault("edge_observations", "exclude")
         model = BayesianMultimodalSRM(**constructor)
+        model.edge_observations_ = model._edge_mode()
         if model.inference != "posterior":
             raise ValueError("posterior archive requires posterior constructor")
         model._config()

@@ -183,7 +183,10 @@ def test_learned_filter_projection_matches_continuous_integrator():
     transformed = model.transform(supplied, times=q)
     x = dict(zip(model.parameter_names_, model.map_parameters_))
     kernel = Gaussian(x["filter", "signal", "width"], x["filter", "signal", "lag"])
-    t = native[mask[:, 0] & adapter._support(native, "signal", (native[0], native[-1]))]
+    # The default scores every in-run observation, edge rows included.
+    support = model.adapter_._support(native, "signal", (native[0], native[-1]))
+    assert support.all() and not adapter._support(native, "signal", (native[0], native[-1])).all()
+    t = native[mask[:, 0] & support]
     w = x["loading", "b", "signal", 0]
     C = w**2 * response_covariance(t, t, kernel, kernel, 3, tolerance=1e-9)
     C += np.eye(len(t)) * x["noise", "b", "signal"]

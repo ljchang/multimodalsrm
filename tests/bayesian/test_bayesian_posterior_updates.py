@@ -32,6 +32,8 @@ def prepared(features=3, algebra="grouped"):
         max_observations=p.adapter.max_observations,
         factor_anchors=tuple(p.keys[:features]),
         linear_algebra=algebra,
+        # The adapter attached below was prepared with support exclusion.
+        edge_observations="exclude",
         search=SearchConfig(starts=1, maxiter=3),
         sampler=SamplerConfig(
             chains=2,
