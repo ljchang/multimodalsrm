@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`MultimodalSRM(response_penalty_scaling="likelihood")`.** `Response.lag_prior`,
+  `Response.prior` and `pooling_strength` were added unscaled to a normalized
+  reconstruction loss, which made them far stronger than their stated values: in a
+  synthetic fit a `Normal(0, 1)` lag prior shrank a one-second relative delay to
+  0.33 s, and partial pooling at a strength matching the true 0.3 s spread between
+  participants removed more than 80% of that spread. The new option multiplies each
+  penalty by the factor a Gaussian likelihood over the scored observations implies
+  (unit residual variance in standardized units, observations counted as
+  independent). The same prior then left the delay at 1.00 s and tightened smoothly
+  as its standard deviation fell, and partial pooling kept more than 80% of the
+  participant spread. Calibration uses the same scaling. The default `"objective"`
+  keeps the original behaviour.
 - **`edge_observations="include"` on both estimators.** By default an observation
   is scored only if its response support envelope (every lag the bounds allow plus
   the response's full tail) lies inside the run: a fixed `DoubleGamma` scores 18% of

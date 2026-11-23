@@ -7,7 +7,7 @@ R-MSRM and GP-MSRM have different inference and prediction contracts. Start with
 
 ## MultimodalSRM
 
-`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L80)
+`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L81)
 
 ```python
 MultimodalSRM(
@@ -36,6 +36,7 @@ MultimodalSRM(
     kernel_extrapolation=True,
     lag_init=None,
     edge_observations="exclude",
+    response_penalty_scaling="objective",
 )
 ```
 
@@ -86,6 +87,20 @@ observed row is scored. The added latent is constrained only by those edge
 observations and the smoothness penalty, and is reported as outside the
 run's valid domain. Predictions near a run's start then rest on less
 information than interior ones.
+
+`response_penalty_scaling` sets how `Response.lag_prior`, `Response.prior` and
+`pooling_strength` weigh against the data. The reconstruction loss is a
+normalized mean, not a sum over observations. With `"objective"`
+(default, the original behaviour) those penalties are added to it unscaled,
+which makes them far stronger than their stated values suggest: a
+`Normal(0, 1)` lag prior can act like a standard deviation of a few
+hundredths of a second, and `pooling_strength=1` like complete pooling.
+`"likelihood"` multiplies each by the factor that a Gaussian likelihood
+over the scored observations would imply, assuming unit residual variance
+in standardized units, so a lag prior's `sd` is in seconds and
+`pooling_strength` is `1 / sd**2` of the spread between participants,
+summed over participants. Residual variance below one makes these priors
+somewhat tighter than stated. Factors are stored in `penalty_scale_`.
 
 Penalties and balancing conventions are recorded in `configuration_`.
 Reaching `max_iter` does not constitute convergence. `init="hybrid"`
