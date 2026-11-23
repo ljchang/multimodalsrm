@@ -92,10 +92,13 @@ def test_single_start_reaches_the_scanned_basin_and_a_wide_start_does_not(seeded
 
 def test_map_report_matches_relative_lags_for_symmetric_responses(seeded_fit):
     report = seeded_fit.timing_report()
-    assert report["convention"] == "across_modality_mean"
+    assert report["convention"] == "first_modality" and report["reference"] == "A"
     assert report["uncertainty"] == "conditional_on_MAP"
+    # relative_lag_draws centres on the mean; the report shows the first modality at zero.
     lags = {m: float(v[0, 0]) for m, v in seeded_fit.relative_lag_draws().items()}
-    assert report["relative_peak_delay"] == pytest.approx(lags)
+    assert report["relative_peak_delay"] == pytest.approx(
+        {m: value - lags["A"] for m, value in lags.items()}
+    )
     assert report["pairwise_difference"]["B - A"] == pytest.approx(lags["B"] - lags["A"])
     with pytest.raises(ValueError, match="reference"):
         seeded_fit.timing_report(reference="missing")

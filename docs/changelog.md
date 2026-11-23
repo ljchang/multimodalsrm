@@ -49,8 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same lag from starts 12 s apart; an unreliable scan warns and leaves the
   configured lags and bounds unchanged.
 - **`timing_report()` on both estimators.** Reports each modality's peak delay
-  relative to a reference modality or to the across-modality mean, pairwise
-  differences, the clock origin that was subtracted, and lags resting at a bound.
+  relative to a reference modality, pairwise differences, the clock origin that
+  was subtracted, and lags resting at a bound. The reference only sets which
+  modality is shown at zero; by default it is the first modality whose lag is not
+  estimated, or the first modality when every lag is estimated.
   Only relative timing is identified, so no modality needs a fixed lag. For
   posterior fits it summarizes peak delay per draw. `peak_delay(kernel)` gives the
   peak of any response family; for Gamma, DoubleGamma and BatemanSCR it is better
