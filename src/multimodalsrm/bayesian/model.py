@@ -771,8 +771,9 @@ class BayesianMultimodalSRM(BaseEstimator):
         For Gamma, DoubleGamma and BatemanSCR the peak is far better
         determined than the ``lag`` parameter that ``relative_lag_draws``
         reports, which is their onset. ``reference`` names the modality at
-        zero; by default it is the only modality without an estimated lag, or
-        the across-modality mean. ``max_draws=None`` uses every draw. This
+        zero. By default it is the only modality without an estimated lag;
+        several such modalities fix the model clock, which is then kept, and
+        with none delays are centred on the across-modality mean. ``max_draws=None`` uses every draw. This
         centres summaries only and does not establish physiological timing.
         """
         from ..lags import peak_delay, timing_summary

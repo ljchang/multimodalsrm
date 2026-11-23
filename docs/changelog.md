@@ -21,7 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   scan-initialized fits in 9 of 9. `multimodalsrm.bayesian.lag_priors` centres GP lag
   priors on the seeded lags, since the GP MAP search starts lags from their priors;
   with it a single GP start recovered delays of 5 and 10 s in 4 of 4 cases against
-  0 of 4 from wide bounds.
+  0 of 4 from wide bounds. On the one empirical recording tested the scan found
+  no reliable delay for any modality pair, and ordinary fits there reached the
+  same lag from starts 12 s apart; an unreliable scan warns and leaves the
+  configured lags and bounds unchanged.
 - **`timing_report()` on both estimators.** Reports each modality's peak delay
   relative to a reference modality or to the across-modality mean, pairwise
   differences, the clock origin that was subtracted, and lags resting at a bound.

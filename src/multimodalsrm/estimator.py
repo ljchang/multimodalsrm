@@ -108,7 +108,9 @@ class MultimodalSRM(BaseEstimator):
     units. Without it, lags start at the configured kernels and a true relative
     delay outside the bounds, or far from the start, can end in a wrong optimum
     with no bound flagged. A precomputed ``LagScan`` is also accepted. The scan
-    is stored as ``lag_scan_`` and a warning reports when it is unreliable.
+    is stored as ``lag_scan_``. When it is unreliable the responses are left as
+    configured and a warning says so: weakly coupled modalities often give no
+    usable scan, and then the configured lags and bounds are the better start.
     Only relative timing is identified: ``timing_report()`` states fitted peak
     delays relative to a reference modality or to their mean.
 
@@ -293,17 +295,28 @@ class MultimodalSRM(BaseEstimator):
             return dict(method="skipped", reason="a lag scan needs at least two modalities")
         else:
             scan, method = scan_lags(data), "scan"
+        self.lag_scan_ = scan
         if not scan.reliable:
+            # Narrow bounds around an unreliable delay would do more harm than
+            # the configured start, so keep the responses as supplied.
             warnings.warn(
-                "lag scan is unreliable; inspect lag_scan_.notes and consider explicit "
-                "response lags and bounds: " + "; ".join(scan.notes),
+                "lag scan found no reliable relative delays, so response lags and bounds "
+                "are unchanged; inspect lag_scan_.notes: " + "; ".join(scan.notes),
                 UserWarning,
                 stacklevel=3,
             )
-        self.lag_scan_ = scan
+            return dict(
+                method=method,
+                applied=False,
+                relative_delays=dict(scan.delays),
+                reliable=False,
+                notes=list(scan.notes),
+                seeded_lags={},
+            )
         self.responses_ = scan.seed_responses(self.responses_)
         return dict(
             method=method,
+            applied=True,
             relative_delays=dict(scan.delays),
             reliable=scan.reliable,
             notes=list(scan.notes),
@@ -824,8 +837,9 @@ class MultimodalSRM(BaseEstimator):
         Reports each modality's peak delay, pairwise differences, the clock
         origin that was subtracted, lags resting at a bound, and agreement
         with the lag scan when one was used. ``reference`` names the modality
-        at zero; by default it is the only modality without an estimated lag,
-        or the across-modality mean when there is none or several.
+        at zero. By default it is the only modality without an estimated lag;
+        with several such modalities delays stay on the model clock they fix,
+        and with none they are centred on the across-modality mean.
         """
         from sklearn.utils.validation import check_is_fitted
 

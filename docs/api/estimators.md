@@ -69,7 +69,9 @@ lag there and narrows its bounds to that lag plus or minus two timestamp
 units. Without it, lags start at the configured kernels and a true relative
 delay outside the bounds, or far from the start, can end in a wrong optimum
 with no bound flagged. A precomputed `LagScan` is also accepted. The scan
-is stored as `lag_scan_` and a warning reports when it is unreliable.
+is stored as `lag_scan_`. When it is unreliable the responses are left as
+configured and a warning says so: weakly coupled modalities often give no
+usable scan, and then the configured lags and bounds are the better start.
 Only relative timing is identified: `timing_report()` states fitted peak
 delays relative to a reference modality or to their mean.
 
@@ -129,8 +131,9 @@ Fitted response timing relative to a reference modality or the mean.
 Reports each modality's peak delay, pairwise differences, the clock
 origin that was subtracted, lags resting at a bound, and agreement
 with the lag scan when one was used. `reference` names the modality
-at zero; by default it is the only modality without an estimated lag,
-or the across-modality mean when there is none or several.
+at zero. By default it is the only modality without an estimated lag;
+with several such modalities delays stay on the model clock they fix,
+and with none they are centred on the across-modality mean.
 
 ### MultimodalSRM.kernel
 
@@ -334,8 +337,9 @@ report a mean, standard deviation and the draws; MAP gives one value.
 For Gamma, DoubleGamma and BatemanSCR the peak is far better
 determined than the `lag` parameter that `relative_lag_draws`
 reports, which is their onset. `reference` names the modality at
-zero; by default it is the only modality without an estimated lag, or
-the across-modality mean. `max_draws=None` uses every draw. This
+zero. By default it is the only modality without an estimated lag;
+several such modalities fix the model clock, which is then kept, and
+with none delays are centred on the across-modality mean. `max_draws=None` uses every draw. This
 centres summaries only and does not establish physiological timing.
 
 ### BayesianMultimodalSRM.predict

@@ -73,7 +73,7 @@ Three tools follow from this:
 | --- | --- |
 | `scan_lags(data)` | Estimates relative delays from the observations before any fit, by lagged canonical correlation between every pair of modalities. Returns a `LagScan` with one delay per modality, pairwise delays, and `notes` explaining when it is unreliable (no lag stands out, pairwise delays do not add up, best lag at the scan limit). It costs a small fraction of one fit. |
 | `LagScan.seed_responses(responses, margin=2.0)` | Returns responses whose free lags start at the scanned delays, with bounds of that lag ± `margin`. `MultimodalSRM(lag_init="scan")` does both steps at fit time. |
-| `model.timing_report(reference=None)` | Reports fitted **peak delays** relative to a reference modality or to the across-modality mean, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. Available on both estimators with the same convention. |
+| `model.timing_report(reference=None)` | Reports fitted **peak delays**, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. By default delays are relative to the only modality without an estimated lag; several such modalities fix the clock themselves; with every lag estimated, delays are centred on the across-modality mean. Available on both estimators with the same convention. |
 
 Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow, and observations whose envelope reaches outside the run are not scored. Wide bounds on a short run can discard most of it.
 
@@ -92,7 +92,9 @@ priors = BayesianPriors(
 
 Compare modalities on peak delay, not on the `lag` parameter. For Gaussian responses they coincide. For Gamma, DoubleGamma and BatemanSCR, `lag` is the onset and trades off against the shape parameters, while the peak is well determined; `peak_delay(kernel)` returns it. `BayesianMultimodalSRM.relative_lag_draws()` reports the raw lag parameter.
 
-The scan locates a basin; it is not itself a timing estimate, and it has been checked on synthetic data only. Treat a warning from it as a reason to set lags and bounds by hand.
+The scan locates a basin; it is not itself a timing estimate. It needs modalities that are measurably coupled within participants. When it finds no reliable delay, `lag_init="scan"` warns and leaves the configured lags and bounds unchanged, and a `LagScan` reports `reliable=False` with the reasons.
+
+The evidence is mixed and should set expectations. On synthetic recordings with large relative delays the scan turned silent wrong-optimum fits into correct ones. On the one empirical recording tested (five participants, one 8-minute film, 2 s sampling; brain parcels, facial action units and emotion ratings) it found no reliable delay for any pair of modalities, and ordinary fits reached the same lag from starts 12 s apart, so the scan was neither usable nor needed there. In that recording the fitted brain lag also changed with the number of factors (about 1.2 s after the face and rating streams at two, 6.9 s at four) while the objective differed by under 1% across lags from 0 to 12 s: report such lags with their sensitivity to model settings.
 
 ## GP-MSRM settings
 

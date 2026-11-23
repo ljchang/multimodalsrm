@@ -52,7 +52,7 @@ Existing `.calibrate` and `.transform` APIs retain their MAP meanings. Do not in
 
 ## Response timing
 
-Both models estimate relative, not absolute, modality timing. `scan_lags` proposes starting lags and narrow bounds from the observations; `timing_report()` reports peak delays relative to a reference modality or to the across-modality mean, with the subtracted clock origin. The scan can fail at very low signal-to-noise and can alias by one period on a near-periodic signal; it reports both conditions, and its thresholds come from synthetic data. A reported delay is a relative model quantity, not a physiological latency.
+Both models estimate relative, not absolute, modality timing. `scan_lags` proposes starting lags and narrow bounds from the observations; `timing_report()` reports peak delays relative to a reference modality or to the across-modality mean, with the subtracted clock origin. The scan can fail at very low signal-to-noise and can alias by one period on a near-periodic signal; it reports both conditions, and its thresholds come from synthetic data. On the one empirical recording tested it found no reliable delay, and scan initialization then leaves the configured lags unchanged. A reported delay is a relative model quantity, not a physiological latency.
 
 ## Interpreting outputs
 

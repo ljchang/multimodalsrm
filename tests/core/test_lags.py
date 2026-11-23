@@ -212,30 +212,42 @@ def test_scan_initialization_reaches_a_delay_the_default_start_misses():
     assert report["scan_reliable"] and report["lags_at_bounds"] == []
     assert isinstance(model.lag_scan_, LagScan)
     provenance = model.configuration_["lag_init"]
-    assert provenance["method"] == "scan" and provenance["reliable"]
+    assert provenance["method"] == "scan" and provenance["reliable"] and provenance["applied"]
     assert set(provenance["seeded_lags"]) == set("ABC")
     # The constructor's responses are not modified.
     assert model.responses["B"].initial_kernel().lag == 0.0
     assert pickle.loads(pickle.dumps(model)).lag_scan_.delays == model.lag_scan_.delays
 
 
-def test_supplied_and_unreliable_scans():
+def test_supplied_scans_are_applied_only_when_reliable():
     data = recording(0, TRUE)
-    supplied = LagScan({"A": -4.7, "B": 5.3, "C": -0.6}, {}, 0.0, 15.0, 0.25, 2, ("made up",))
-    with pytest.warns(UserWarning, match="lag scan is unreliable.*made up"):
+    delays = {"A": -4.7, "B": 5.3, "C": -0.6}
+    model = fit(
+        data,
+        responses=gaussian_responses(),
+        lag_init=LagScan(delays, {}, 0.0, 15.0, 0.25, 2),
+    )
+    provenance = model.configuration_["lag_init"]
+    assert provenance["method"] == "supplied_scan" and provenance["applied"]
+    assert model.timing_report(reference="A")["relative_peak_delay"]["B"] == pytest.approx(
+        10.0, abs=0.1
+    )
+    unreliable = LagScan(delays, {}, 0.0, 15.0, 0.25, 2, ("made up",))
+    with pytest.warns(UserWarning, match="no reliable relative delays.*made up"):
         model = MultimodalSRM(
             features=2,
             latent_dt=0.5,
             responses=gaussian_responses(),
-            lag_init=supplied,
-            max_iter=300,
+            lag_init=unreliable,
+            max_iter=5,
             random_state=0,
         ).fit(data)
-    assert model.configuration_["lag_init"]["method"] == "supplied_scan"
-    assert model.timing_report(reference="A")["relative_peak_delay"]["B"] == pytest.approx(
-        10.0, abs=0.1
-    )
-    assert not model.timing_report()["scan_reliable"]
+    provenance = model.configuration_["lag_init"]
+    assert not provenance["applied"] and provenance["seeded_lags"] == {}
+    # Lags and bounds stay as configured rather than narrowing around a guess.
+    assert model.responses_["B"].initial_kernel().lag == 0.0
+    assert model.responses_["B"].parameter_bounds()["lag"] == (-2.0, 2.0)
+    assert model.lag_scan_ is unreliable
 
 
 def test_scan_initialization_is_skipped_when_it_cannot_apply():
@@ -291,6 +303,13 @@ def test_timing_report_reference_conventions():
     assert chosen["pairwise_difference"] == pytest.approx(automatic["pairwise_difference"])
     with pytest.raises(ValueError, match="reference"):
         model.timing_report(reference="missing")
+    # Two modalities without an estimated lag already fix the model clock.
+    responses["C"] = Response(Identity(), estimate=False)
+    report = fit(data, responses=responses).timing_report()
+    assert report["reference"] is None and report["clock_origin"] == 0.0
+    assert report["convention"] == "model_clock_set_by_modalities_without_estimated_lags"
+    assert report["relative_peak_delay"] == report["peak_delay_model_clock"]
+    assert report["relative_peak_delay"]["A"] == report["relative_peak_delay"]["C"] == 0.0
 
 
 def test_timing_report_uses_peaks_and_lists_participants_when_not_shared():

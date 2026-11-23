@@ -324,11 +324,13 @@ def scan_lags(data, *, max_lag=15.0, step=0.25, components=2, modalities=None):
 
 
 def resolve_reference(reference, estimated):
-    """Pick the modality that defines zero delay, or None for the mean.
+    """Pick what defines zero delay: a modality, the model clock, or the mean.
 
     An explicit name wins. Otherwise a single modality whose lag is not
-    estimated (a fixed lag or an Identity response) is the natural clock;
-    with none or several, delays are centred on the across-modality mean.
+    estimated (a fixed lag or an Identity response) is the reference. Several
+    such modalities already fix the model's clock between them, so delays are
+    reported on that clock unchanged. With every lag estimated the common
+    offset is arbitrary and delays are centred on the across-modality mean.
     """
     if reference is not None:
         if reference not in estimated:
@@ -337,6 +339,8 @@ def resolve_reference(reference, estimated):
     fixed = [m for m, free in estimated.items() if not free]
     if len(fixed) == 1:
         return fixed[0], "only_modality_without_an_estimated_lag"
+    if fixed:
+        return None, "model_clock_set_by_modalities_without_estimated_lags"
     return None, "across_modality_mean"
 
 
@@ -352,11 +356,12 @@ def timing_summary(peaks, estimated, reference=None):
         raise ValueError("timing needs at least one response")
     reference, convention = resolve_reference(reference, estimated)
     arrays = {m: np.asarray(v, dtype=float) for m, v in peaks.items()}
-    origin = (
-        np.mean(np.stack(np.broadcast_arrays(*arrays.values())), axis=0)
-        if reference is None
-        else arrays[reference]
-    )
+    if reference is not None:
+        origin = arrays[reference]
+    elif convention == "across_modality_mean":
+        origin = np.mean(np.stack(np.broadcast_arrays(*arrays.values())), axis=0)
+    else:
+        origin = np.zeros_like(next(iter(arrays.values())))
 
     def describe(values):
         values = np.asarray(values, dtype=float)
