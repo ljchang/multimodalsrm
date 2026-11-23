@@ -140,6 +140,7 @@ def _prepare(model, training, *, conventions_from=None):
         max_observations=model.max_observations,
         covariance_tolerance=model.covariance_tolerance,
     )
+    adapter.edge_observations = model.edge_observations
     adapter.capacity_unit = capacity_unit(
         model.linear_algebra,
         noise_prior=model.priors.noise,
