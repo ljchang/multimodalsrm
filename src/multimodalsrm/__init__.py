@@ -16,6 +16,7 @@ from .kernels import (
     Response,
     SampledKernel,
 )
+from .lags import LagScan, peak_delay, scan_lags
 from .posterior_results import PosteriorSeriesResult
 from .results import SeriesResult
 from .selection import (
@@ -46,6 +47,9 @@ __all__ = [
     "PosteriorSeriesResult",
     "MultimodalSRM",
     "KernelEstimate",
+    "scan_lags",
+    "LagScan",
+    "peak_delay",
     "LeaveOneRunOut",
     "cross_validate",
     "CrossValidationResult",
