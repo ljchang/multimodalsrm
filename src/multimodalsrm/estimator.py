@@ -115,7 +115,7 @@ class MultimodalSRM(BaseEstimator):
     configured and a warning says so: weakly coupled modalities often give no
     usable scan, and then the configured lags and bounds are the better start.
     Only relative timing is identified: ``timing_report()`` states fitted peak
-    delays relative to a reference modality or to their mean.
+    delays relative to a reference modality, by default the first.
 
     A response reads the latent over its whole support envelope, which covers
     every lag its bounds allow and the response's full tail. With
@@ -900,14 +900,15 @@ class MultimodalSRM(BaseEstimator):
         return calibrate(self, data, **kwargs)
 
     def timing_report(self, reference=None):
-        """Fitted response timing relative to a reference modality or the mean.
+        """Fitted response timing relative to a reference modality.
 
         Reports each modality's peak delay, pairwise differences, the clock
         origin that was subtracted, lags resting at a bound, and agreement
         with the lag scan when one was used. ``reference`` names the modality
-        at zero. By default it is the only modality without an estimated lag;
-        with several such modalities delays stay on the model clock they fix,
-        and with none they are centred on the across-modality mean.
+        shown at zero. It only changes how delays are displayed: the fit and
+        the pairwise differences are the same for every choice. By default it
+        is the first modality whose lag is not estimated, or the first
+        modality in ``responses`` when every lag is estimated.
         """
         from sklearn.utils.validation import check_is_fitted
 

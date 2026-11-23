@@ -61,10 +61,13 @@ class BayesianMultimodalSRM(BaseEstimator):
     Optional ``anchor=(subject, modality, feature)`` sets a positive loading
     for one factor; otherwise the first sorted eligible training feature is
     used. The anchor may have any supported response family.
-    Optional ``reference_modality`` selects a fixed lag (shape may be learned).
-    Otherwise an already fixed lag is used if available; with all lags free,
-    proper supplied priors define the common offset and relative lag summaries
-    subtract the across-modality mean. Latent queries and lag priors/bounds
+    Optional ``reference_modality`` names a modality with a fixed lag (shape
+    may be learned) to report other lags against. It is a reporting
+    convention: it does not change the likelihood, and ``timing_report`` can
+    use any modality as its reference after fitting. Without it an already
+    fixed lag is used if available; with all lags free, proper supplied priors
+    define the common offset and ``relative_lag_draws`` subtracts the
+    across-modality mean. Latent queries and lag priors/bounds
     remain in model-clock coordinates. No convention establishes physiological
     timing or identifies disconnected data components.
     The model consumes supplied units without standardization. MAP and NUTS
@@ -797,18 +800,19 @@ class BayesianMultimodalSRM(BaseEstimator):
         return {m: readonly_array(lags - reference_lag) for m, lags in output.items()}
 
     def timing_report(self, reference=None, *, max_draws=200):
-        """Peak response delays relative to a reference modality or their mean.
+        """Peak response delays relative to a reference modality.
 
         The same convention as ``MultimodalSRM.timing_report``. Each retained
         parameter draw gives one peak delay per modality, so posterior fits
         report a mean, standard deviation and the draws; MAP gives one value.
         For Gamma, DoubleGamma and BatemanSCR the peak is far better
         determined than the ``lag`` parameter that ``relative_lag_draws``
-        reports, which is their onset. ``reference`` names the modality at
-        zero. By default it is the only modality without an estimated lag;
-        several such modalities fix the model clock, which is then kept, and
-        with none delays are centred on the across-modality mean. ``max_draws=None`` uses every draw. This
-        centres summaries only and does not establish physiological timing.
+        reports, which is their onset. ``reference`` names the modality shown
+        at zero and only changes how delays are displayed. By default it is
+        ``reference_modality`` when that was set, otherwise the first modality
+        whose lag is not estimated, otherwise the first modality in
+        ``responses``. ``max_draws=None`` uses every draw. This does not
+        establish physiological timing.
         """
         from ..lags import peak_delay, timing_summary
         from .prediction import selected_draws
@@ -839,6 +843,8 @@ class BayesianMultimodalSRM(BaseEstimator):
                 )
         if self.configuration_["inference"] != "posterior":
             peaks = {m: float(v[0]) for m, v in peaks.items()}
+        if reference is None:
+            reference = self.reference_modality
         report = timing_summary(peaks, estimated, reference)
         report["uncertainty"] = self.configuration_["uncertainty"]
         report["lags_at_bounds"] = [

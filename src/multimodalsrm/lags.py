@@ -5,7 +5,7 @@ delaying every response by a constant is absorbed by shifting the latent in
 time. The scan here estimates relative delays directly from the observations,
 before any model is fitted, so that response lags start in the right basin and
 their bounds can stay narrow. The timing report states fitted delays relative
-to a named reference or to the across-modality mean, never as absolute times.
+to a reference modality, never as absolute times.
 
 Nothing here changes a model objective.
 """
@@ -324,44 +324,36 @@ def scan_lags(data, *, max_lag=15.0, step=0.25, components=2, modalities=None):
 
 
 def resolve_reference(reference, estimated):
-    """Pick what defines zero delay: a modality, the model clock, or the mean.
+    """Pick the modality whose peak delay is reported as zero.
 
-    An explicit name wins. Otherwise a single modality whose lag is not
-    estimated (a fixed lag or an Identity response) is the reference. Several
-    such modalities already fix the model's clock between them, so delays are
-    reported on that clock unchanged. With every lag estimated the common
-    offset is arbitrary and delays are centred on the across-modality mean.
+    The reference only changes how delays are displayed: differences between
+    modalities are the same for every choice. An explicit name wins. Otherwise
+    it is the first modality whose lag is not estimated (a fixed lag or an
+    Identity response), or the first modality when every lag is estimated.
     """
     if reference is not None:
         if reference not in estimated:
             raise ValueError(f"reference {reference!r} has no fitted response")
         return reference, "requested_reference"
     fixed = [m for m, free in estimated.items() if not free]
-    if len(fixed) == 1:
-        return fixed[0], "only_modality_without_an_estimated_lag"
     if fixed:
-        return None, "model_clock_set_by_modalities_without_estimated_lags"
-    return None, "across_modality_mean"
+        return fixed[0], "first_modality_without_an_estimated_lag"
+    return next(iter(estimated)), "first_modality"
 
 
 def timing_summary(peaks, estimated, reference=None):
-    """Reference-free timing table from peak delays (scalars or draw arrays).
+    """Timing table from peak delays (scalars or draw arrays).
 
     Only differences between modalities are identified, so every delay is
-    reported relative to ``reference`` or to the across-modality mean.
-    ``clock_origin`` is what was subtracted: a latent event at model time
-    ``t`` occurs at ``t + clock_origin`` on the reported clock.
+    reported relative to one modality: ``reference``, or the default that
+    ``resolve_reference`` picks. ``clock_origin`` is that modality's peak
+    delay on the model clock, which was subtracted from every delay.
     """
     if not peaks:
         raise ValueError("timing needs at least one response")
     reference, convention = resolve_reference(reference, estimated)
     arrays = {m: np.asarray(v, dtype=float) for m, v in peaks.items()}
-    if reference is not None:
-        origin = arrays[reference]
-    elif convention == "across_modality_mean":
-        origin = np.mean(np.stack(np.broadcast_arrays(*arrays.values())), axis=0)
-    else:
-        origin = np.zeros_like(next(iter(arrays.values())))
+    origin = arrays[reference]
 
     def describe(values):
         values = np.asarray(values, dtype=float)
@@ -383,8 +375,9 @@ def timing_summary(peaks, estimated, reference=None):
         },
         lag_estimated=dict(estimated),
         interpretation=(
-            "Differences between modalities are estimated; the common offset is a "
-            "reporting convention and does not establish physiological timing."
+            "Differences between modalities are estimated. The reference only sets "
+            "which modality is shown at zero; it does not change the fit or "
+            "establish physiological timing."
         ),
     )
 

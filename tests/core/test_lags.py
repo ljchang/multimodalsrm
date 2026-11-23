@@ -274,11 +274,12 @@ def test_timing_report_is_invariant_to_the_arbitrary_common_offset():
     data = recording(2, {"A": 0.0, "B": 1.0, "C": 0.4})
     first = fit(data, responses=gaussian_responses(lag=0.0)).timing_report()
     second = fit(data, responses=gaussian_responses(lag=1.5)).timing_report()
-    assert first["convention"] == "across_modality_mean" and first["reference"] is None
+    assert first["convention"] == "first_modality" and first["reference"] == "A"
     for name in ("relative_peak_delay", "pairwise_difference"):
         assert first[name] == pytest.approx(second[name], abs=0.02)
     assert first["pairwise_difference"]["B - A"] == pytest.approx(1.0, abs=0.1)
-    assert sum(first["relative_peak_delay"].values()) == pytest.approx(0.0, abs=1e-9)
+    assert first["relative_peak_delay"]["A"] == 0.0
+    assert first["clock_origin"] == first["peak_delay_model_clock"]["A"]
     # Raw lags follow the start; the reported clock origin absorbs the shift.
     shift = second["clock_origin"] - first["clock_origin"]
     assert shift == pytest.approx(1.5, abs=0.05)
@@ -294,7 +295,7 @@ def test_timing_report_reference_conventions():
     model = fit(data, responses=responses)
     automatic = model.timing_report()
     assert automatic["reference"] == "A"
-    assert automatic["convention"] == "only_modality_without_an_estimated_lag"
+    assert automatic["convention"] == "first_modality_without_an_estimated_lag"
     assert automatic["relative_peak_delay"]["A"] == 0.0 and automatic["clock_origin"] == 0.0
     assert automatic["lag_estimated"] == {"A": False, "B": True, "C": True}
     chosen = model.timing_report(reference="C")
@@ -303,11 +304,11 @@ def test_timing_report_reference_conventions():
     assert chosen["pairwise_difference"] == pytest.approx(automatic["pairwise_difference"])
     with pytest.raises(ValueError, match="reference"):
         model.timing_report(reference="missing")
-    # Two modalities without an estimated lag already fix the model clock.
+    # With several modalities without an estimated lag, the first is used.
     responses["C"] = Response(Identity(), estimate=False)
     report = fit(data, responses=responses).timing_report()
-    assert report["reference"] is None and report["clock_origin"] == 0.0
-    assert report["convention"] == "model_clock_set_by_modalities_without_estimated_lags"
+    assert report["reference"] == "A" and report["clock_origin"] == 0.0
+    assert report["convention"] == "first_modality_without_an_estimated_lag"
     assert report["relative_peak_delay"] == report["peak_delay_model_clock"]
     assert report["relative_peak_delay"]["A"] == report["relative_peak_delay"]["C"] == 0.0
 
