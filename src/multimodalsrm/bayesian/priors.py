@@ -133,3 +133,21 @@ class BayesianPriors:
         ):
             raise ValueError("filter priors must be Prior objects")
         object.__setattr__(self, "filters", copied)
+
+
+def lag_priors(responses, *, sd=1.0):
+    """Normal lag priors centred on each response's current lag.
+
+    Use after ``LagScan.seed_responses``: the GP MAP search starts lags from
+    their prior, not from the kernel's own lag, so a scanned lag only takes
+    effect once the prior and the bounds are centred on it. Returns
+    ``{modality: {"lag": Prior}}`` for every response with a free lag, ready
+    to merge into ``BayesianPriors(filters=...)`` beside any shape priors.
+    """
+    if not np.isfinite(sd) or sd <= 0:
+        raise ValueError("sd must be positive finite")
+    return {
+        modality: {"lag": Prior.normal(response.initial_kernel().parameters["lag"], sd)}
+        for modality, response in responses.items()
+        if "lag" in response.free_parameters
+    }

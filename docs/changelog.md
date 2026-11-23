@@ -11,6 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Lag scan and scan-seeded response lags.** `scan_lags(data)` estimates relative
+  modality delays from the observations before fitting, by lagged canonical
+  correlation between every pair of modalities, and returns a `LagScan` with
+  reliability notes. `LagScan.seed_responses` starts free lags at the scanned delays
+  with bounds of that lag ± a margin, and `MultimodalSRM(lag_init="scan")` does both
+  at fit time. On synthetic recordings with true relative delays of 2, 5 and 10 s,
+  default R-MSRM fits recovered them in 1 of 9 cases with no bound flagged and
+  scan-initialized fits in 9 of 9. `multimodalsrm.bayesian.lag_priors` centres GP lag
+  priors on the seeded lags, since the GP MAP search starts lags from their priors;
+  with it a single GP start recovered delays of 5 and 10 s in 4 of 4 cases against
+  0 of 4 from wide bounds. On the one empirical recording tested the scan found
+  no reliable delay for any modality pair, and ordinary fits there reached the
+  same lag from starts 12 s apart; an unreliable scan warns and leaves the
+  configured lags and bounds unchanged.
+- **`timing_report()` on both estimators.** Reports each modality's peak delay
+  relative to a reference modality or to the across-modality mean, pairwise
+  differences, the clock origin that was subtracted, and lags resting at a bound.
+  Only relative timing is identified, so no modality needs a fixed lag. For
+  posterior fits it summarizes peak delay per draw. `peak_delay(kernel)` gives the
+  peak of any response family; for Gamma, DoubleGamma and BatemanSCR it is better
+  determined than the `lag` onset parameter.
 - `MultimodalSRM(kernel_tol=1e-4)` adds a response-step condition to convergence:
   no free response coordinate may have moved further than `kernel_tol` in the last
   iteration (seconds for lags, log units for positive parameters). Alternating

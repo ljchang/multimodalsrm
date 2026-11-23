@@ -25,6 +25,7 @@ from .kernel_optimization import (
     optimize_kernels,
 )
 from .kernels import Identity, Response
+from .lags import LagScan, scan_lags
 from .objective import (
     PreparedBlocks,
     build_grids,
@@ -101,6 +102,18 @@ class MultimodalSRM(BaseEstimator):
     it reproduces earlier fits, including the earlier ``latent_ridge`` default
     of 1e-4, and cannot be combined with ``latent_timescale``.
 
+    ``lag_init="scan"`` estimates relative modality delays from the training
+    observations before fitting (see ``scan_lags``), starts every free response
+    lag there and narrows its bounds to that lag plus or minus two timestamp
+    units. Without it, lags start at the configured kernels and a true relative
+    delay outside the bounds, or far from the start, can end in a wrong optimum
+    with no bound flagged. A precomputed ``LagScan`` is also accepted. The scan
+    is stored as ``lag_scan_``. When it is unreliable the responses are left as
+    configured and a warning says so: weakly coupled modalities often give no
+    usable scan, and then the configured lags and bounds are the better start.
+    Only relative timing is identified: ``timing_report()`` states fitted peak
+    delays relative to a reference modality or to their mean.
+
     Penalties and balancing conventions are recorded in ``configuration_``.
     Reaching ``max_iter`` does not constitute convergence. ``init="hybrid"``
     uses one deterministic spectral start followed by paired random starts;
@@ -148,6 +161,7 @@ class MultimodalSRM(BaseEstimator):
         balance_scale=True,
         kernel_tol=1e-4,
         kernel_extrapolation=True,
+        lag_init=None,
     ):
         self.features = features
         self.latent_dt = latent_dt
@@ -171,6 +185,7 @@ class MultimodalSRM(BaseEstimator):
         self.balance_scale = balance_scale
         self.kernel_tol = kernel_tol
         self.kernel_extrapolation = kernel_extrapolation
+        self.lag_init = lag_init
 
     def __setstate__(self, state):
         """Restore pre-policy pickles with the historical pair-scaled ridge."""
@@ -183,6 +198,7 @@ class MultimodalSRM(BaseEstimator):
         state.setdefault("kernel_extrapolation", False)
         # Earlier estimators stored the penalty strengths directly.
         state.setdefault("latent_timescale", None)
+        state.setdefault("lag_init", None)
         if "configuration_" in state:
             state.setdefault("latent_ridge_", state.get("latent_ridge"))
             state.setdefault("temporal_strength_", state.get("temporal_strength"))
@@ -202,6 +218,10 @@ class MultimodalSRM(BaseEstimator):
             raise ValueError("init must be random, spectral, or hybrid")
         if not isinstance(self.balance_scale, (bool, np.bool_)):
             raise ValueError("balance_scale must be boolean")
+        if not (
+            self.lag_init is None or self.lag_init == "scan" or isinstance(self.lag_init, LagScan)
+        ):
+            raise ValueError("lag_init must be None, 'scan', or a LagScan")
         if not isinstance(self.kernel_extrapolation, (bool, np.bool_)):
             raise ValueError("kernel_extrapolation must be boolean")
         if self.kernel_tol is not None and (
@@ -266,6 +286,47 @@ class MultimodalSRM(BaseEstimator):
         else:
             self.affinity_ = None
 
+    def _seed_lags(self, data):
+        """Start free lags at scanned relative delays; return the provenance."""
+        modalities = {m for runs in data.values() for mods in runs.values() for m in mods}
+        if isinstance(self.lag_init, LagScan):
+            scan, method = self.lag_init, "supplied_scan"
+        elif len(modalities) < 2:
+            return dict(method="skipped", reason="a lag scan needs at least two modalities")
+        else:
+            scan, method = scan_lags(data), "scan"
+        self.lag_scan_ = scan
+        if not scan.reliable:
+            # Narrow bounds around an unreliable delay would do more harm than
+            # the configured start, so keep the responses as supplied.
+            warnings.warn(
+                "lag scan found no reliable relative delays, so response lags and bounds "
+                "are unchanged; inspect lag_scan_.notes: " + "; ".join(scan.notes),
+                UserWarning,
+                stacklevel=3,
+            )
+            return dict(
+                method=method,
+                applied=False,
+                relative_delays=dict(scan.delays),
+                reliable=False,
+                notes=list(scan.notes),
+                seeded_lags={},
+            )
+        self.responses_ = scan.seed_responses(self.responses_)
+        return dict(
+            method=method,
+            applied=True,
+            relative_delays=dict(scan.delays),
+            reliable=scan.reliable,
+            notes=list(scan.notes),
+            seeded_lags={
+                m: r.initial_kernel().parameters["lag"]
+                for m, r in self.responses_.items()
+                if "lag" in r.free_parameters
+            },
+        )
+
     def _latent_penalty(self):
         """Resolve (ridge, derivative strength) from either parameterization."""
 
@@ -316,6 +377,11 @@ class MultimodalSRM(BaseEstimator):
         }
         if any(not mods for runs in active.values() for mods in runs.values()):
             raise ValueError("participant/run has no positively weighted usable data")
+        lag_init = None
+        if self.lag_init is not None and any(
+            "lag" in r.free_parameters for r in self.responses_.values()
+        ):
+            lag_init = self._seed_lags(active)
         self.run_grids_, self.run_domains_ = build_grids(active, self.latent_dt)
         self.preprocessing_ = fit_preprocessing(active, self.modality_weights_)
         initial = {
@@ -352,6 +418,7 @@ class MultimodalSRM(BaseEstimator):
             + ("" if self.kernel_tol is None else "_and_kernel_step"),
             "kernel_tol": self.kernel_tol,
             "kernel_extrapolation": bool(self.kernel_extrapolation),
+            "lag_init": lag_init,
         }
 
         blocks_for = PreparedBlocks(
@@ -763,6 +830,23 @@ class MultimodalSRM(BaseEstimator):
         from .calibration import calibrate
 
         return calibrate(self, data, **kwargs)
+
+    def timing_report(self, reference=None):
+        """Fitted response timing relative to a reference modality or the mean.
+
+        Reports each modality's peak delay, pairwise differences, the clock
+        origin that was subtracted, lags resting at a bound, and agreement
+        with the lag scan when one was used. ``reference`` names the modality
+        at zero. By default it is the only modality without an estimated lag;
+        with several such modalities delays stay on the model clock they fix,
+        and with none they are centred on the across-modality mean.
+        """
+        from sklearn.utils.validation import check_is_fitted
+
+        from .lags import regularized_timing_report
+
+        check_is_fitted(self, "subject_kernels_")
+        return regularized_timing_report(self, reference)
 
     def kernel(self, modality, subject=None, level="subject", times=None):
         from .inspection import kernel

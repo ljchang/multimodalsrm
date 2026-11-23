@@ -340,3 +340,116 @@ Priors in supplied data units; filter priors map modality then parameter.
 `noise` is a prior on variance, not on standard deviation or log variance.
 Loading and offset scales are illustrative defaults; applications should
 set all scales from their measurement units and prior predictive checks.
+
+## scan_lags
+
+`from multimodalsrm import scan_lags` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/lags.py#L202)
+
+```python
+scan_lags(data, *, max_lag=15.0, step=0.25, components=2, modalities=None)
+```
+
+Estimate relative modality delays by lagged canonical correlation.
+
+For every pair of modalities and every participant who has both, the
+leading `components` principal time courses of one stream are compared
+with those of the other at each lag from `-max_lag` to `max_lag`.
+Pairwise delays are then reconciled by prominence-weighted least squares
+into one delay per modality. No model is fitted; the cost is a small
+fraction of one fit.
+
+The scan locates a basin for response lags; it is not a timing estimate.
+It returns approximately the delay between response peaks. It can fail at
+very low signal-to-noise and can alias by one period on a near-periodic
+signal; both cases are reported in `notes` (low prominence, pairwise
+delays that do not add up) and make `reliable` False. Lags are in
+timestamp units, and at least half of each run must overlap at every
+scanned lag, so `max_lag` should stay well below half a run.
+## LagScan
+
+`from multimodalsrm import LagScan` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/lags.py#L67)
+
+```python
+LagScan(delays, pairwise, closure_error, max_lag, step, components, notes=tuple())
+```
+
+
+| Field | Type | Default |
+| --- | --- | --- |
+| `delays` | `dict` | `required` |
+| `pairwise` | `dict` | `required` |
+| `closure_error` | `float &#124; None` | `required` |
+| `max_lag` | `float` | `required` |
+| `step` | `float` | `required` |
+| `components` | `int` | `required` |
+| `notes` | `tuple` | `tuple() (new per instance)` |
+
+Relative modality delays estimated from observations before fitting.
+
+`delays` are seconds (timestamp units) relative to the across-modality
+mean: only their differences carry information. `pairwise[(a, b)]` holds
+the directly scanned delay of `b` relative to `a` with its
+`prominence` (how far the best lag stands above the typical lag) and
+whether it sits `at_limit` of the scanned range. `closure_error` is the
+largest disagreement between a pairwise delay and the fitted delays; it is
+None with fewer than three modalities. `notes` explains every reason
+`reliable` is False.
+
+### LagScan.reliable
+
+`LagScan.reliable` (property)
+
+### LagScan.relative_to
+
+```python
+LagScan.relative_to(reference)
+```
+
+Delays with `reference` at zero.
+
+### LagScan.seed_responses
+
+```python
+LagScan.seed_responses(responses, *, margin=2.0)
+```
+
+Return responses whose free lags start at the scanned delays.
+
+Each free lag is moved so the response *peaks* at its scanned delay,
+and its bounds become that lag plus or minus `margin`. Narrow bounds
+matter twice: they keep the optimizer in the scanned basin, and they
+keep the fixed support envelope small, so fewer edge observations are
+excluded. The clock is taken from modalities whose lag is not
+estimated (fixed lags and Identity responses); with every lag free,
+the mean peak delay of the supplied responses is preserved.
+Modalities the scan could not place are returned unchanged.
+
+## peak_delay
+
+`from multimodalsrm import peak_delay` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/lags.py#L29)
+
+```python
+peak_delay(kernel)
+```
+
+Time of a response's largest positive value, in timestamp units.
+
+This is the timing quantity to compare across response families. For
+causal families the `lag` parameter is the onset, which trades off
+against the shape parameters; the peak is far better determined.
+Identity is an impulse at zero.
+## lag_priors
+
+`from multimodalsrm.bayesian import lag_priors` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L138)
+
+```python
+lag_priors(responses, *, sd=1.0)
+```
+
+Normal lag priors centred on each response's current lag.
+
+Use after `LagScan.seed_responses`: the GP MAP search starts lags from
+their prior, not from the kernel's own lag, so a scanned lag only takes
+effect once the prior and the bounds are centred on it. Returns
+`{modality: {"lag": Prior}}` for every response with a free lag, ready
+to merge into `BayesianPriors(filters=...)` beside any shape priors.

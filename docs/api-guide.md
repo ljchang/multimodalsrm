@@ -59,8 +59,42 @@ Import `MultimodalSRM` from `multimodalsrm`. `latent_dt` is required. The estima
 | `init="random"` | Also `"spectral"` or `"hybrid"`. Hybrid uses a spectral first start and random remaining starts. Repeated spectral starts are redundant. |
 | `n_init=1`, `n_jobs=1`, `random_state=None` | Restart count, process workers (`-1` uses available CPUs, capped by restarts), and seed. An integer seed makes starts reproducible across worker counts. |
 | `max_iter=100`, `kernel_max_iter=50`, `tol=1e-5` | Outer optimization budget, response optimization budget, and stopping tolerance. Inspect `converged_` and `restart_diagnostics_`. |
+| `lag_init=None` | `"scan"` estimates relative modality delays from the training observations before fitting, starts every free response lag there and narrows its bounds to that lag ± 2. Use it whenever lags are estimated and the delays between modalities are not already known to within the lag bounds: otherwise a fit can settle in a wrong optimum without any bound being flagged. A precomputed `LagScan` is also accepted. See [response timing](#response-timing-lags-and-what-is-identified). |
 | `kernel_tol=1e-4`, `kernel_extrapolation=True` | Convergence also requires that no free response coordinate moved further than `kernel_tol` in the last iteration (seconds for lags, log units for positive parameters); `None` restores the objective-only rule. Extrapolation follows each response step further while the complete objective keeps decreasing; it changes the path, not the objective. |
 | `gap_threshold=None` | Default splits integration support above twice the median usable interval. A positive explicit threshold uses timestamp units. |
+
+## Response timing: lags and what is identified
+
+Delaying every modality's response by the same amount is absorbed by shifting the latent response in time. Only **differences** between modality delays are estimated; the common offset is set by where the lags start (R-MSRM) or by the lag priors (GP-MSRM). You do not have to fix one modality as a reference, and fixing one does not make the timing absolute.
+
+Three tools follow from this:
+
+| Tool | What it does |
+| --- | --- |
+| `scan_lags(data)` | Estimates relative delays from the observations before any fit, by lagged canonical correlation between every pair of modalities. Returns a `LagScan` with one delay per modality, pairwise delays, and `notes` explaining when it is unreliable (no lag stands out, pairwise delays do not add up, best lag at the scan limit). It costs a small fraction of one fit. |
+| `LagScan.seed_responses(responses, margin=2.0)` | Returns responses whose free lags start at the scanned delays, with bounds of that lag ± `margin`. `MultimodalSRM(lag_init="scan")` does both steps at fit time. |
+| `model.timing_report(reference=None)` | Reports fitted **peak delays**, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. By default delays are relative to the only modality without an estimated lag; several such modalities fix the clock themselves; with every lag estimated, delays are centred on the across-modality mean. Available on both estimators with the same convention. |
+
+Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow, and observations whose envelope reaches outside the run are not scored. Wide bounds on a short run can discard most of it.
+
+For GP-MSRM, the MAP search starts each lag from its prior, not from the kernel's own lag, so seed the prior as well:
+
+```python
+from multimodalsrm import scan_lags
+from multimodalsrm.bayesian import BayesianPriors, Prior, lag_priors
+
+responses = scan_lags(training).seed_responses(responses)
+priors = BayesianPriors(
+    noise=Prior.lognormal(0.0, 1.0),
+    filters=lag_priors(responses, sd=1.0),
+)
+```
+
+Compare modalities on peak delay, not on the `lag` parameter. For Gaussian responses they coincide. For Gamma, DoubleGamma and BatemanSCR, `lag` is the onset and trades off against the shape parameters, while the peak is well determined; `peak_delay(kernel)` returns it. `BayesianMultimodalSRM.relative_lag_draws()` reports the raw lag parameter.
+
+The scan locates a basin; it is not itself a timing estimate. It needs modalities that are measurably coupled within participants. When it finds no reliable delay, `lag_init="scan"` warns and leaves the configured lags and bounds unchanged, and a `LagScan` reports `reliable=False` with the reasons.
+
+The evidence is mixed and should set expectations. On synthetic recordings with large relative delays the scan turned silent wrong-optimum fits into correct ones. On the one empirical recording tested (five participants, one 8-minute film, 2 s sampling; brain parcels, facial action units and emotion ratings) it found no reliable delay for any pair of modalities, and ordinary fits reached the same lag from starts 12 s apart, so the scan was neither usable nor needed there. In that recording the fitted brain lag also changed with the number of factors (about 1.2 s after the face and rating streams at two, 6.9 s at four) while the objective differed by under 1% across lags from 0 to 12 s: report such lags with their sensitivity to model settings.
 
 ## GP-MSRM settings
 

@@ -11,6 +11,7 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.utils.validation import check_is_fitted
 
 from ..data import readonly_array
+from ..kernels import Gaussian
 from .blocks import validate_blocks
 from .environment import check_environment_once
 from .fitting import SamplerConfig, SearchConfig, sample, search
@@ -760,6 +761,58 @@ class BayesianMultimodalSRM(BaseEstimator):
         if reference_lag is None:
             reference_lag = np.mean(np.stack(list(output.values())), axis=0)
         return {m: readonly_array(lags - reference_lag) for m, lags in output.items()}
+
+    def timing_report(self, reference=None, *, max_draws=200):
+        """Peak response delays relative to a reference modality or their mean.
+
+        The same convention as ``MultimodalSRM.timing_report``. Each retained
+        parameter draw gives one peak delay per modality, so posterior fits
+        report a mean, standard deviation and the draws; MAP gives one value.
+        For Gamma, DoubleGamma and BatemanSCR the peak is far better
+        determined than the ``lag`` parameter that ``relative_lag_draws``
+        reports, which is their onset. ``reference`` names the modality at
+        zero. By default it is the only modality without an estimated lag;
+        several such modalities fix the model clock, which is then kept, and
+        with none delays are centred on the across-modality mean. ``max_draws=None`` uses every draw. This
+        centres summaries only and does not establish physiological timing.
+        """
+        from ..lags import peak_delay, timing_summary
+        from .prediction import selected_draws
+
+        check_is_fitted(self, "parameter_draws_")
+        draws = np.asarray(selected_draws(self, max_draws))
+        peaks, estimated = {}, {}
+        for m, response in self.problem_.responses.items():
+            kernel = response.initial_kernel()
+            indices = {p: self.problem_.indices[("filter", m, p)] for p in response.free_parameters}
+            estimated[m] = "lag" in indices
+            if not indices:
+                peaks[m] = np.full(len(draws), peak_delay(kernel))
+            elif type(kernel) is Gaussian:
+                peaks[m] = (
+                    draws[:, indices["lag"]]
+                    if "lag" in indices
+                    else np.full(len(draws), kernel.lag)
+                )
+            else:
+                peaks[m] = np.array(
+                    [
+                        peak_delay(
+                            kernel.with_parameters(**{p: float(x[i]) for p, i in indices.items()})
+                        )
+                        for x in draws
+                    ]
+                )
+        if self.configuration_["inference"] != "posterior":
+            peaks = {m: float(v[0]) for m, v in peaks.items()}
+        report = timing_summary(peaks, estimated, reference)
+        report["uncertainty"] = self.configuration_["uncertainty"]
+        report["lags_at_bounds"] = [
+            list(name)
+            for name in self.map_diagnostics_.get("boundary_parameters", [])
+            if tuple(name)[0] == "filter" and tuple(name)[-1] == "lag"
+        ]
+        return report
 
     def predict(self, *, times, include_noise=False, max_draws=200):
         """Query excluded targets after ``condition``; default 200 mixture draws.
