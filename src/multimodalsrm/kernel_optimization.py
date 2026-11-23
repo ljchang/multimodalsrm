@@ -91,6 +91,56 @@ def _kernel_penalty_gradient(kernels, responses):
     return gradients
 
 
+def free_coordinates(kernels, responses):
+    """Free response parameters in fitting coordinates: log for positive ones."""
+    return {
+        (s, m, p): k.to_coordinates()[p]
+        for s, mods in kernels.items()
+        for m, k in mods.items()
+        for p in responses[m].free_parameters
+    }
+
+
+def coordinate_step(before, after):
+    """Largest absolute change of any free response coordinate."""
+    return max((abs(after[key] - before[key]) for key in before), default=0.0)
+
+
+def extrapolated_kernels(kernels, responses, direction, scale):
+    """Move free coordinates by ``scale * direction`` inside their bounds.
+
+    Return None when nothing moves or the family rejects the candidate. Shared
+    responses stay shared because their participants hold equal directions.
+    """
+    result = copy.deepcopy(kernels)
+    moved = False
+    for s, mods in kernels.items():
+        for m, kernel in mods.items():
+            free = responses[m].free_parameters
+            if not free:
+                continue
+            coordinates = kernel.to_coordinates()
+            bounds = responses[m].parameter_bounds()
+            for p in free:
+                lo, hi = bounds[p]
+                if p in kernel.positive_parameters:
+                    lo, hi = np.log([lo, hi])
+                value = float(np.clip(coordinates[p] + scale * direction[s, m, p], lo, hi))
+                moved |= value != coordinates[p]
+                coordinates[p] = value
+            try:
+                result[s][m] = kernel.from_coordinates(coordinates)
+            except (ValueError, FloatingPointError):
+                return None
+    if not moved:
+        return None
+    try:
+        group_kernels(result, responses)
+    except (ValueError, FloatingPointError):
+        return None
+    return result
+
+
 class KernelObjective:
     """Fixed-map/latent loss in component space, centered on the current fit.
 
