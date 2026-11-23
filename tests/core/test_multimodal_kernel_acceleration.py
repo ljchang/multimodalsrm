@@ -224,7 +224,8 @@ def test_full_objective_rejects_misleading_candidate_loss(analytic):
 def test_prepared_cache_stays_bounded_and_does_not_mutate_saved_blocks():
     kernels, _, prepared, _, _, _, build = problem()
     original = [b.H.copy() for b in prepared.blocks]
-    for width in np.linspace(0.5, 1.5, 70):
+    # Participants on one clock share operators, so more candidates fill the cache.
+    for width in np.linspace(0.5, 1.5, 140):
         candidate = copy.deepcopy(kernels)
         for mods in candidate.values():
             mods["m"] = Gaussian(width, -0.7)
@@ -233,3 +234,33 @@ def test_prepared_cache_stays_bounded_and_does_not_mutate_saved_blocks():
     for b, h, expected in zip(prepared.blocks, original, build(kernels)):
         np.testing.assert_array_equal(b.H.toarray(), h.toarray())
         np.testing.assert_array_equal(b.coefficients, expected.coefficients)
+
+
+def test_prepared_operators_are_shared_across_participants_on_one_clock():
+    kernels, _, prepared, _, _, _, _ = problem()
+    blocks = prepared(kernels)
+    by_clock = {}
+    for b in blocks:
+        by_clock.setdefault((b.run, b.modality, b.times.tobytes()), []).append(b)
+    assert any(len({b.subject for b in group}) > 1 for group in by_clock.values())
+    for group in by_clock.values():
+        assert all(b.H is group[0].H for b in group)
+    assert len(prepared.cache) == len(by_clock)
+    for b in blocks:
+        expected, _ = observation_operator(
+            prepared.grids[b.run],
+            b.times,
+            kernels[b.subject][b.modality],
+            prepared.supports[b.modality],
+        )
+        np.testing.assert_array_equal(b.H.toarray(), expected.toarray())
+
+
+def test_prepared_operators_stay_separate_for_different_participant_kernels():
+    kernels, _, prepared, _, _, _, _ = problem(pooling="none")
+    candidate = copy.deepcopy(kernels)
+    candidate["b"]["m"] = Gaussian(0.6, -0.5)
+    blocks = {(b.subject, b.run): b for b in prepared(candidate) if b.modality == "m"}
+    for run in ("one", "two"):
+        assert blocks["a", run].H is not blocks["b", run].H
+        assert abs(blocks["a", run].H - blocks["b", run].H).max() > 1e-3

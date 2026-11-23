@@ -45,6 +45,11 @@ class PreparedBlocks:
     of kernel candidates. Construct anew for each fit; never reuse across folds
     or datasets. Only H changes, while feature arrays are shared read-only by
     convention with the original blocks.
+
+    An operator depends on the run grid, native timestamps, response support
+    and kernel parameters, never on the participant. Blocks with bytewise
+    identical timestamps in one run and modality therefore share one cached
+    operator; treat cached matrices as read-only.
     """
 
     def __init__(self, blocks, grids, responses):
@@ -53,9 +58,19 @@ class PreparedBlocks:
         self.supports = {m: r.support_envelope() for m, r in responses.items()}
         self.pairs = {(b.subject, b.modality) for b in blocks}
         self.cache = {}
+        clocks = {}
+        self.clocks = {
+            (b.subject, b.run, b.modality): clocks.setdefault(
+                (b.run, b.modality, b.times.tobytes()), len(clocks)
+            )
+            for b in blocks
+        }
 
     def operator(self, block, kernel, derivatives=False):
-        key = (block.subject, block.run, block.modality, tuple(kernel.parameters.items()))
+        key = (
+            self.clocks[block.subject, block.run, block.modality],
+            tuple(kernel.parameters.items()),
+        )
         cached = self.cache.get(key)
         if cached is None or (derivatives and cached[1] is None):
             args = (self.grids[block.run], block.times, kernel, self.supports[block.modality])
@@ -145,6 +160,8 @@ def make_blocks(
     """Build scored blocks. Optional cache must be scoped to fixed data/grids/responses.
 
     Cache holds at most 256 native observation operators; it never changes scores.
+    Participants with bytewise identical timestamps in a run and modality share
+    one operator, which callers must treat as read-only.
     """
     envelopes = {m: response.support_envelope() for m, response in responses.items()}
     blocks = []
@@ -155,7 +172,7 @@ def make_blocks(
                 if weights[m] <= 0 or m not in kernels.get(s, {}):
                     continue
                 support = envelopes[m]
-                key = (s, r, m, tuple(kernels[s][m].parameters.items()))
+                key = (r, m, ts.times.tobytes(), tuple(kernels[s][m].parameters.items()))
                 cached = None if operator_cache is None else operator_cache.get(key)
                 if cached is None:
                     H, valid = observation_operator(grids[r], ts.times, kernels[s][m], support)
