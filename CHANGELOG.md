@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`BayesianMultimodalSRM.timing_report(uncertainty="laplace")`.** A MAP fit gave
+  lags without any measure of uncertainty. The option adds model-based standard
+  errors for each lag relative to the reference modality and for each pairwise lag
+  difference, from the inverse Hessian of the negative log posterior at the MAP.
+  In a simulation study (three modalities, two factors, 244 parameters) the
+  Laplace standard deviation of each lag was 1.01 to 1.04 times that of a Gibbs
+  posterior, and 90% intervals contained the true lag 87% and 96% of the time on
+  data generated from the model. On deliberately misspecified data they contained
+  it 79% and 54% of the time: the errors assume the model is right and are too
+  narrow when it is not. Response widths are excluded, because their marginal
+  posterior sits far from the MAP. A lag at a bound gets `NaN`, and the report
+  states whether the Hessian is positive definite once the factor-rotation
+  directions, which are known in closed form, are removed. Off by default; available for MAP fits with
+  dense, grouped or state-space algebra and at most 2000 parameters.
 - **`MultimodalSRM(response_penalty_scaling="likelihood")`.** `Response.lag_prior`,
   `Response.prior` and `pooling_strength` were added unscaled to a normalized
   reconstruction loss, which made them far stronger than their stated values: in a
@@ -151,6 +165,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Bus error with `response_quadrature_order=32` and a `Gaussian` response.**
+  `BayesianMultimodalSRM` evaluated response covariances in fixed batches of 32
+  time differences. With 256 quadrature nodes (order 32 on the eight Gaussian
+  panels) each batch intermediate was exactly 64 KiB, the largest size that
+  jaxlib 0.11's CPU fusion runtime places on the stack of an XLA worker thread,
+  and several of them nested overflowed that 544 KiB stack. The process died with
+  "Fatal Python error: Bus error", most visibly after a MAP search when the final
+  log-likelihood was evaluated. The batch is now sized so these intermediates
+  always exceed the stack-allocation limit. Each time difference is still
+  evaluated by the same arithmetic.
 - **GP response-quadrature gradients at quadrature endpoints.** With
   `response_quadrature_order` set, the weighted Matérn sum bounded its exponential
   coordinates with `clip`, whose derivative is one half where the query equals the

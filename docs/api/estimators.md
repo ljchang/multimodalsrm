@@ -372,7 +372,7 @@ absolute timing identification or calibrated uncertainty.
 ### BayesianMultimodalSRM.timing_report
 
 ```python
-BayesianMultimodalSRM.timing_report(reference=None, *, max_draws=200)
+BayesianMultimodalSRM.timing_report(reference=None, *, max_draws=200, uncertainty=None)
 ```
 
 Peak response delays relative to a reference modality.
@@ -388,6 +388,26 @@ the modality `relative_lag_draws` uses: `reference_modality` when
 that was set, otherwise a modality whose lag is not estimated,
 otherwise the first modality in `responses`. `max_draws=None` uses every draw. This does not
 establish physiological timing.
+
+`uncertainty="laplace"` adds `report["lag_standard_error"]` for a
+MAP fit with dense, grouped or state-space algebra: standard errors of
+each lag, each lag relative to the reference, and each pairwise lag
+difference, from the inverse Hessian of the negative log posterior at
+the MAP. They are model-based: they assume the model is correct and
+are too narrow when it is not. They refer to the `lag` parameter,
+which is the peak delay for Identity and Gaussian responses and for
+any response whose only free parameter is its lag
+(`applies_to_peak_delay`); widths and other shape parameters get no
+standard error. A lag resting on a bound gives NaN and is listed in
+`lags_at_bounds`; `positive_definite=False` means the fit is not
+at a local optimum and the errors should not be used. Factor rotations
+leave the model unchanged; those directions are removed in closed form
+(`null_directions`), and `null_direction_residual` reports how far
+they are from flat, which shrinks as the fit is tightened. The cost is
+one Hessian-vector product per parameter plus a dense
+eigendecomposition, and more than 2000 parameters raise an error.
+Posterior fits raise too: their draws already give a standard
+deviation.
 
 ### BayesianMultimodalSRM.predict
 
