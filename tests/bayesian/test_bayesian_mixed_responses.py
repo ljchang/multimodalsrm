@@ -175,6 +175,43 @@ def test_fast_matern_sum_matches_direct_sum_for_signed_weights_and_distant_queri
     assert_allclose(weighted_matern(queries, nodes, weights, 3.0), expected, atol=1e-12, rtol=1e-12)
 
 
+def test_fast_matern_endpoint_derivatives_match_direct_signed_sum():
+    api()
+    import jax
+    import jax.numpy as jnp
+
+    from multimodalsrm.bayesian.response_quadrature import weighted_matern
+
+    nodes = jnp.array([-5.0, -0.2, 3.0])
+    weights = jnp.array([0.4, -0.2, 0.7])
+    queries = jnp.array([-100.0, -5.0, -0.2, 1.0, 3.0, 100.0])
+
+    def direct(y, u, w, length):
+        distance = jnp.sqrt(3.0) * jnp.abs(y[:, None] - u) / length
+        return ((1 + distance) * jnp.exp(-distance)) @ w
+
+    for argument in range(4):
+        expected = jax.jacfwd(direct, argument)(queries, nodes, weights, 3.0)
+        actual = jax.jacfwd(weighted_matern, argument)(queries, nodes, weights, 3.0)
+        assert_allclose(actual, expected, atol=2e-12, rtol=2e-12)
+    # A central difference is independent of how either sum is differentiated.
+    step = 1e-6
+    central = (
+        weighted_matern(queries + step, nodes, weights, 3.0)
+        - weighted_matern(queries - step, nodes, weights, 3.0)
+    ) / (2 * step)
+    slope = jnp.diag(jax.jacfwd(weighted_matern)(queries, nodes, weights, 3.0))
+    assert_allclose(slope, central, atol=1e-8)
+    # MAP polishing uses second derivatives. Endpoint handling must preserve
+    # the continuous Matérn curvature as well as its zero atom slope.
+    for argument in (0, 1):
+        expected = jax.jacfwd(jax.jacrev(direct, argument), argument)(queries, nodes, weights, 3.0)
+        actual = jax.jacfwd(jax.jacrev(weighted_matern, argument), argument)(
+            queries, nodes, weights, 3.0
+        )
+        assert_allclose(actual, expected, atol=2e-12, rtol=2e-12)
+
+
 def test_mixed_conditional_moments_match_direct_gaussian_conditioning():
     from multimodalsrm.bayesian.prediction import project
 

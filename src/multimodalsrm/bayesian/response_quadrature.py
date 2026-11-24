@@ -81,9 +81,13 @@ def weighted_matern(y, nodes, weights, length):
     s0 = jnp.concatenate((jnp.cumsum(minus[::-1])[::-1], zero))
     s1 = jnp.concatenate((jnp.cumsum((minus * b)[::-1])[::-1], zero))
     index = jnp.searchsorted(nodes, y)
-    z = jnp.clip(y, nodes[0], nodes[-1]) - center
+    # At an endpoint use the interior derivative. The prefix/suffix partition
+    # includes a boundary atom on exactly one side; clip's half derivative at
+    # ties would give that atom a spurious Matérn slope.
+    bounded = jnp.where(y < nodes[0], nodes[0], jnp.where(y > nodes[-1], nodes[-1], y))
+    z = bounded - center
     d = y - center
-    outside = jnp.abs(y - jnp.clip(y, nodes[0], nodes[-1]))
+    outside = jnp.abs(y - bounded)
     left = jnp.exp(-rate * z - rate * outside) * ((1 + rate * d) * p0[index] - rate * p1[index])
     right = jnp.exp(rate * z - rate * outside) * ((1 - rate * d) * s0[index] + rate * s1[index])
     return left + right
@@ -202,18 +206,24 @@ class ResponseQuadrature:
         _, jnp, _, _ = runtime()
         a, b = jnp.asarray(times_a), jnp.asarray(times_b)
         ma, mb = np.asarray(modalities_a), np.asarray(modalities_b)
+        static = isinstance(times_a, np.ndarray) and isinstance(times_b, np.ndarray)
+        symmetric = static and np.array_equal(times_a, times_b) and np.array_equal(ma, mb)
         result = jnp.zeros((len(a), len(b)))
         nodes = {int(m): self.nodes(x, int(m)) for m in np.union1d(ma, mb)}
         for m in np.unique(ma):
             ia = np.flatnonzero(ma == m)
             for n in np.unique(mb):
+                if symmetric and n < m:
+                    continue
                 ib = np.flatnonzero(mb == n)
                 delta = a[ia, None] - b[ib][None, :]
-                if isinstance(times_a, np.ndarray) and isinstance(times_b, np.ndarray):
+                if static:
                     # Static native clocks: reuse exact differences, never bins.
-                    unique, inverse = np.unique(
-                        times_a[ia, None] - times_b[ib][None, :], return_inverse=True
-                    )
+                    differences = times_a[ia, None] - times_b[ib][None, :]
+                    if symmetric and m == n:
+                        # The same finite Gram block is even in the time difference.
+                        differences = np.abs(differences)
+                    unique, inverse = np.unique(differences, return_inverse=True)
                     values = self.pair(
                         jnp.asarray(unique), nodes[int(m)], nodes[int(n)], length_scale
                     )
@@ -221,4 +231,6 @@ class ResponseQuadrature:
                 else:
                     block = self.pair(delta, nodes[int(m)], nodes[int(n)], length_scale)
                 result = result.at[np.ix_(ia, ib)].set(block)
+                if symmetric and m != n:
+                    result = result.at[np.ix_(ib, ia)].set(block.T)
         return result

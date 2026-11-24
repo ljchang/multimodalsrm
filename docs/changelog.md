@@ -154,9 +154,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   log-likelihood was evaluated. The batch is now sized so these intermediates
   always exceed the stack-allocation limit. Each time difference is still
   evaluated by the same arithmetic.
+- **GP response-quadrature gradients at quadrature endpoints.** With
+  `response_quadrature_order` set, the weighted Matérn sum bounded its exponential
+  coordinates with `clip`, whose derivative is one half where the query equals the
+  first or last quadrature node. The node at that boundary is counted on one side
+  only, so the covariance gradient gained a slope that is not there. Values were
+  always right. A response node lands exactly on an endpoint when a learned
+  Gaussian response has its default width of 1 and timestamps are 2, 8 or 10 s
+  apart, or when two modalities start from identical response parameters on the
+  same clock. That is typically the starting point of a fit rather than a later
+  iterate. In a synthetic two-participant fit on a 2 s clock the objective gradient
+  for a Gaussian width was −7.4654 where a central difference gives −7.4623, and
+  for a lag −5.11320 against −5.11332; both now agree with the difference to 2e-8.
+  In the primitive, with nodes `[-5, -0.2, 3]`, signed weights and a 3 s length
+  scale, the slope at the last node was −0.381 against a true 0.023. Second
+  derivatives, which MAP polishing uses, were affected at the same points.
 
 ### Performance
 
+- GP response quadrature computes each pair of modalities once when a covariance
+  is requested between a set of timestamps and itself, filling the transposed
+  block, and evaluates one value per distinct absolute time difference within a
+  modality. Timestamps are compared exactly, and queries against a different clock
+  or against traced times take the full calculation as before. On synthetic
+  two-participant problems with two learned Gaussian responses on CPU, one
+  objective-and-gradient evaluation ran 1.3 to 1.8 times faster across dense and
+  grouped algebra, orders 64 and 384, and 24 or 48 timestamps per modality, timed
+  on a busy machine; objectives agreed to 3e-12 and gradients to 2e-11 away from the
+  endpoint cases above.
 - R-MSRM response operators are shared across participants whose timestamps are
   identical within a run and modality, instead of being rebuilt per participant.
   The quadrature operator for Gamma, DoubleGamma, sampled and Identity responses
