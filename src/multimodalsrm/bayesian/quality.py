@@ -77,7 +77,7 @@ def summarize_fit(record):
     descriptive optimization summaries, never uncertainty intervals.
 
     Gaussian peak delay is fitted lag minus fixed reference lag, or minus the
-    across-modality mean lag when no fixed reference is available. FWHM is
+    first modality's lag when no fixed reference is available. FWHM is
     2*sqrt(2*log(2))*width. Identity is an impulse with undefined FWHM. Neither
     these summaries nor saved convergence gates establish timing recovery or
     calibration. Missing metadata yields explicitly incomplete shape summaries.
@@ -125,8 +125,10 @@ def summarize_fit(record):
     names = record.get("parameter_names")
     metadata = config.get("response_metadata")
     reference_lag = reference.get("reference_lag_seconds")
+    definition = reference.get("relative_lag_definition")
+    # Earlier fits centred on the across-modality mean; both remain readable.
     centered = (
-        reference.get("relative_lag_definition") == "modality_lag_minus_mean_lag"
+        definition in ("modality_lag_minus_mean_lag", "modality_lag_minus_first_modality_lag")
         and reference.get("reference_modality") is None
     )
     if (
@@ -165,13 +167,14 @@ def summarize_fit(record):
     if centered:
         if reference_lag is not None:
             raise ValueError("centered lag convention cannot specify a fixed reference lag")
+        lags = {
+            m: parameters.get(("filter", m, "lag"), r.get("parameters", {}).get("lag", 0.0))
+            for m, r in metadata.items()
+        }
         reference_lag = float(
-            np.mean(
-                [
-                    parameters.get(("filter", m, "lag"), r.get("parameters", {}).get("lag", 0.0))
-                    for m, r in metadata.items()
-                ]
-            )
+            np.mean(list(lags.values()))
+            if definition == "modality_lag_minus_mean_lag"
+            else lags[reference["relative_lag_reference"]]
         )
         result["relative_lag_origin_seconds"] = reference_lag
     else:

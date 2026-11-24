@@ -532,6 +532,12 @@ def restore(saved, *, updated=False):
             model.posterior_update_ = _copy_readonly(update)
         else:
             model.adapter_, model.problem_ = _prepare(model, saved["training"])
+            from .reference import keep_saved_reference
+
+            keep_saved_reference(
+                model.problem_.reference_convention,
+                saved["fit"]["configuration"].get("reference_convention"),
+            )
         model.training_data_ = model.adapter_._training_data
         model.prediction_runs_, model.targets_ = dict(model.adapter_.domains_), None
         if updated:

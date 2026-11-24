@@ -82,6 +82,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **GP-MSRM lag summaries share one reference.** With every lag estimated,
+  `relative_lag_draws()` and the fit summary's peak delays now show the first
+  modality at zero, as `timing_report()` does, instead of centring on the
+  across-modality mean. With several fixed lags the reference is the first in the
+  order the responses were given rather than the first alphabetically. Pairwise
+  differences are unchanged, and fits saved under the earlier convention keep it.
 - **`Response(pooling=...)` now defaults to `"shared"`.** The earlier default,
   `"partial"` with `pooling_strength=1`, already behaved almost like complete
   pooling, because the penalty is added unscaled to a normalized loss: in a
