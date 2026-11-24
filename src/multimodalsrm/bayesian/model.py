@@ -143,7 +143,7 @@ class BayesianMultimodalSRM(BaseEstimator):
         reference_modality=None,
         responses=None,
         length_scale=3.0,
-        inference="posterior",
+        inference="map",
         search=None,
         sampler=None,
         sample_blocks=None,

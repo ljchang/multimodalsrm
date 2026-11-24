@@ -111,6 +111,7 @@ def test_nuts_initializes_when_map_lies_exactly_on_uniform_boundary():
     model = b.BayesianMultimodalSRM(
         priors=b.BayesianPriors(noise=b.Prior.uniform(0.1, 1.0)),
         anchor=("s", "ref", 0),
+        inference="posterior",
         random_state=0,
         search=b.SearchConfig(starts=2, maxiter=1000),
         sampler=b.SamplerConfig(chains=2, warmup=80, draws=80, max_tree_depth=7),
@@ -125,3 +126,9 @@ def test_nuts_initializes_when_map_lies_exactly_on_uniform_boundary():
         a["parameter"] == ["noise", "s", "ref"]
         for a in model.sampling_diagnostics_["initialization_adjustments"]
     )
+
+
+def test_map_is_the_default_inference():
+    b = api()
+    model = b.BayesianMultimodalSRM(priors=None)
+    assert model.inference == "map"

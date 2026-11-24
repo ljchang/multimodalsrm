@@ -36,7 +36,7 @@ MultimodalSRM(
     kernel_extrapolation=True,
     lag_init=None,
     edge_observations="include",
-    response_penalty_scaling="objective",
+    response_penalty_scaling="likelihood",
 )
 ```
 
@@ -91,17 +91,18 @@ short runs can discard much of a recording.
 
 `response_penalty_scaling` sets how `Response.lag_prior`, `Response.prior` and
 `pooling_strength` weigh against the data. The reconstruction loss is a
-normalized mean, not a sum over observations. With `"objective"`
-(default, the original behaviour) those penalties are added to it unscaled,
-which makes them far stronger than their stated values suggest: a
-`Normal(0, 1)` lag prior can act like a standard deviation of a few
-hundredths of a second, and `pooling_strength=1` like complete pooling.
-`"likelihood"` multiplies each by the factor that a Gaussian likelihood
-over the scored observations would imply, assuming unit residual variance
-in standardized units, so a lag prior's `sd` is in seconds and
+normalized mean, not a sum over observations. `"likelihood"` (default)
+multiplies each penalty by the factor that a Gaussian likelihood over the
+scored observations would imply, assuming unit residual variance in
+standardized units, so a lag prior's `sd` is in seconds and
 `pooling_strength` is `1 / sd**2` of the spread between participants,
 summed over participants. Residual variance below one makes these priors
-somewhat tighter than stated. Factors are stored in `penalty_scale_`.
+somewhat tighter than stated. `"objective"` (the behaviour before 0.3.0)
+adds the penalties unscaled, which makes them far stronger than their
+stated values suggest: a `Normal(0, 1)` lag prior can act like a standard
+deviation of a few hundredths of a second, and `pooling_strength=1` like
+complete pooling. Fits without these penalties are the same either way.
+Factors are stored in `penalty_scale_`.
 
 Penalties and balancing conventions are recorded in `configuration_`.
 Reaching `max_iter` does not constitute convergence. `init="hybrid"`
@@ -190,7 +191,7 @@ BayesianMultimodalSRM(
     reference_modality=None,
     responses=None,
     length_scale=3.0,
-    inference="posterior",
+    inference="map",
     search=None,
     sampler=None,
     sample_blocks=None,

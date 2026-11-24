@@ -61,8 +61,8 @@ response.
 `"partial"` gives each participant their own parameters, penalized toward
 the group's by `pooling_strength`, and `"none"` leaves them
 independent; both are R-MSRM only and need enough data per participant to
-determine a response for each. `pooling_strength` is only interpretable
-as `1 / sd**2` of the spread between participants with
+determine a response for each. `pooling_strength` is `1 / sd**2` of
+the spread between participants under the default
 `MultimodalSRM(response_penalty_scaling="likelihood")`.
 
 ### Response.lag_only

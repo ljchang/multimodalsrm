@@ -31,6 +31,7 @@ def prepared(features=3, algebra="grouped"):
         responses=p.responses,
         max_observations=p.adapter.max_observations,
         factor_anchors=tuple(p.keys[:features]),
+        inference="posterior",
         linear_algebra=algebra,
         # The adapter attached below was prepared with support exclusion.
         edge_observations="exclude",
