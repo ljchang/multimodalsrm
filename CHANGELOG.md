@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`BayesianMultimodalSRM.timing_report(uncertainty="laplace")`.** A MAP fit gave
+  lags without any measure of uncertainty. The option adds model-based standard
+  errors for each lag relative to the reference modality and for each pairwise lag
+  difference, from the inverse Hessian of the negative log posterior at the MAP.
+  In a simulation study (three modalities, two factors, 244 parameters) the
+  Laplace standard deviation of each lag was 1.01 to 1.04 times that of a Gibbs
+  posterior, and 90% intervals contained the true lag 87% and 96% of the time on
+  data generated from the model. On deliberately misspecified data they contained
+  it 79% and 54% of the time: the errors assume the model is right and are too
+  narrow when it is not. Response widths are excluded, because their marginal
+  posterior sits far from the MAP. A lag at a bound gets `NaN`, and the report
+  states whether the Hessian is positive definite and how many zero (factor
+  rotation) directions it found. Off by default; available for MAP fits with
+  dense, grouped or state-space algebra and at most 2000 parameters.
 - **`MultimodalSRM(response_penalty_scaling="likelihood")`.** `Response.lag_prior`,
   `Response.prior` and `pooling_strength` were added unscaled to a normalized
   reconstruction loss, which made them far stronger than their stated values: in a
