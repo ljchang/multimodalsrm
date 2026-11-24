@@ -144,6 +144,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Bus error with `response_quadrature_order=32` and a `Gaussian` response.**
+  `BayesianMultimodalSRM` evaluated response covariances in fixed batches of 32
+  time differences. With 256 quadrature nodes (order 32 on the eight Gaussian
+  panels) each batch intermediate was exactly 64 KiB, the largest size that
+  jaxlib 0.11's CPU fusion runtime places on the stack of an XLA worker thread,
+  and several of them nested overflowed that 544 KiB stack. The process died with
+  "Fatal Python error: Bus error", most visibly after a MAP search when the final
+  log-likelihood was evaluated. The batch is now sized so these intermediates
+  always exceed the stack-allocation limit. Each time difference is still
+  evaluated by the same arithmetic.
 - **GP response-quadrature gradients at quadrature endpoints.** With
   `response_quadrature_order` set, the weighted Matérn sum bounded its exponential
   coordinates with `clip`, whose derivative is one half where the query equals the
