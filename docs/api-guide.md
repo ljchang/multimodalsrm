@@ -76,6 +76,7 @@ Three tools follow from this:
 | `scan_lags(data)` | Estimates relative delays from the observations before any fit, by lagged canonical correlation between every pair of modalities. Returns a `LagScan` with one delay per modality, pairwise delays, and `notes` explaining when it is unreliable (no lag stands out, pairwise delays do not add up, best lag at the scan limit). It costs a small fraction of one fit. |
 | `LagScan.seed_responses(responses, margin=2.0)` | Returns responses whose free lags start at the scanned delays, with bounds of that lag ± `margin`. `MultimodalSRM(lag_init="scan")` does both steps at fit time. |
 | `model.timing_report(reference=None)` | Reports fitted **peak delays**, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. `reference` names the modality shown at zero. It only changes how delays are displayed: the fit and the pairwise differences are the same for every choice. By default it is the first modality whose lag is not estimated, or the first modality in `responses` when every lag is estimated. Available on both estimators with the same convention. |
+| `gp_model.timing_report(uncertainty="laplace")` | GP-MSRM MAP fits only. Adds `lag_standard_error`: model-based standard errors for each lag relative to the reference and for each pairwise lag difference. Off by default. See [standard errors for GP lags](#model-based-standard-errors-for-gp-lags). |
 
 Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow. Observations whose envelope reaches outside the run rest on latent that R-MSRM must estimate beyond the run, and with `edge_observations="exclude"` they are not scored at all, so wide bounds on a short run can discard most of it.
 
@@ -93,6 +94,35 @@ priors = BayesianPriors(
 ```
 
 Compare modalities on peak delay, not on the `lag` parameter. For Gaussian responses they coincide. For Gamma, DoubleGamma and BatemanSCR, `lag` is the onset and trades off against the shape parameters, while the peak is well determined; `peak_delay(kernel)` returns it. `BayesianMultimodalSRM.relative_lag_draws()` reports the raw lag parameter.
+
+### Model-based standard errors for GP lags
+
+A GP-MSRM MAP fit gives one value per lag. `timing_report(uncertainty="laplace")` adds a standard error for each, from a Laplace approximation: the negative log posterior (latent GP marginalized) is expanded to second order at the MAP, and the inverse of its Hessian is taken as the covariance of the parameters.
+
+```python
+report = model.timing_report(reference="brain", uncertainty="laplace")
+errors = report["lag_standard_error"]
+errors["relative_lag"]["face"]  # {"estimate": ..., "standard_error": ...}
+errors["pairwise_lag_difference"]["rating - face"]
+```
+
+| Field | Meaning |
+| --- | --- |
+| `relative_lag`, `pairwise_lag_difference` | Estimate and standard error of each lag minus the reference lag, and of each difference between two lags. Both use the covariance between lags (`var_a + var_b - 2 cov`); a fixed lag contributes no variance. |
+| `lag_model_clock` | The same for each lag on the model clock. When every lag is estimated the common offset is set by the priors, so these are much wider than the differences. |
+| `applies_to_peak_delay` | Errors are for the `lag` parameter. That is the peak delay for Identity and Gaussian responses and for any response whose only free parameter is its lag. It is `False` for a modality with free shape parameters (for example a Gamma scale), where the reported peak delay also depends on them and has no standard error here. |
+| `lags_at_bounds`, `parameters_at_bounds` | A lag resting on a bound has no valid standard error: it and every difference that uses it are `NaN`. Parameters at a bound are held fixed, so the remaining errors are conditional on them. |
+| `null_directions` | Number of directions along which the model is exactly unchanged, which are removed before the Hessian is inverted. Rotating the factors is one for each pair of factors (`features * (features - 1) / 2`, none for one factor); lags do not depend on them. They are computed from the fitted loadings, not detected from small eigenvalues. When every lag is estimated under flat (uniform) lag priors, a common shift of all lags is one more. |
+| `null_direction_residual` | How far those directions are from flat at the fitted point, relative to the largest Hessian eigenvalue. It is zero at an exact optimum and shrinks as the fit is tightened (`SearchConfig(gtol=..., ftol=...)`); in a small two-factor test fit it was about 5e-9 at default tolerances and 2e-10 after tightening, with identical standard errors. A value that is not small means the fit stopped short of an optimum. |
+| `positive_definite`, `min_eigenvalue` | Checked on the remaining directions only. `False` means the Hessian has a zero or negative eigenvalue there: the fit is not at a local optimum and the errors should not be used. |
+| `not_identified` | Quantities that depend on a removed direction; they are `NaN`. With flat lag priors and every lag estimated these are the lags on the model clock, while their differences keep their errors. |
+| `hessian_seconds`, `parameters` | Time spent on the Hessian, and its size. |
+
+**These are model-based errors.** They describe uncertainty if the model is right, and they are too narrow when it is not. In one simulation study (three modalities, two factors, 244 parameters, about 24 datasets per condition) the Laplace standard deviation of each lag was 1.01 to 1.04 times that of a validated Gibbs posterior, and on data generated from the model its 90% intervals contained the true lag 87% and 96% of the time for the two estimated lags. On deliberately misspecified data (autocorrelated heavy-tailed noise, a private signal in each participant, and lags that varied between participants) the same intervals contained it 79% and 54% of the time. These are results from that study, not guarantees for other data. On real recordings, treat the errors as a lower bound and also report how the lags change with model settings.
+
+**Response widths are left out.** The approximation centres a Gaussian on the MAP. For lags that was close to the posterior. For widths the marginal posterior sits far from the MAP, so a standard error around the MAP width would describe the wrong place. Fit with `inference="posterior"` when width uncertainty matters.
+
+**Cost and limits.** The Hessian takes one Hessian-vector product per parameter, computed 32 at a time to bound memory, then a dense eigendecomposition. With grouped algebra, 458 parameters (eight participants, three modalities, two factors, 9,600 observed values) took 6.4 s on the first call including compilation and 1.6 s on a repeat on a laptop CPU, and about four times that when the machine was busy. Dense and state-space algebra are slower per product: with 62 parameters and 1,200 observed values, dense took about 10 s and state-space tens of seconds. Fits with more than 2000 parameters raise an error. The option needs a MAP fit with dense, grouped or state-space algebra that has not been re-conditioned with `mode="frozen"`. Posterior fits raise an error because their draws already give a standard deviation in the default report.
 
 The scan locates a basin; it is not itself a timing estimate. It needs modalities that are measurably coupled within participants. When it finds no reliable delay, `lag_init="scan"` warns and leaves the configured lags and bounds unchanged, and a `LagScan` reports `reliable=False` with the reasons.
 
@@ -219,6 +249,7 @@ The `Response` bounds truncate and renormalize the corresponding GP filter prior
 | Calibrate a new participant | `calibrate(data, reference=...)` | MAP `calibrate(...)` or supported joint `calibrate_posterior(...)` |
 | Decode each participant independently | Select R donor source for prediction | `transform(data, times=...)` for MAP; `condition_participants(...)` for supported posterior updates |
 | Draw a joint latent trajectory | Not available | `sample_latent(...)`; request all correlated query times in one call |
+| Report relative response timing | `timing_report(reference=None)` | `timing_report(reference=None)`; MAP fits can add model-based (Laplace) lag standard errors with `uncertainty="laplace"`, which are too narrow under misspecification and exclude widths ([details](#model-based-standard-errors-for-gp-lags)) |
 | Inspect response curves | `kernel(...)`, `plot_kernels(...)` | Consult fitted parameters and posterior summaries; R inspection methods are not shared GP methods |
 
 [Full method signatures](api/estimators.md) include progress, query and calibration options. Consult the [capability guide](capabilities.md) before combining advanced options. A finite objective, narrow interval or successful call does not establish convergence or recovery.
