@@ -38,7 +38,10 @@ def recording(features, duration=30.0):
     return data
 
 
-def fit(features=1, fixed=("A",), bounds=None):
+TIGHT = dict(maxiter=3000, gtol=1e-10, ftol=1e-15)
+
+
+def fit(features=1, fixed=("A",), bounds=None, search=None, flat=False):
     bounds = bounds or {}
     responses = {
         m: Response(Gaussian(w), pooling="shared", estimate=False)
@@ -51,7 +54,8 @@ def fit(features=1, fixed=("A",), bounds=None):
         )
         for m, w in WIDTHS.items()
     }
-    filters = {m: {"lag": Prior.normal(0.0, 1.0)} for m in WIDTHS if m not in fixed}
+    prior = Prior.uniform(-2.0, 2.0) if flat else Prior.normal(0.0, 1.0)
+    filters = {m: {"lag": prior} for m in WIDTHS if m not in fixed}
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return BayesianMultimodalSRM(
@@ -62,21 +66,29 @@ def fit(features=1, fixed=("A",), bounds=None):
             inference="map",
             linear_algebra="grouped",
             max_observations=5000,
-            # Tight stopping: with two factors the rotation direction of the
-            # Hessian is exactly zero only where the gradient vanishes.
-            search=SearchConfig(starts=1, maxiter=3000, gtol=1e-10, ftol=1e-15),
+            search=SearchConfig(starts=1, **(search or dict(maxiter=600))),
             random_state=0,
         ).fit(recording(features))
 
 
-def reference_covariance(model):
-    """The validated computation: pseudo-inverse of the full dense Hessian."""
+def dense_hessian(model):
     import jax
     import jax.numpy as jnp
 
     hessian = jax.hessian(model.problem_.objective)(jnp.asarray(model.map_parameters_))
-    hessian = (np.asarray(hessian) + np.asarray(hessian).T) / 2
-    return np.linalg.pinv(hessian, rcond=1e-9, hermitian=True)
+    return (np.asarray(hessian) + np.asarray(hessian).T) / 2
+
+
+def reference_covariance(model):
+    """The validated computation: pseudo-inverse of the full dense Hessian."""
+    return np.linalg.pinv(dense_hessian(model), rcond=1e-9, hermitian=True)
+
+
+def covariance_dropping(model, nullity):
+    """Pseudo-inverse that drops a stated number of smallest eigenvalues."""
+    values, vectors = np.linalg.eigh(dense_hessian(model))
+    keep = np.argsort(np.abs(values))[nullity:]
+    return (vectors[:, keep] / values[keep]) @ vectors[:, keep].T
 
 
 def lag_index(model, modality):
@@ -90,12 +102,14 @@ def one_factor():
 
 @pytest.fixture(scope="module")
 def all_free():
-    return fit(features=2, fixed=())
+    return fit(features=2, fixed=(), search=TIGHT)
 
 
 @pytest.mark.parametrize("features", [1, 2])
 def test_lag_standard_errors_match_the_dense_pseudo_inverse(features, one_factor):
-    model = one_factor if features == 1 else fit(features=2)
+    # Tight stopping, so the eigenvalue cut-off of the reference computation
+    # finds the rotation direction that the report removes in closed form.
+    model = one_factor if features == 1 else fit(features=2, search=TIGHT)
     block = model.timing_report(uncertainty="laplace")["lag_standard_error"]
     covariance = reference_covariance(model)
     assert block["method"] == "laplace" and block["quantity"] == "lag"
@@ -112,13 +126,64 @@ def test_lag_standard_errors_match_the_dense_pseudo_inverse(features, one_factor
     assert block["lag_model_clock"]["A"] == dict(estimate=0.0, standard_error=0.0)
     assert block["relative_lag"]["A"]["standard_error"] == 0.0
     assert block["parameters"] == len(model.problem_.names)
-    assert block["expected_null_directions"] == features * (features - 1) // 2
-    assert block["null_directions"] == block["expected_null_directions"]
+    assert block["null_directions"] == features * (features - 1) // 2
+    assert block["null_direction_residual"] < 1e-8
     assert block["positive_definite"] is True
     assert block["lags_at_bounds"] == [] and block["not_identified"] == []
     assert block["parameters_at_bounds"] == 0
     assert block["applies_to_peak_delay"] == {"A": True, "B": True, "C": True}
     assert block["hessian_seconds"] > 0
+
+
+def test_rotation_directions_are_removed_at_default_fit_tolerances():
+    # At default stopping tolerances the curvature along the rotation is small
+    # but not zero, and an eigenvalue cut-off can miss it.
+    model = fit(features=2, fixed=())
+    block = model.timing_report(uncertainty="laplace")["lag_standard_error"]
+    assert block["null_directions"] == 1
+    assert block["positive_definite"] is True and block["min_eigenvalue"] > 0.1
+    assert 0 < block["null_direction_residual"] < 1e-5
+    assert block["not_identified"] == []
+    covariance = covariance_dropping(model, 1)
+    for m in WIDTHS:
+        i = lag_index(model, m)
+        assert block["lag_model_clock"][m]["standard_error"] == pytest.approx(
+            np.sqrt(covariance[i, i]), rel=1e-4
+        )
+    # The closed-form directions are exact invariances of the objective.
+    from multimodalsrm.bayesian.laplace import invariant_directions
+
+    x = np.asarray(model.map_parameters_, dtype=float)
+    tangent = invariant_directions(model.problem_, x)
+    assert tangent.shape == (len(x), 1)
+    angle = 0.3
+    loadings = x[: len(model.problem_.keys) * 2].reshape(-1, 2)
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    rotated = x.copy()
+    rotated[: loadings.size] = (loadings @ rotation.T).ravel()
+    value = model.problem_.value_gradient(x)[0]
+    assert model.problem_.value_gradient(rotated)[0] == pytest.approx(value, rel=1e-12)
+    step = x + 1e-6 * tangent[:, 0]
+    assert model.problem_.value_gradient(step)[0] == pytest.approx(value, abs=1e-9)
+    one = fit(features=1)
+    assert invariant_directions(one.problem_, np.asarray(one.map_parameters_)).shape[1] == 0
+
+
+def test_flat_lag_priors_leave_the_common_shift_unidentified():
+    model = fit(features=1, fixed=(), flat=True)
+    block = model.timing_report(uncertainty="laplace")["lag_standard_error"]
+    assert block["lags_at_bounds"] == []
+    assert block["null_directions"] == 1 and block["positive_definite"] is True
+    assert block["not_identified"] == ["lag A", "lag B", "lag C"]
+    assert all(np.isnan(v["standard_error"]) for v in block["lag_model_clock"].values())
+    covariance = covariance_dropping(model, 1)
+    index = {m: lag_index(model, m) for m in WIDTHS}
+    for a, b in (("A", "B"), ("A", "C"), ("B", "C")):
+        i, j = index[b], index[a]
+        expected = np.sqrt(covariance[i, i] + covariance[j, j] - 2 * covariance[i, j])
+        assert block["pairwise_lag_difference"][f"{b} - {a}"]["standard_error"] == pytest.approx(
+            expected, rel=1e-6
+        )
 
 
 def test_relative_and_pairwise_errors_use_the_lag_covariance(all_free):

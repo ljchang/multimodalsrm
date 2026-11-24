@@ -399,8 +399,10 @@ any response whose only free parameter is its lag
 (`applies_to_peak_delay`); widths and other shape parameters get no
 standard error. A lag resting on a bound gives NaN and is listed in
 `lags_at_bounds`; `positive_definite=False` means the fit is not
-at a local optimum and the errors should not be used; and the block
-records how many zero Hessian directions were found and expected. The cost is
+at a local optimum and the errors should not be used. Factor rotations
+leave the model unchanged; those directions are removed in closed form
+(`null_directions`), and `null_direction_residual` reports how far
+they are from flat, which shrinks as the fit is tightened. The cost is
 one Hessian-vector product per parameter plus a dense
 eigendecomposition, and more than 2000 parameters raise an error.
 Posterior fits raise too: their draws already give a standard

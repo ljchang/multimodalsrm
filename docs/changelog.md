@@ -22,8 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   it 79% and 54% of the time: the errors assume the model is right and are too
   narrow when it is not. Response widths are excluded, because their marginal
   posterior sits far from the MAP. A lag at a bound gets `NaN`, and the report
-  states whether the Hessian is positive definite and how many zero (factor
-  rotation) directions it found. Off by default; available for MAP fits with
+  states whether the Hessian is positive definite once the factor-rotation
+  directions, which are known in closed form, are removed. Off by default; available for MAP fits with
   dense, grouped or state-space algebra and at most 2000 parameters.
 - **`MultimodalSRM(response_penalty_scaling="likelihood")`.** `Response.lag_prior`,
   `Response.prior` and `pooling_strength` were added unscaled to a normalized
