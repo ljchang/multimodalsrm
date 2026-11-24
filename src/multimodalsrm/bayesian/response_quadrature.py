@@ -189,7 +189,13 @@ class ResponseQuadrature:
         def one(d):
             return jnp.sum(wa * weighted_matern(d - u, -v[::-1], wb[::-1], length))
 
-        result = jax.lax.map(one, flat, batch_size=32)
+        # jaxlib 0.11's CPU fusion runtime puts intermediates of at most 64 KiB on
+        # the 544 KiB stack of an XLA worker thread, several deep. Batch-by-node
+        # float64 buffers just under that limit (32 x 256 nodes) overflow it and
+        # kill the process, so keep every such buffer above the limit.
+        sizes = [n for n in (len(u), len(v)) if n > 1]
+        batch = max(32, 65536 // (8 * min(sizes)) + 1) if sizes else 32
+        result = jax.lax.map(one, flat, batch_size=batch)
         return result.reshape(delta.shape)
 
     def covariance(self, x, times_a, modalities_a, times_b, modalities_b, *, length_scale=None):
