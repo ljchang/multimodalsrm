@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (unit residual variance in standardized units, observations counted as
   independent). The same prior then left the delay at 1.00 s and tightened smoothly
   as its standard deviation fell, and partial pooling kept more than 80% of the
-  participant spread. Calibration uses the same scaling. The default `"objective"`
-  keeps the original behaviour.
+  participant spread. Calibration uses the same scaling. `"objective"` keeps the
+  original behaviour.
 - **`edge_observations` on both estimators.** An observation used to be scored
   only if its response support envelope (every lag the bounds allow plus the
   response's full tail) lay inside the run: a fixed `DoubleGamma` scored 18% of a
@@ -80,6 +80,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`BayesianMultimodalSRM(inference=...)` now defaults to `"map"`.** A plain
+  `fit` used to run NUTS, which is experimental, excludes the state-space algebra
+  and can take hours on a full recording. Pass `inference="posterior"` to sample.
+- **`MultimodalSRM(response_penalty_scaling=...)` now defaults to `"likelihood"`.**
+  A lag prior's `sd` is in seconds and `pooling_strength` is `1 / sd²` of the
+  spread between participants. Fits with no `lag_prior`, `Response.prior` or
+  partial pooling are unchanged; fits that use them are penalized far less than
+  before, and `"objective"` restores the earlier weighting. Estimators pickled by
+  earlier versions keep `"objective"`.
 - **GP-MSRM lag summaries share one reference.** With every lag estimated,
   `relative_lag_draws()` and the fit summary's peak delays now show the first
   modality at zero, as `timing_report()` does, instead of centring on the

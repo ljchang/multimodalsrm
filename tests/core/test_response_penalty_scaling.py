@@ -80,8 +80,15 @@ def test_scale_is_the_objective_weight_per_scored_value():
     assert "loadings" in model.configuration_["penalty_scaling"]
 
 
-def test_default_keeps_the_original_unscaled_penalties():
+def test_likelihood_scaling_is_the_default():
+    assert MultimodalSRM(latent_dt=0.5).response_penalty_scaling == "likelihood"
     model = fit(recording(0), responses=responses(1.0))
+    assert model.penalty_scale_ is not None
+    assert model.configuration_["response_penalty_scaling"] == "likelihood"
+
+
+def test_objective_scaling_keeps_the_original_unscaled_penalties():
+    model = fit(recording(0), responses=responses(1.0), response_penalty_scaling="objective")
     assert model.response_penalty_scaling == "objective" and model.penalty_scale_ is None
     kernels = model.subject_kernels_
     assert kernel_penalty(kernels, model.responses_) == kernel_penalty(
@@ -143,21 +150,21 @@ def test_a_one_second_prior_no_longer_overrides_the_data():
     data = recording(0)
     unpenalized = difference(fit(data, responses=responses()))
     assert unpenalized == pytest.approx(1.0, abs=0.05)
-    original = difference(fit(data, responses=responses(1.0)))
-    scaled = difference(fit(data, responses=responses(1.0), response_penalty_scaling="likelihood"))
+    original = difference(fit(data, responses=responses(1.0), response_penalty_scaling="objective"))
+    scaled = difference(fit(data, responses=responses(1.0)))
     assert original < 0.6  # A nominal 1 s prior pulls a 1 s delay most of the way to zero.
     assert scaled == pytest.approx(unpenalized, abs=0.01)
 
 
 def test_scaled_prior_tightens_smoothly_with_its_standard_deviation():
     data = recording(1)
-    values = [
-        difference(fit(data, responses=responses(sd), response_penalty_scaling="likelihood"))
-        for sd in (1.0, 0.1, 0.03, 0.01)
-    ]
+    values = [difference(fit(data, responses=responses(sd))) for sd in (1.0, 0.1, 0.03, 0.01)]
     assert all(a > b for a, b in zip(values, values[1:]))
     assert values[0] > 0.95 and values[-1] < 0.5
-    original = [difference(fit(data, responses=responses(sd))) for sd in (0.3, 0.1)]
+    original = [
+        difference(fit(data, responses=responses(sd), response_penalty_scaling="objective"))
+        for sd in (0.3, 0.1)
+    ]
     assert max(original) < 0.1
 
 
@@ -181,8 +188,9 @@ def test_scaled_partial_pooling_keeps_participant_differences():
         ]
     )
     assert reference == pytest.approx(np.std(offsets), abs=0.08)
-    assert spread() < 0.2 * reference  # Unscaled: effectively complete pooling.
-    assert spread(response_penalty_scaling="likelihood") > 0.8 * reference
+    # Unscaled: effectively complete pooling.
+    assert spread(response_penalty_scaling="objective") < 0.2 * reference
+    assert spread() > 0.8 * reference
 
 
 def test_calibration_uses_the_scaled_penalty():
