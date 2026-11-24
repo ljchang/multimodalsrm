@@ -1,5 +1,7 @@
 {
   "bayesian": [
+    "tests/bayesian/test_response_quadrature_symmetry.py",
+    "tests/bayesian/test_bayesian_mixed_responses.py::test_fast_matern_endpoint_derivatives_match_direct_signed_sum",
     "tests/bayesian/test_grouped_prediction.py::test_multi_feature_draw_and_query_batches_match_dense[noise0-3]",
     "tests/bayesian/test_grouped_prediction.py::test_multi_feature_draw_and_query_batches_match_dense[noise1-3]",
     "tests/bayesian/test_grouped_prediction.py::test_draw_aligned_rotations_retain_cross_factor_covariance",
