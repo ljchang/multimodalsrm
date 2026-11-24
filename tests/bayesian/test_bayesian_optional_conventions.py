@@ -84,7 +84,7 @@ def test_all_filtered_lags_remain_free_with_their_original_priors_and_bounds():
     assert problem.reference_convention["absolute_physiological_timing_established"] is False
 
 
-def test_centered_lag_draws_and_covariance_ignore_common_lag_shift():
+def test_relative_lag_draws_and_covariance_ignore_common_lag_shift():
     model, problem, _ = prepared()
     point = problem.initial.copy()
     for i, name in enumerate(problem.names):
@@ -96,10 +96,17 @@ def test_centered_lag_draws_and_covariance_ignore_common_lag_shift():
     draws[..., indices] += np.array([[0.0, 0.1, -0.1], [0.2, 0.3, 0.0]])[..., None]
     model.problem_, model.parameter_draws_ = problem, draws
     relative = model.relative_lag_draws()
-    assert_allclose(relative["brain"], 0.3)
-    assert_allclose(relative["physio"], -0.3)
+    # The first modality is shown at zero; the difference is 0.4 - (-0.2).
+    assert next(iter(model.responses)) == "brain"
+    assert_allclose(relative["brain"], 0.0)
+    assert_allclose(relative["physio"], -0.6)
     assert relative["brain"].shape == (2, 3)
     assert not relative["brain"].flags.writeable
+    # A fit restored from before this convention still centres on the mean.
+    current = problem.reference_convention["relative_lag_definition"]
+    problem.reference_convention["relative_lag_definition"] = "modality_lag_minus_mean_lag"
+    assert_allclose(model.relative_lag_draws()["brain"], 0.3)
+    problem.reference_convention["relative_lag_definition"] = current
     shifted = point.copy()
     shifted[indices] += 0.25
     assert_allclose(
@@ -193,8 +200,10 @@ def test_fit_quality_reports_centered_lags_without_a_reference(fitted_optional):
         )
     )
     assert report["availability"] == "complete"
-    assert report["reference"]["relative_lag_definition"] == "modality_lag_minus_mean_lag"
-    assert_allclose(sum(row["peak_delay_seconds"] for row in report["filters"]), 0, atol=1e-12)
+    assert report["reference"]["relative_lag_definition"] == "modality_lag_minus_first_modality_lag"
+    first = report["reference"]["relative_lag_reference"]
+    assert first == next(iter(model.problem_.responses))
+    assert next(r for r in report["filters"] if r["modality"] == first)["peak_delay_seconds"] == 0
     assert len(report["relative_delays"]) == 1
 
 

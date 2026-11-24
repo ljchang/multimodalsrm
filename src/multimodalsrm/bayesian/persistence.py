@@ -402,6 +402,12 @@ def _restore_model(state):
             raise ValueError("invalid original training seed")
         model.seed_ = seed
         adapter, model.problem_ = _prepare(model, state["training"])
+        from .reference import keep_saved_reference
+
+        keep_saved_reference(
+            model.problem_.reference_convention,
+            fit["configuration"].get("reference_convention"),
+        )
         model.adapter_ = adapter
         _parameters(model, state["parameter_names"], fit["map_parameters"], fit)
         model.specification_ = model._specification()

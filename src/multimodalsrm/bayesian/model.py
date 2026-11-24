@@ -66,8 +66,8 @@ class BayesianMultimodalSRM(BaseEstimator):
     convention: it does not change the likelihood, and ``timing_report`` can
     use any modality as its reference after fitting. Without it an already
     fixed lag is used if available; with all lags free, proper supplied priors
-    define the common offset and ``relative_lag_draws`` subtracts the
-    across-modality mean. Latent queries and lag priors/bounds
+    define the common offset and lag summaries show the first modality at
+    zero. Latent queries and lag priors/bounds
     remain in model-clock coordinates. No convention establishes physiological
     timing or identifies disconnected data components.
     The model consumes supplied units without standardization. MAP and NUTS
@@ -775,9 +775,9 @@ class BayesianMultimodalSRM(BaseEstimator):
 
         Return read-only arrays with the original (chain, draw) axes, including
         fixed modalities. MAP gives shape (1, 1). A fixed reference lag is
-        subtracted when available. Without one, subtract
-        the across-modality mean separately for each draw, preserving all
-        pairwise differences. This centers summaries only: latent query times
+        subtracted when available. Without one, subtract the first modality's
+        lag separately for each draw, as ``timing_report`` does by default,
+        preserving all pairwise differences. This shifts summaries only: latent query times
         and lag priors remain in model coordinates. It does not establish
         absolute timing identification or calibrated uncertainty.
         """
@@ -796,7 +796,12 @@ class BayesianMultimodalSRM(BaseEstimator):
             )
             output[m] = lags
         if reference_lag is None:
-            reference_lag = np.mean(np.stack(list(output.values())), axis=0)
+            convention = self.problem_.reference_convention
+            if convention.get("relative_lag_definition") == "modality_lag_minus_mean_lag":
+                # A fit restored from before the first-modality convention.
+                reference_lag = np.mean(np.stack(list(output.values())), axis=0)
+            else:
+                reference_lag = output[convention["relative_lag_reference"]]
         return {m: readonly_array(lags - reference_lag) for m, lags in output.items()}
 
     def timing_report(self, reference=None, *, max_draws=200):
@@ -809,9 +814,9 @@ class BayesianMultimodalSRM(BaseEstimator):
         determined than the ``lag`` parameter that ``relative_lag_draws``
         reports, which is their onset. ``reference`` names the modality shown
         at zero and only changes how delays are displayed. By default it is
-        ``reference_modality`` when that was set, otherwise the first modality
-        whose lag is not estimated, otherwise the first modality in
-        ``responses``. ``max_draws=None`` uses every draw. This does not
+        the modality ``relative_lag_draws`` uses: ``reference_modality`` when
+        that was set, otherwise a modality whose lag is not estimated,
+        otherwise the first modality in ``responses``. ``max_draws=None`` uses every draw. This does not
         establish physiological timing.
         """
         from ..lags import peak_delay, timing_summary
@@ -843,9 +848,23 @@ class BayesianMultimodalSRM(BaseEstimator):
                 )
         if self.configuration_["inference"] != "posterior":
             peaks = {m: float(v[0]) for m, v in peaks.items()}
+        label = None
         if reference is None:
-            reference = self.reference_modality
+            # The same modality that relative_lag_draws and the fit summary use.
+            convention = self.problem_.reference_convention
+            reference = convention.get("reference_modality") or convention.get(
+                "relative_lag_reference"
+            )
+            label = (
+                "reference_modality"
+                if self.reference_modality is not None
+                else "first_modality_without_an_estimated_lag"
+                if convention.get("reference_modality") is not None
+                else "first_modality"
+            )
         report = timing_summary(peaks, estimated, reference)
+        if label is not None and reference is not None:
+            report["convention"] = label
         report["uncertainty"] = self.configuration_["uncertainty"]
         report["lags_at_bounds"] = [
             list(name)

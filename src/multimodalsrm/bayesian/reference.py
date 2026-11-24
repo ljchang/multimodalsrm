@@ -40,11 +40,12 @@ def reference_convention(
         if requested_anchor is not None and type(responses[anchor[1]].initial_kernel()) is Identity:
             reference, mode = anchor[1], "identity_anchor"
         else:
-            fixed = sorted(
+            # In the order the responses were given, as timing reports use.
+            fixed = [
                 m
                 for m, response in responses.items()
                 if "lag" not in response.free_parameters and any(key[1] == m for key in observed)
-            )
+            ]
             reference = fixed[0] if fixed else None
             mode = "automatic_fixed_lag" if fixed else "relative_lags"
     else:
@@ -75,11 +76,15 @@ def reference_convention(
         lag_coordinates="model_clock_seconds",
         relative_lag_definition="modality_lag_minus_reference_lag"
         if reference is not None
-        else "modality_lag_minus_mean_lag",
+        else "modality_lag_minus_first_modality_lag",
         absolute_physiological_timing_established=False,
         identification="convention_only; data_connectivity_and_information_not_verified",
     )
     if reference is None:
+        # With every lag free, summaries show the first observed modality at zero.
+        result["relative_lag_reference"] = next(
+            m for m in responses if any(key[1] == m for key in observed)
+        )
         result["common_lag_offset"] = (
             "prior_and_spectral_boundary_dependent"
             if linear_algebra == "spectral"
@@ -92,3 +97,37 @@ def reference_convention(
             p for p in response.free_parameters if p != "lag"
         ]
     return result
+
+
+REFERENCE_FIELDS = (
+    "reference_modality",
+    "reference_family",
+    "reference_lag_seconds",
+    "reference_width",
+    "reference_shape_parameters_estimated",
+)
+
+
+def keep_saved_reference(convention, saved):
+    """Let a fit saved under an earlier default keep its reporting reference.
+
+    Earlier fits centred all-free lags on the across-modality mean, and chose
+    among several fixed lags alphabetically. Neither changes the model, so a
+    saved fit keeps the reference its stored summaries were written with.
+    """
+    if not isinstance(saved, dict):
+        return
+    if (
+        saved.get("relative_lag_definition") == "modality_lag_minus_mean_lag"
+        and convention.get("relative_lag_definition") == "modality_lag_minus_first_modality_lag"
+    ):
+        convention["relative_lag_definition"] = "modality_lag_minus_mean_lag"
+        convention.pop("relative_lag_reference", None)
+    elif saved.get("mode") == convention.get("mode") == "automatic_fixed_lag" and saved.get(
+        "reference_modality"
+    ) != convention.get("reference_modality"):
+        for name in REFERENCE_FIELDS:
+            if name in saved:
+                convention[name] = saved[name]
+            else:
+                convention.pop(name, None)

@@ -94,11 +94,10 @@ def test_map_report_matches_relative_lags_for_symmetric_responses(seeded_fit):
     report = seeded_fit.timing_report()
     assert report["convention"] == "first_modality" and report["reference"] == "A"
     assert report["uncertainty"] == "conditional_on_MAP"
-    # relative_lag_draws centres on the mean; the report shows the first modality at zero.
+    # Both summaries show the first modality at zero.
     lags = {m: float(v[0, 0]) for m, v in seeded_fit.relative_lag_draws().items()}
-    assert report["relative_peak_delay"] == pytest.approx(
-        {m: value - lags["A"] for m, value in lags.items()}
-    )
+    assert lags["A"] == 0.0
+    assert report["relative_peak_delay"] == pytest.approx(lags)
     assert report["pairwise_difference"]["B - A"] == pytest.approx(lags["B"] - lags["A"])
     with pytest.raises(ValueError, match="reference"):
         seeded_fit.timing_report(reference="missing")
@@ -132,3 +131,44 @@ def test_causal_responses_report_their_peak_not_their_onset():
     kernel = Gamma(3.0, 0.8, 1.2)
     assert peak_delay(kernel) == pytest.approx(1.2 + 2 * 0.8)
     assert peak_delay(kernel.with_parameters(scale=1.0, lag=0.8)) == pytest.approx(2.8)
+
+
+def test_fits_saved_with_mean_centred_lags_still_load_and_keep_that_reference(seeded_fit):
+    import copy
+
+    from multimodalsrm.bayesian.persistence import _model_state, _restore_model
+
+    state = copy.deepcopy(_model_state(seeded_fit))
+    convention = state["fit"]["configuration"]["reference_convention"]
+    assert convention.pop("relative_lag_reference") == "A"
+    convention["relative_lag_definition"] = "modality_lag_minus_mean_lag"
+    restored, _ = _restore_model(state)
+    lags = {m: float(v[0, 0]) for m, v in restored.relative_lag_draws().items()}
+    assert sum(lags.values()) == pytest.approx(0.0, abs=1e-9)
+    current = {m: float(v[0, 0]) for m, v in seeded_fit.relative_lag_draws().items()}
+    assert lags["B"] - lags["A"] == pytest.approx(current["B"] - current["A"])
+    # The report still needs one modality at zero and falls back to the first.
+    assert restored.timing_report()["reference"] == "A"
+
+
+def test_saved_alphabetical_fixed_reference_is_kept():
+    from multimodalsrm.bayesian.reference import keep_saved_reference
+
+    current = dict(
+        mode="automatic_fixed_lag",
+        reference_modality="rating",
+        reference_family="Identity",
+        reference_lag_seconds=0.0,
+        reference_width="fixed",
+        relative_lag_definition="modality_lag_minus_reference_lag",
+    )
+    saved = dict(current, reference_modality="brain", reference_family="Gaussian")
+    saved.update(reference_lag_seconds=1.0, reference_shape_parameters_estimated=[])
+    convention = dict(current)
+    keep_saved_reference(convention, saved)
+    assert convention == saved
+    # An explicit reference, or a matching one, is never replaced.
+    for other in (dict(saved, mode="explicit_fixed_lag"), dict(current), None):
+        convention = dict(current)
+        keep_saved_reference(convention, other)
+        assert convention == current
