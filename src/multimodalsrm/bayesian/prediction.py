@@ -163,8 +163,9 @@ def project(problem, draws, run, times, *, key, include_noise, latent_loading=No
             reduction = jnp.sum(cross.T * inverse_cross, axis=0)
         elif problem.linear_algebra == "grouped" and problem.run_baseline_sd:
             from .baselines import grouped_factor
+            from .precision_factor import precision_solve
 
-            _, beta, L, q, qU, precision, lu = grouped_factor(problem, x, run)
+            _, beta, L, q, qU, _, factored = grouped_factor(problem, x, run)
             nodes = problem.grouped_systems[run]
             nm = nodes.modalities
             cross = loading * problem.temporal_covariance(x, query, qm, nodes.times, nm)
@@ -177,8 +178,7 @@ def project(problem, draws, run, times, *, key, include_noise, latent_loading=No
                 baseline_variance = 0.0  # Posterior coefficient variance below.
             delta = query_baseline - cross @ qU
             mean = cross @ q + offset + delta @ beta
-            solved = jsp.linalg.lu_solve(lu, cross.T)
-            reduction = jnp.sum(cross.T * precision[:, None] * solved, axis=0)
+            reduction = jnp.sum(cross.T * precision_solve(factored, cross.T), axis=0)
             # Law of total variance avoids subtracting large baseline terms.
             projected_baseline = jsp.linalg.solve_triangular(L, delta.T, lower=True)
             baseline_uncertainty = jnp.sum(projected_baseline**2, axis=0)

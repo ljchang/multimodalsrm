@@ -15,9 +15,9 @@ def gaussian_score():
     C = B^-1 K, and q = B^-T score. The exact Gaussian scores need only
     the diagonal blocks of C and the factor trace of D B^-1 - q q'.
     Guarded Cholesky inverts well-conditioned precision blocks; singular or
-    ill-conditioned blocks retain the LU identities, with no inverse of K or
-    D. Thus zero/rank-deficient loadings and singular K remain valid. Both
-    paths obtain the scores without cubic dense products or differentiating LU.
+    ill-conditioned blocks use the block-root Cholesky identities, with no
+    inverse of K or D. Thus zero/rank-deficient loadings and singular K remain
+    valid. Neither path differentiates a factorization.
 
     The primal uses the stable residual-form density. This is a custom JVP
     (rather than a stopped derivative) to retain higher-order derivatives.

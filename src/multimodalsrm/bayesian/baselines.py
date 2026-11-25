@@ -51,17 +51,18 @@ def grouped_factor(problem, x, run):
     form avoids subtracting large nearly equal quadratic forms.
     """
     from .grouped import factor_arrays, operands
+    from .precision_factor import logdet, score_solve
 
     jax, jnp, jsp, _ = runtime()
     K, w, r, variance, nodes = operands(problem, x, run)
-    _, _, precision, lu = factor_arrays(K, w, r, variance, nodes)
+    _, _, precision, factor = factor_arrays(K, w, r, variance, nodes)
     U = jnp.asarray(problem.baseline_designs[run][0])
 
     def first_solve(rhs):
         score = jax.ops.segment_sum(
             w[:, None] * rhs / variance[:, None], nodes, num_segments=len(K)
         )
-        q = jsp.linalg.lu_solve(lu, score, trans=1)
+        q = score_solve(factor, score)
         return (rhs - w[:, None] * (K @ q)[nodes]) / variance[:, None]
 
     rhs = jnp.column_stack((U, r))
@@ -74,7 +75,7 @@ def grouped_factor(problem, x, run):
         solved = solved + first_solve(error)
     V, alpha0 = solved[:, :-1], solved[:, -1]
     # Derive GP coefficients from the refined observation inverse. Accumulating
-    # LU coefficients separately leaves them inconsistent at high signal/noise.
+    # solve coefficients separately leaves them inconsistent at high signal/noise.
     coefficients = jax.ops.segment_sum(w[:, None] * solved, nodes, num_segments=len(K))
     qU, q0 = coefficients[:, :-1], coefficients[:, -1]
     small = jnp.eye(U.shape[1]) + U.T @ V
@@ -83,15 +84,12 @@ def grouped_factor(problem, x, run):
 
     adjusted = r - U @ beta
     score = jax.ops.segment_sum(w * adjusted / variance, nodes, num_segments=len(K))
-    q = jsp.linalg.lu_solve(lu, score, trans=1)
+    q = score_solve(factor, score)
     mean = K @ q
     error = adjusted - w * mean[nodes]
     quadratic = jnp.sum(error**2 / variance) + q @ mean + beta @ beta
-    diagonal = jnp.diag(lu[0])
-    sign = jnp.prod(jnp.sign(diagonal)) * (-1.0) ** jnp.sum(lu[1] != jnp.arange(len(K)))
-    logdet = jnp.where(sign > 0, jnp.log(jnp.abs(diagonal)).sum(), jnp.inf)
     nll = (
-        0.5 * (quadratic + jnp.log(variance).sum() + logdet + len(r) * np.log(2 * np.pi))
+        0.5 * (quadratic + jnp.log(variance).sum() + logdet(factor) + len(r) * np.log(2 * np.pi))
         + jnp.log(jnp.diag(L)).sum()
     )
-    return nll, beta, L, q0, qU, precision, lu
+    return nll, beta, L, q0, qU, precision, factor

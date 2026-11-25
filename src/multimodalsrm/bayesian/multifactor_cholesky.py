@@ -5,6 +5,7 @@ import numpy as np
 from ._backend import runtime
 from .factorization import symmetric_solve
 from .multifactor import block_statistics, factor_statistics
+from .precision_factor import posterior_terms
 
 
 def gaussian_terms(temporal, weights, residual, variance, nodes):
@@ -13,7 +14,8 @@ def gaussian_terms(temporal, weights, residual, variance, nodes):
     For positive-definite precision blocks D, S=K+D^-1 is SPD even if K is
     singular. Then q=S^-1 D^-1 score, D(I+KD)^-1=S^-1, and
     C=(I+KD)^-1 K=D^-1 S^-1 K. All block contractions are exact.
-    Ill-conditioned or singular D uses the existing LU identities unchanged.
+    Ill-conditioned or singular D uses the block-root Cholesky reference,
+    which needs no inverse of D.
     The guard selects algebra only: no loading truncation, jitter or ridge.
     """
     jax, jnp, jsp, _ = runtime()
@@ -22,12 +24,10 @@ def gaussian_terms(temporal, weights, residual, variance, nodes):
     blocks, score = block_statistics(weights, residual, variance, nodes, count)
 
     def reference(_):
-        value, q, _, lu = factor_statistics(
+        value, q, _, factor = factor_statistics(
             temporal, weights, residual, variance, nodes, blocks, score
         )
-        inverse = jsp.linalg.lu_solve(lu, jnp.eye(size)).reshape(count, factors, count, factors)
-        diagonal = jnp.einsum("iajb,ji->iab", inverse, temporal)
-        trace = jnp.einsum("iab,ibja->ij", blocks, inverse)
+        trace, diagonal = posterior_terms(factor)
         return value, q.reshape(count, factors), diagonal, trace
 
     def cholesky(_):

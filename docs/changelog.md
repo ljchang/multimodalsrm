@@ -167,6 +167,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Grouped algebra returned wrong or infinite densities on long recordings with
+  smooth covariance.** `linear_algebra="grouped"` factored the nonsymmetric
+  `I + K D` (`K` the covariance over shared nodes, `D` their observation precision)
+  by LU with partial pivoting, whose element growth has no useful bound for this
+  matrix. With three participants, 504 one-second samples, two modalities of three
+  features and a Gaussian response of width 5 over a 3 s length scale (1,008
+  nodes), the matrix had a condition number near 1e3 and a log determinant of
+  752.9, yet the LU diagonal ran from 4e-29 to 4.5e44. The grouped objective was
+  5.7e57 where the unreduced covariance gives 13,173.7, and infinite at width 6.
+  L-BFGS-B stepped into such a value, backed off to a zero step and reported
+  convergence with a gradient near 250. Accuracy was already lost at smaller sizes:
+  with the same design at 300 nodes the density was wrong in the sixth digit at
+  width 6 and the fourth at width 8, and at 400 nodes by a factor of 1e5 at
+  width 6. At 200 nodes or fewer, and at widths up to 3 at every size, it agreed
+  with the unreduced covariance to 1e-13.
+  Every consumer of that factor was affected: the multi-factor density, run
+  baselines, correlated noise, conditional prediction, joint latent trajectories
+  and the variance polishing step, which declined the repair. With a root
+  `D = R.T R` the matrix is similar to the symmetric positive-definite
+  `I + R K R.T`, which is now Cholesky factored: the square root of the diagonal
+  for one factor, an eigenvector root of each node's block for several. Nothing is
+  divided by a loading and `K` is not inverted, so zero loadings and singular `K`
+  remain valid, and derivatives of every order come from identities in `K` and `D`
+  rather than from differentiating the root. Correlated noise makes `D` couple
+  nodes, where no cheap root exists, and uses Householder QR instead. Grouped and
+  dense objectives now agree to 1e-15 relative at every size and width above, and
+  gradients to 2e-12 at 1,008 nodes. One objective-and-gradient evaluation there took
+  11.0 and 12.6 ms before and after for one factor, 50.7 and 50.9 ms for two
+  factors, 25.3 and 19.5 ms with run baselines and 26.3 and 37.0 ms with
+  correlated noise, where QR costs about five times LU. The one-factor gradient
+  needs one more matrix product than before; its objective alone fell from 5.8 to
+  3.6 ms.
 - **Bus error with `response_quadrature_order=32` and a `Gaussian` response.**
   `BayesianMultimodalSRM` evaluated response covariances in fixed batches of 32
   time differences. With 256 quadrature nodes (order 32 on the eight Gaussian
@@ -177,6 +209,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   log-likelihood was evaluated. The batch is now sized so these intermediates
   always exceed the stack-allocation limit. Each time difference is still
   evaluated by the same arithmetic.
+- **Bus error from a partial response-quadrature batch.** The batch sizing above
+  keeps whole batches over jaxlib 0.11's 64 KiB stack-allocation limit, but
+  `jax.lax.map` evaluates the last, partial batch on its own, and that one could
+  fall back under the limit. Order 64 on the nine Gamma panels gives 576 nodes:
+  fourteen distinct time differences made one 14 x 576 float64 buffer of 63 KiB,
+  and eight of those nested overflow the 544 KiB stack. A compiled Gamma covariance
+  over 14 timestamps killed the interpreter in 5 of 5 runs. Whether a larger
+  program crashed depended on which thread ran the kernel: an order-16 Gaussian
+  objective over 126 timestamps (a partial batch of 61 x 128) ran in every run or
+  died in every run according to unrelated details of the rest of the program. The
+  last time difference is now repeated until the partial batch is large enough,
+  and the repeats are dropped. Each time difference is still evaluated by the same
+  arithmetic. The cost is at most one batch of extra rows per pair of modalities:
+  0.1 ms on a 60-node objective, not measurable at 1,008 nodes.
 - **GP response-quadrature gradients at quadrature endpoints.** With
   `response_quadrature_order` set, the weighted Matérn sum bounded its exponential
   coordinates with `clip`, whose derivative is one half where the query equals the

@@ -9,6 +9,7 @@ import numpy as np
 
 from ._backend import runtime
 from .grouped import factor
+from .precision_factor import precision_solve, score_solve
 
 
 def project(problem, draws, run, times, *, keys, include_noise, directions=None):
@@ -48,12 +49,12 @@ def project(problem, draws, run, times, *, keys, include_noise, directions=None)
 
     @jax.jit
     def prepare(x):
-        _, q, precision, lu = factor(problem, x, run)
+        _, q, precision, factored = factor(problem, x, run)
         weights, offsets, noise, _, _ = problem.arrays(x)
         common = (
             q,
             precision,
-            lu,
+            factored,
             weights.reshape(len(problem.keys), problem.features),
             offsets,
             noise,
@@ -78,7 +79,7 @@ def project(problem, draws, run, times, *, keys, include_noise, directions=None)
 
     @jax.jit
     def batch(prepared, cross, prior, query, output_keys, loading_directions):
-        (q, precision, lu, weights, offsets, noise), private = prepared
+        (q, _, factored, weights, offsets, noise), private = prepared
         loading = loading_directions if latent else weights[output_keys]
         offset = 0.0 if latent else offsets[output_keys]
         measurement = noise[groups[output_keys]] if include_noise and not latent else 0.0
@@ -97,7 +98,7 @@ def project(problem, draws, run, times, *, keys, include_noise, directions=None)
             rhs = observed_cross.T
             first = noise_system.precision(rhs, variance)
             score = design_transpose(first, w, indices, count)
-            coefficient = jsp.linalg.lu_solve(lu, score, trans=1)
+            coefficient = score_solve(factored, score)
             inverse = first - noise_system.precision(
                 design_product(K @ coefficient, w, indices, count), variance
             )
@@ -106,8 +107,7 @@ def project(problem, draws, run, times, *, keys, include_noise, directions=None)
         else:
             shared_cross = (cross[:, :, None] * loading[:, None, :]).reshape(len(query), -1)
             mean = shared_cross @ q + offset
-            solved = jsp.linalg.lu_solve(lu, shared_cross.T)
-            weighted = precision[:, None] * solved if precision.ndim == 1 else precision @ solved
+            weighted = precision_solve(factored, shared_cross.T)
             reduction = jnp.sum(shared_cross.T * weighted, axis=0)
         scale = prior * jnp.sum(loading**2, axis=1) + measurement
         return mean, scale - reduction, scale
