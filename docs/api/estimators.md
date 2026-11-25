@@ -156,6 +156,86 @@ MultimodalSRM.infer_latent(data, *, times=None)
 MultimodalSRM.predict(data, *, targets, source="within", times=None)
 ```
 
+### MultimodalSRM.residual_report
+
+```python
+MultimodalSRM.residual_report(
+    data,
+    *,
+    acf_lags=(2.0, 5.0, 10.0, 30.0),
+    max_lag=10.0,
+    min_shift=30.0,
+    n_shifts=100,
+    random_state=0,
+    detail=False,
+)
+```
+
+Check whether what the fit left over behaves like private noise.
+
+The residual is each observed feature minus the fitted shared
+reconstruction, in standardized units. `data` is normally the
+training data; other recordings of the same participants and
+modalities also work. The latent is solved from all of `data` with
+the fitted loadings and kernels, as in `infer_latent`, and only
+scored rows are used. Nothing is refitted and the model is unchanged.
+Returns a plain dictionary:
+
+`variance[modality]`: `shared` and `residual` are the variances
+of the reconstruction and of the residual as shares of each feature's
+observed variance, averaged over participants and features (they need
+not sum to one: the two parts are not orthogonal). `acf_lag1` and
+`acf` give the residual's autocorrelation one sample apart and at
+`acf_lags` seconds (None where a lag is not a multiple of the
+sampling interval). `timescale` and `slow_fraction` come from
+fitting `slow_fraction * exp(-lag / timescale)` to the leading lags;
+both are None, and `timescale_status` says why, unless the lag-one
+value exceeds 0.1 and at least two lags exceed 0.05. `per_feature`
+holds the same shares and `acf_lag1` per feature.
+
+`participant_correlation[modality]`: each participant's residual
+feature is correlated with the mean residual of the other participants
+(leave-one-out). `rms` is the root mean square of those correlations
+over participants and features and `correlation` their signed mean.
+Shared signal the factors missed raises `rms`; it raises
+`correlation` only when a feature has the same sign of loading in
+every participant, which separately fitted loadings do not ensure.
+Participants need matching timestamps on a regular grid; otherwise
+`status` says the run was skipped. The reference repeats the
+statistic `n_shifts` times after circularly shifting every
+participant at once, each inside its own slot of the run, so any two
+are displaced by at least `min_shift` seconds, or by half a slot
+when the run is too short for that (`min_shift_used`).
+`rms_null_mean`, `rms_null_q95` and `rms_p_shift` (the share of
+shifts at or above the observed value) belong to `rms`;
+`null_mean`, `null_q95` and `p_shift` to `correlation`.
+
+`modality_cross_correlation[(a, b)]`: `correlation` over `lags`
+(seconds, up to `max_lag` either way; positive when `b` follows
+`a`) is the root mean square of the correlations between every
+residual feature of `a` and of `b` within a participant, averaged
+over participants. A participant-specific signal that links the
+modalities raises it near their relative delay. The root mean square
+needs no matrix inverse, so it stays stable when features are many and
+samples few, where a canonical correlation is not; it has a positive
+floor even for unrelated series, which `null_mean` shows. Residuals
+are linearly interpolated to the coarser of the two sampling steps
+(`resampled` says whether any value was interpolated). The null
+shifts `b` against `a` by at least `min_shift` beyond the
+scanned lags: `null_q95` is for any single lag, `null_peak_q95`
+and `p_shift` for the largest value over all lags, which is the fair
+reference for `peak` at `peak_lag`.
+
+No reference level comes from an independent-sample formula:
+residuals are autocorrelated, and circular shifts preserve that.
+`min_shift` should exceed the residual's own correlation time.
+Fitting couples residuals slightly, on the order of the number of
+factors over the number of participant features, so small problems
+show small excesses even when the model is right; compare the size of
+an excess with its reference level, not only `p_shift`.
+`detail=True` adds per-participant values under `participants` in
+each entry and the residual series under `residuals`.
+
 ### MultimodalSRM.calibrate
 
 ```python
@@ -432,6 +512,44 @@ Query excluded targets after `condition`; default 200 mixture draws.
 
 Output nesting is subject/run/modality. `max_draws=None` uses all
 retained draws; otherwise selection is balanced across chains.
+
+### BayesianMultimodalSRM.residual_report
+
+```python
+BayesianMultimodalSRM.residual_report(
+    *,
+    acf_lags=(2.0, 5.0, 10.0, 30.0),
+    max_lag=10.0,
+    min_shift=30.0,
+    n_shifts=100,
+    random_state=0,
+    detail=False,
+    max_draws=200,
+)
+```
+
+Check whether what the fit left over behaves like private noise.
+
+Returns the same dictionary as `MultimodalSRM.residual_report`, which
+documents every entry: the variance shares and autocorrelation of the
+residual, its leave-one-out correlation across participants, and its
+lagged cross-correlation between modalities within a participant, each
+correlation with a circular-shift reference level.
+
+The residual is each conditioning observation minus the conditional
+mean of its filtered signal given all of them, offsets included, from
+the same prediction code as `predict`. No data are passed because
+the model keeps its conditioning observations; nothing is refitted.
+Values are in the supplied units and variances are reported as shares
+of each feature's observed variance.
+
+A MAP fit uses its one parameter vector; a posterior fit averages the
+conditional mean over `max_draws` retained draws. Dense, grouped,
+state-space and spectral algebra are supported. With
+`noise_timescales` the modelled correlated noise stays in the
+residual, so a slow residual is then expected. Run baselines belong to
+the reconstruction and are queried feature by feature, which is slow
+for many features.
 
 ### BayesianMultimodalSRM.calibrate
 

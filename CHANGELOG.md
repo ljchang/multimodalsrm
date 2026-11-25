@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`residual_report` on both estimators.** Each model treats what its shared
+  reconstruction leaves over as private noise, and nothing checked that for a
+  given fit. `MultimodalSRM.residual_report(data)` and
+  `BayesianMultimodalSRM.residual_report()` return one dictionary with three
+  parts per modality: the residual's share of variance, autocorrelation and
+  implied timescale; the leave-one-out correlation of residuals across
+  participants (shared signal the factors missed); and the lagged
+  cross-correlation of residuals between modalities within a participant (a
+  participant-specific signal). Reference levels come from circular shifts, which
+  keep each series' autocorrelation, never from independent-sample formulas.
+  Nothing is refitted: R-MSRM solves the latent from the supplied data at the
+  fitted parameters as `infer_latent` does, and GP-MSRM takes the conditional mean
+  of the filtered signal from its prediction code. In simulations with 25
+  participants, 504 s and 36 features, both estimators gave a participant
+  correlation (root mean square) of 0.042 to 0.066 with the right number of
+  factors, against a reference mean of 0.044 to 0.063, and 0.16 to 0.24 with one
+  factor fitted to three; a participant-specific signal delayed by 3 s between
+  two modalities gave a cross-correlation peak of 0.26 to 0.28 at 3 s against a
+  peak reference of 0.052 to 0.054; and noise with lag-one autocorrelation 0.7
+  gave a residual lag-one autocorrelation of 0.67 to 0.69 with the other two parts
+  within 0.006 of their reference means. Fitting itself couples residuals
+  slightly, so small problems show small excesses with a correct model, and with
+  long recordings the shift test detects excesses too small to matter: read the
+  size of an excess against its reference, not only `p_shift`. The API guide
+  explains how to read each part.
+
 - **Warning and diagnostic for `MultimodalSRM` fits that stop at response bounds.**
   A response parameter resting at a bound no longer moves, so it passes the
   `kernel_tol` test however steeply the objective still falls outside the bound,

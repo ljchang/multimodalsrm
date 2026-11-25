@@ -923,6 +923,56 @@ class BayesianMultimodalSRM(BaseEstimator):
                     )
         return output
 
+    def residual_report(
+        self,
+        *,
+        acf_lags=(2.0, 5.0, 10.0, 30.0),
+        max_lag=10.0,
+        min_shift=30.0,
+        n_shifts=100,
+        random_state=0,
+        detail=False,
+        max_draws=200,
+    ):
+        """Check whether what the fit left over behaves like private noise.
+
+        Returns the same dictionary as ``MultimodalSRM.residual_report``, which
+        documents every entry: the variance shares and autocorrelation of the
+        residual, its leave-one-out correlation across participants, and its
+        lagged cross-correlation between modalities within a participant, each
+        correlation with a circular-shift reference level.
+
+        The residual is each conditioning observation minus the conditional
+        mean of its filtered signal given all of them, offsets included, from
+        the same prediction code as ``predict``. No data are passed because
+        the model keeps its conditioning observations; nothing is refitted.
+        Values are in the supplied units and variances are reported as shares
+        of each feature's observed variance.
+
+        A MAP fit uses its one parameter vector; a posterior fit averages the
+        conditional mean over ``max_draws`` retained draws. Dense, grouped,
+        state-space and spectral algebra are supported. With
+        ``noise_timescales`` the modelled correlated noise stays in the
+        residual, so a slow residual is then expected. Run baselines belong to
+        the reconstruction and are queried feature by feature, which is slow
+        for many features.
+        """
+        from ..residuals import residual_report
+        from .residuals import residual_series
+
+        check_is_fitted(self, "parameter_draws_")
+        return residual_report(
+            residual_series(self, max_draws),
+            acf_lags=acf_lags,
+            max_lag=max_lag,
+            min_shift=min_shift,
+            n_shifts=n_shifts,
+            random_state=random_state,
+            detail=detail,
+            units="supplied units, as shares of each feature's observed variance",
+            reconstruction="conditional mean of the filtered signal given all observations",
+        )
+
     def calibrate(self, data, *, search=None, random_state=None, progress=None):
         """Fit one new participant against the frozen training MAP group.
 
