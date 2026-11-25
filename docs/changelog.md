@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`BayesianMultimodalSRM.timing_report(uncertainty="robust")` and `split_runs`.**
+  Laplace lag standard errors assume the model is right and were too narrow when
+  it was not. The new option adds a cluster-robust (sandwich) standard error next
+  to each Laplace one, for the same relative lags and pairwise differences, using
+  the fitted runs as clusters: the spread of the per-run gradients at the MAP
+  replaces the model's own variance, with the factor `B / (B - 1)` and the number
+  of clusters reported so intervals can use t quantiles. In a simulation with
+  AR(1) noise that the model treats as white (24 datasets, eight blocks), 90%
+  Laplace intervals contained the true lag in 19 and 20 of 24 datasets and robust
+  ones in 23 and 22; with white noise the counts were 23 and 24 against 21 and 23.
+  It needs at least three runs and flags fewer than ten as few. `split_runs(data,
+  blocks)` cuts recordings into contiguous time blocks presented as runs, keeping
+  masks; this changes the model, because each block gets its own latent, so
+  blocks should be long relative to the response widths and length scale. The
+  `"laplace"` output is unchanged.
+- **`timing_report(max_parameters=...)`.** The 2000-parameter limit on the lag
+  standard errors could not be raised from the report. It can now; the default is
+  unchanged, and the error message names the keyword and the cost (one
+  3,532-parameter grouped fit took about 10 minutes for the Hessian).
 - **Warning and diagnostic for `MultimodalSRM` fits that stop at response bounds.**
   A response parameter resting at a bound no longer moves, so it passes the
   `kernel_tol` test however steeply the objective still falls outside the bound,

@@ -40,6 +40,8 @@ Participants observing the same aligned recording should use the same run ID and
 
 An independent test recording must have a new run ID. Reusing a training run name does not make it an independent prediction problem.
 
+`split_runs(data, blocks)` cuts every run into contiguous time blocks and returns them as separate runs (`"movie-01/block-01"`, ...), keeping values, timestamps and masks. It exists for [cluster-robust lag standard errors](api-guide.md#cluster-robust-standard-errors), which need several runs. It changes the model: each block gets its own latent response, so use it for that purpose and not as a general preprocessing step.
+
 ## Separate training, donors, and targets
 
 Training observations estimate mappings and response parameters. Donor observations provide information when inferring a response or predicting an excluded target. A target is the participant–modality stream being predicted.

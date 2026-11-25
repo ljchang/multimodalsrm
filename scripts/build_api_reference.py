@@ -42,6 +42,7 @@ PAGES = {
         "Data and results",
         [
             "TimeSeries",
+            "split_runs",
             "SeriesResult",
             "PosteriorSeriesResult",
             "KernelEstimate",

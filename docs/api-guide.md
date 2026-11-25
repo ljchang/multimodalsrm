@@ -77,6 +77,7 @@ Three tools follow from this:
 | `LagScan.seed_responses(responses, margin=2.0)` | Returns responses whose free lags start at the scanned delays, with bounds of that lag ± `margin`. `MultimodalSRM(lag_init="scan")` does both steps at fit time. |
 | `model.timing_report(reference=None)` | Reports fitted **peak delays**, pairwise differences, the clock origin that was subtracted, and lags resting at a bound. `reference` names the modality shown at zero. It only changes how delays are displayed: the fit and the pairwise differences are the same for every choice. By default it is the first modality whose lag is not estimated, or the first modality in `responses` when every lag is estimated. Available on both estimators with the same convention. |
 | `gp_model.timing_report(uncertainty="laplace")` | GP-MSRM MAP fits only. Adds `lag_standard_error`: model-based standard errors for each lag relative to the reference and for each pairwise lag difference. Off by default. See [standard errors for GP lags](#model-based-standard-errors-for-gp-lags). |
+| `gp_model.timing_report(uncertainty="robust")` | The same block plus a cluster-robust `robust_standard_error` for each quantity, with the fitted runs as clusters. Needs at least three runs; `split_runs(data, blocks)` cuts recordings into time blocks for this. See [cluster-robust standard errors](#cluster-robust-standard-errors). |
 
 Narrow lag bounds matter for two reasons. They keep the optimizer in the scanned basin, and they keep the response's support envelope small: the envelope covers every lag the bounds allow. Observations whose envelope reaches outside the run rest on latent that R-MSRM must estimate beyond the run, and with `edge_observations="exclude"` they are not scored at all, so wide bounds on a short run can discard most of it.
 
@@ -122,7 +123,36 @@ errors["pairwise_lag_difference"]["rating - face"]
 
 **Response widths are left out.** The approximation centres a Gaussian on the MAP. For lags that was close to the posterior. For widths the marginal posterior sits far from the MAP, so a standard error around the MAP width would describe the wrong place. Fit with `inference="posterior"` when width uncertainty matters.
 
-**Cost and limits.** The Hessian takes one Hessian-vector product per parameter, computed 32 at a time to bound memory, then a dense eigendecomposition. With grouped algebra, 458 parameters (eight participants, three modalities, two factors, 9,600 observed values) took 6.4 s on the first call including compilation and 1.6 s on a repeat on a laptop CPU, and about four times that when the machine was busy. Dense and state-space algebra are slower per product: with 62 parameters and 1,200 observed values, dense took about 10 s and state-space tens of seconds. Fits with more than 2000 parameters raise an error. The option needs a MAP fit with dense, grouped or state-space algebra that has not been re-conditioned with `mode="frozen"`. Posterior fits raise an error because their draws already give a standard deviation in the default report.
+**Cost and limits.** The Hessian takes one Hessian-vector product per parameter, computed 32 at a time to bound memory, then a dense eigendecomposition. With grouped algebra, 458 parameters (eight participants, three modalities, two factors, 9,600 observed values) took 6.4 s on the first call including compilation and 1.6 s on a repeat on a laptop CPU, and about four times that when the machine was busy. Dense and state-space algebra are slower per product: with 62 parameters and 1,200 observed values, dense took about 10 s and state-space tens of seconds. Fits with more than 2000 parameters raise an error unless you raise the limit with `timing_report(..., max_parameters=N)`. Time grows at least with the square of the parameter count: one 3,532-parameter grouped fit took about 10 minutes for the Hessian. The option needs a MAP fit with dense, grouped or state-space algebra that has not been re-conditioned with `mode="frozen"`. Posterior fits raise an error because their draws already give a standard deviation in the default report.
+
+### Cluster-robust standard errors
+
+`timing_report(uncertainty="robust")` returns the same block, with `method="robust"`, and adds a `robust_standard_error` next to every `standard_error`. It is the cluster-robust (sandwich) estimate with the fitted **runs as clusters**. Runs are independent in the model, so the objective is a sum of one likelihood term per run minus the log prior. The spread of the per-run gradients (scores) at the MAP measures how much the data actually vary from run to run, and replaces the model's own statement of that variance: the covariance is `H⁻¹ J H⁻¹`, where `H` is the same Hessian the Laplace errors use and `J` is the sum over runs of the outer products of the centred scores. The prior is treated as a fixed penalty: it stays in `H`, and centring the scores across runs shares its gradient equally among them. No refits are needed; the extra cost over `"laplace"` is one gradient per run.
+
+```python
+from scipy import stats
+from multimodalsrm import split_runs
+
+model.fit(split_runs(data, 8))  # eight time blocks per recording, as separate runs
+errors = model.timing_report(reference="brain", uncertainty="robust")["lag_standard_error"]
+entry = errors["relative_lag"]["face"]  # estimate, standard_error, robust_standard_error
+half_width = stats.t.ppf(0.95, errors["degrees_of_freedom"]) * entry["robust_standard_error"]
+```
+
+| Field | Meaning |
+| --- | --- |
+| `robust_standard_error` | In every entry of `relative_lag`, `pairwise_lag_difference` and `lag_model_clock`. It already includes the small-sample factor `B / (B - 1)` for `B` clusters. `NaN` wherever the Laplace error is `NaN` (a lag at a bound, a quantity that is not identified). |
+| `clusters`, `degrees_of_freedom` | The number of runs `B`, and `B - 1`. Build intervals from t quantiles with that many degrees of freedom, not from normal quantiles. |
+| `few_clusters` | `True` below ten clusters. The standard error is then itself noisy: with `B` clusters its own relative error is roughly `1 / sqrt(2 (B - 1))`, about 27% at eight. |
+| `score_seconds` | Time spent on the per-run gradients. |
+
+Everything else (`positive_definite`, `null_directions`, `lags_at_bounds`, the Laplace `standard_error`) is as described above, and the same warnings apply: if the Hessian is not positive definite, neither error should be used.
+
+**Which to use.** Laplace errors assume the model is right. Robust errors allow for misspecification that is independent between runs, such as autocorrelated or heavy-tailed noise within a run. When the model is right the two estimate the same thing and the Laplace one is less noisy, so a robust error well above the Laplace one is evidence of misspecification, and one below it is most likely noise. Robust errors do not allow for anything shared by all runs, for example a response shape that is wrong in every block, and they do not cover widths either. Reporting both is reasonable.
+
+**The cluster requirement.** Fewer than three runs raise an error. If the recordings are a few long runs, cut each into contiguous time blocks with `split_runs(data, blocks)` and refit. Splitting changes the model: each block gets its own independent latent response, so what one block says about its neighbour across an edge is lost, observations whose response reaches across an edge are scored against a latent that stops there (or are left out, depending on `edge_observations`), and blocks that are adjacent in time are treated as independent although the noise near an edge is not. Keep blocks long relative to the response widths and the latent length scale. Lag estimates from the split fit differ slightly from the unsplit fit; the robust errors belong to the split fit. More blocks give a less noisy standard error but lose more at the edges.
+
+**What was measured.** In one simulation (three modalities, two factors, four participants, 240 s cut into eight 30 s blocks, 244 parameters, 24 datasets) with AR(1) observation noise that the model treats as white, 90% Laplace intervals contained the true lag in 19 and 20 of 24 datasets for the two estimated lags, and the error was 1.30 and 1.40 times the stated standard error (root mean square). Robust intervals with t quantiles contained it in 23 and 22 of 24, and the ratio was 1.01 and 0.97. With white noise, where the model is right, Laplace intervals contained it in 23 and 24 of 24 and robust ones in 21 and 23. With 24 datasets each proportion is uncertain by about ±0.07, so these show the direction of the effect, not its size, and they are results from that design, not guarantees for other data. On an otherwise idle laptop the per-run gradients took about 5 s on top of a 32 s Hessian for one of those fits.
 
 The scan locates a basin; it is not itself a timing estimate. It needs modalities that are measurably coupled within participants. When it finds no reliable delay, `lag_init="scan"` warns and leaves the configured lags and bounds unchanged, and a `LagScan` reports `reliable=False` with the reasons.
 
@@ -249,7 +279,7 @@ The `Response` bounds truncate and renormalize the corresponding GP filter prior
 | Calibrate a new participant | `calibrate(data, reference=...)` | MAP `calibrate(...)` or supported joint `calibrate_posterior(...)` |
 | Decode each participant independently | Select R donor source for prediction | `transform(data, times=...)` for MAP; `condition_participants(...)` for supported posterior updates |
 | Draw a joint latent trajectory | Not available | `sample_latent(...)`; request all correlated query times in one call |
-| Report relative response timing | `timing_report(reference=None)` | `timing_report(reference=None)`; MAP fits can add model-based (Laplace) lag standard errors with `uncertainty="laplace"`, which are too narrow under misspecification and exclude widths ([details](#model-based-standard-errors-for-gp-lags)) |
+| Report relative response timing | `timing_report(reference=None)` | `timing_report(reference=None)`; MAP fits can add model-based (Laplace) lag standard errors with `uncertainty="laplace"`, which are too narrow under misspecification and exclude widths ([details](#model-based-standard-errors-for-gp-lags)), or cluster-robust ones with `uncertainty="robust"` when the fit has several runs ([details](#cluster-robust-standard-errors)) |
 | Inspect response curves | `kernel(...)`, `plot_kernels(...)` | Consult fitted parameters and posterior summaries; R inspection methods are not shared GP methods |
 
 [Full method signatures](api/estimators.md) include progress, query and calibration options. Consult the [capability guide](capabilities.md) before combining advanced options. A finite objective, narrow interval or successful call does not establish convergence or recovery.

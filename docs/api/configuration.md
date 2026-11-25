@@ -212,6 +212,14 @@ BayesianProblem.temporal_covariance(x, times_a, modalities_a, times_b, modalitie
 
 Shared temporal block; modality -1 denotes the unfiltered latent.
 
+### BayesianProblem.run_nll
+
+```python
+BayesianProblem.run_nll(x, run)
+```
+
+Negative log likelihood of one run; runs are independent given `x`.
+
 ### BayesianProblem.nll
 
 ```python

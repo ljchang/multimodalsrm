@@ -407,36 +407,37 @@ class BayesianProblem:
             self.gp_length_scale(x),
         )
 
-    def nll(self, x):
+    def run_nll(self, x, run):
+        """Negative log likelihood of one run; runs are independent given ``x``."""
         if self.linear_algebra == "state_space":
             from .state_space import nll
 
-            return sum(nll(self, x, run) for run in self.systems)
+            return nll(self, x, run)
         if self.linear_algebra == "spectral":
             from .spectral import nll
 
-            return sum(nll(self, x, run) for run in self.systems)
+            return nll(self, x, run)
         if self.linear_algebra == "grouped":
             if self.run_baseline_sd:
                 from .baselines import grouped_factor
 
-                return sum(grouped_factor(self, x, run)[0] for run in self.systems)
+                return grouped_factor(self, x, run)[0]
             from .grouped import nll
 
-            return sum(nll(self, x, run) for run in self.systems)
+            return nll(self, x, run)
         _, jnp, jsp, _ = runtime()
         _, offsets, _, _, _ = self.arrays(x)
-        value = 0.0
-        for run, system in self.systems.items():
-            L = jnp.linalg.cholesky(self.covariance(x, run))
-            y = jnp.asarray(system.values) - offsets[self._packed[run][0]]
-            whitened = jsp.linalg.solve_triangular(L, y, lower=True)
-            value += (
-                0.5 * jnp.sum(whitened**2)
-                + jnp.log(jnp.diag(L)).sum()
-                + 0.5 * len(y) * np.log(2 * np.pi)
-            )
-        return value
+        L = jnp.linalg.cholesky(self.covariance(x, run))
+        y = jnp.asarray(self.systems[run].values) - offsets[self._packed[run][0]]
+        whitened = jsp.linalg.solve_triangular(L, y, lower=True)
+        return (
+            0.5 * jnp.sum(whitened**2)
+            + jnp.log(jnp.diag(L)).sum()
+            + 0.5 * len(y) * np.log(2 * np.pi)
+        )
+
+    def nll(self, x):
+        return sum(self.run_nll(x, run) for run in self.systems)
 
     def log_prior(self, x):
         _, jnp, _, _ = runtime()

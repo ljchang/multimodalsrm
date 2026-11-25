@@ -804,7 +804,9 @@ class BayesianMultimodalSRM(BaseEstimator):
                 reference_lag = output[convention["relative_lag_reference"]]
         return {m: readonly_array(lags - reference_lag) for m, lags in output.items()}
 
-    def timing_report(self, reference=None, *, max_draws=200, uncertainty=None):
+    def timing_report(
+        self, reference=None, *, max_draws=200, uncertainty=None, max_parameters=2000
+    ):
         """Peak response delays relative to a reference modality.
 
         The same convention as ``MultimodalSRM.timing_report``. Each retained
@@ -835,16 +837,29 @@ class BayesianMultimodalSRM(BaseEstimator):
         (``null_directions``), and ``null_direction_residual`` reports how far
         they are from flat, which shrinks as the fit is tightened. The cost is
         one Hessian-vector product per parameter plus a dense
-        eigendecomposition, and more than 2000 parameters raise an error.
-        Posterior fits raise too: their draws already give a standard
-        deviation.
+        eigendecomposition, and more than ``max_parameters`` (default 2000)
+        parameters raise an error. Raise it knowingly: one 3,532-parameter
+        grouped fit took about 10 minutes. Posterior fits raise too: their
+        draws already give a standard deviation.
+
+        ``uncertainty="robust"`` returns the same block with ``method``
+        ``"robust"`` and adds, next to every ``standard_error``, a
+        ``robust_standard_error``: the cluster-robust sandwich ``H^-1 J H^-1``
+        with the fitted runs as clusters and the factor ``B / (B - 1)``. It
+        allows for misspecification that is independent between runs, such as
+        autocorrelated noise within a run. ``clusters`` is the number of runs
+        B and ``degrees_of_freedom`` is B - 1, for t quantiles;
+        ``few_clusters`` is True below ten runs, where the errors are noisy.
+        Fewer than three runs raise an error: cut the recordings into time
+        blocks with ``multimodalsrm.split_runs`` and refit. Robust errors are
+        NaN wherever the Laplace ones are.
         """
         from ..lags import peak_delay, timing_summary
         from .prediction import selected_draws
 
         check_is_fitted(self, "parameter_draws_")
-        if uncertainty not in (None, "laplace"):
-            raise ValueError("uncertainty must be None or 'laplace'")
+        if uncertainty not in (None, "laplace", "robust"):
+            raise ValueError("uncertainty must be None, 'laplace' or 'robust'")
         draws = np.asarray(selected_draws(self, max_draws))
         peaks, estimated = {}, {}
         for m, response in self.problem_.responses.items():
@@ -893,10 +908,15 @@ class BayesianMultimodalSRM(BaseEstimator):
             for name in self.map_diagnostics_.get("boundary_parameters", [])
             if tuple(name)[0] == "filter" and tuple(name)[-1] == "lag"
         ]
-        if uncertainty == "laplace":
+        if uncertainty is not None:
             from .laplace import lag_standard_errors
 
-            report["lag_standard_error"] = lag_standard_errors(self, report["reference"])
+            report["lag_standard_error"] = lag_standard_errors(
+                self,
+                report["reference"],
+                max_parameters=max_parameters,
+                robust=uncertainty == "robust",
+            )
         return report
 
     def predict(self, *, times, include_noise=False, max_draws=200):

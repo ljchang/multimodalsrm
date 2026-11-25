@@ -385,7 +385,13 @@ absolute timing identification or calibrated uncertainty.
 ### BayesianMultimodalSRM.timing_report
 
 ```python
-BayesianMultimodalSRM.timing_report(reference=None, *, max_draws=200, uncertainty=None)
+BayesianMultimodalSRM.timing_report(
+    reference=None,
+    *,
+    max_draws=200,
+    uncertainty=None,
+    max_parameters=2000,
+)
 ```
 
 Peak response delays relative to a reference modality.
@@ -418,9 +424,22 @@ leave the model unchanged; those directions are removed in closed form
 (`null_directions`), and `null_direction_residual` reports how far
 they are from flat, which shrinks as the fit is tightened. The cost is
 one Hessian-vector product per parameter plus a dense
-eigendecomposition, and more than 2000 parameters raise an error.
-Posterior fits raise too: their draws already give a standard
-deviation.
+eigendecomposition, and more than `max_parameters` (default 2000)
+parameters raise an error. Raise it knowingly: one 3,532-parameter
+grouped fit took about 10 minutes. Posterior fits raise too: their
+draws already give a standard deviation.
+
+`uncertainty="robust"` returns the same block with `method`
+`"robust"` and adds, next to every `standard_error`, a
+`robust_standard_error`: the cluster-robust sandwich `H^-1 J H^-1`
+with the fitted runs as clusters and the factor `B / (B - 1)`. It
+allows for misspecification that is independent between runs, such as
+autocorrelated noise within a run. `clusters` is the number of runs
+B and `degrees_of_freedom` is B - 1, for t quantiles;
+`few_clusters` is True below ten runs, where the errors are noisy.
+Fewer than three runs raise an error: cut the recordings into time
+blocks with `multimodalsrm.split_runs` and refit. Robust errors are
+NaN wherever the Laplace ones are.
 
 ### BayesianMultimodalSRM.predict
 

@@ -20,6 +20,30 @@ TimeSeries(values, times, mask=None)
 | `times` | `np.ndarray` | `required` |
 | `mask` | `np.ndarray &#124; None` | `None` |
 
+## split_runs
+
+`from multimodalsrm import split_runs` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/data.py#L87)
+
+```python
+split_runs(data, blocks)
+```
+
+Cut every run into `blocks` contiguous time blocks, returned as runs.
+
+Block `k` of run `r` becomes the run `"r/block-kk"`. A run's edges
+are equally spaced between the earliest and latest timestamp of that run
+over all subjects and modalities, so a block covers the same stretch of
+time for everyone. Values, timestamps and masks are carried over
+unchanged and every sample lands in exactly one block. A series with no
+observed value inside a block is left out of that block, because a fully
+masked `TimeSeries` is not allowed.
+
+This is for `BayesianMultimodalSRM.timing_report(uncertainty="robust")`,
+which needs several runs as clusters. Splitting changes the model: each
+block gets its own independent latent, so what one block says about its
+neighbour across an edge is lost, and observations near an edge can be
+left unscored (see `edge_observations`). Keep blocks long relative to
+the response widths and the latent length scale.
 ## SeriesResult
 
 `from multimodalsrm import SeriesResult` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/results.py#L12)

@@ -82,3 +82,51 @@ def normalize_data(data):
                 counts[key] = count
                 out[subject][run][modality] = series
     return out
+
+
+def split_runs(data, blocks):
+    """Cut every run into ``blocks`` contiguous time blocks, returned as runs.
+
+    Block ``k`` of run ``r`` becomes the run ``"r/block-kk"``. A run's edges
+    are equally spaced between the earliest and latest timestamp of that run
+    over all subjects and modalities, so a block covers the same stretch of
+    time for everyone. Values, timestamps and masks are carried over
+    unchanged and every sample lands in exactly one block. A series with no
+    observed value inside a block is left out of that block, because a fully
+    masked ``TimeSeries`` is not allowed.
+
+    This is for ``BayesianMultimodalSRM.timing_report(uncertainty="robust")``,
+    which needs several runs as clusters. Splitting changes the model: each
+    block gets its own independent latent, so what one block says about its
+    neighbour across an edge is lost, and observations near an edge can be
+    left unscored (see ``edge_observations``). Keep blocks long relative to
+    the response widths and the latent length scale.
+    """
+    if isinstance(blocks, bool) or not isinstance(blocks, (int, np.integer)) or blocks < 1:
+        raise ValueError("blocks must be a positive integer")
+    data = normalize_data(data)
+    if blocks == 1:
+        return data
+    spans = {}
+    for runs in data.values():
+        for run, modalities in runs.items():
+            for series in modalities.values():
+                first, last = spans.get(run, (np.inf, -np.inf))
+                spans[run] = min(first, series.times[0]), max(last, series.times[-1])
+    out = {}
+    for subject, runs in data.items():
+        out[subject] = {}
+        for run, modalities in runs.items():
+            # Interior edges only: the first and last block are open-ended.
+            edges = np.linspace(*spans[run], blocks + 1)[1:-1]
+            for k in range(blocks):
+                part = {}
+                for modality, series in modalities.items():
+                    keep = np.searchsorted(edges, series.times, side="right") == k
+                    if series.mask[keep].any():
+                        part[modality] = TimeSeries(
+                            series.values[keep], series.times[keep], series.mask[keep]
+                        )
+                if part:
+                    out[subject][f"{run}/block-{k + 1:02d}"] = part
+    return out
