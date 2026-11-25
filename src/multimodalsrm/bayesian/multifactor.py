@@ -69,12 +69,12 @@ def factor(problem, x, run):
     from .grouped import operands
 
     _, jnp, _, _ = runtime()
-    value, q, blocks, lu = factor_arrays(*operands(problem, x, run))
+    value, q, blocks, factor = factor_arrays(*operands(problem, x, run))
     count, features = blocks.shape[:2]
     precision = jnp.einsum("ij,iab->iajb", jnp.eye(count), blocks).reshape(
         count * features, count * features
     )
-    return value, q, precision, lu
+    return value, q, precision, factor
 
 
 def factor_arrays(temporal, weights, residual, variance, nodes):
@@ -97,21 +97,23 @@ def block_statistics(weights, residual, variance, nodes, count):
 
 
 def factor_statistics(temporal, weights, residual, variance, nodes, blocks, score):
-    """LU reference using already constructed exact sufficient statistics."""
-    _, jnp, jsp, _ = runtime()
+    """Symmetric reference using already constructed exact sufficient statistics.
+
+    Coordinates are ordered node-major, then factor within each node. With
+    block roots D[j] = R[j].T R[j], I + (K_time x I) D is similar to the
+    symmetric positive-definite I + R (K_time x I) R.T, which is Cholesky
+    factored; LU of the nonsymmetric matrix is unstable for smooth K_time.
+    """
+    from .precision_factor import factorize, logdet, score_solve
+
+    _, jnp, _, _ = runtime()
     count, features = len(temporal), weights.shape[1]
-    # Coordinates are ordered node-major, then factor within each node.
-    size = count * features
-    # (K_time x I) D has block (i,j) = K_time[i,j] D[j]. Construct
-    # those blocks directly instead of a cubic dense matrix multiplication.
-    B = jnp.eye(size) + jnp.einsum("ij,jab->iajb", temporal, blocks).reshape(size, size)
-    lu, pivots = jsp.linalg.lu_factor(B)
-    diagonal = jnp.diag(lu)
-    sign = jnp.prod(jnp.sign(diagonal)) * (-1.0) ** jnp.sum(pivots != jnp.arange(size))
-    logdet = jnp.where(sign > 0, jnp.log(jnp.abs(diagonal)).sum(), jnp.inf)
-    q = jsp.linalg.lu_solve((lu, pivots), score, trans=1)
+    factor = factorize(temporal, blocks)
+    q = score_solve(factor, score)
     mean = temporal @ q.reshape(count, features)
     error = residual - jnp.sum(weights * mean[nodes], axis=1)
     quadratic = jnp.sum(error**2 / variance) + jnp.sum(q.reshape(count, features) * mean)
-    nll = 0.5 * (quadratic + jnp.log(variance).sum() + logdet + len(residual) * np.log(2 * np.pi))
-    return nll, q, blocks, (lu, pivots)
+    nll = 0.5 * (
+        quadratic + jnp.log(variance).sum() + logdet(factor) + len(residual) * np.log(2 * np.pi)
+    )
+    return nll, q, blocks, factor

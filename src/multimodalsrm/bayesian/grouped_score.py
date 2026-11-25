@@ -8,15 +8,18 @@ from .grouped import factor_arrays
 
 @lru_cache(maxsize=1)
 def gaussian_score():
-    """Use one inverse solve instead of differentiating the LU factorization.
+    """Use one inverse solve instead of differentiating the factorization.
 
     This rule assumes symmetric covariance K and its symmetric tangents. With
     C=(I+KD)^-1 K and q=(I+DK)^-1 score, dL/dK=(D(I+KD)^-1-qq')/2.
     The observation scores use the posterior mean Kq and diagonal of C.
     No inverse of K or division by D is needed, including at zero loadings
-    or singular latent covariance. The original stable LU density is retained.
+    or singular latent covariance. D(I+KD)^-1 is the symmetric R'M^-1R of
+    the Cholesky factor, and the density is the stable residual form.
     """
-    jax, jnp, jsp, _ = runtime()
+    from .precision_factor import posterior_terms
+
+    jax, jnp, _, _ = runtime()
 
     @jax.custom_jvp
     def nll(K, w, residual, variance, nodes):
@@ -26,12 +29,11 @@ def gaussian_score():
     def differential(primals, tangents):
         K, w, residual, variance, nodes = primals
         dK, dw, dr, dv, _ = tangents
-        value, q, precision, lu = factor_arrays(*primals)
+        value, q, _, factor = factor_arrays(*primals)
         mean = K @ q
         error = residual - w * mean[nodes]
-        inverse = jsp.linalg.lu_solve(lu, jnp.eye(len(K)))
-        cdiag = jnp.sum(inverse * K.T, axis=1)[nodes]
-        G = precision[:, None] * inverse
+        G, diagonal = posterior_terms(factor)
+        cdiag = diagonal[:, 0, 0][nodes]
         gK = 0.5 * (0.5 * (G + G.T) - jnp.outer(q, q))
         gw = (w * cdiag - error * mean[nodes]) / variance
         gr = error / variance

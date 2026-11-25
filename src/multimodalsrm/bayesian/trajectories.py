@@ -30,8 +30,9 @@ def joint_moments(problem, run, times):
         )
         if problem.linear_algebra == "grouped":
             from .grouped import factor
+            from .precision_factor import precision_solve
 
-            _, q, precision, lu = factor(problem, x, run)
+            _, q, _, factored = factor(problem, x, run)
             nodes = problem.grouped_systems[run]
             temporal = problem.temporal_covariance(
                 x,
@@ -42,9 +43,7 @@ def joint_moments(problem, run, times):
             )
             cross = jnp.kron(temporal, rotation.T)
             mean = cross @ q
-            solved = jsp.linalg.lu_solve(lu, cross.T)
-            weighted = precision[:, None] * solved if features == 1 else precision @ solved
-            covariance = prior - cross @ weighted
+            covariance = prior - cross @ precision_solve(factored, cross.T)
         else:
             weights, offsets, _, _, _ = problem.arrays(x)
             reported = weights.reshape(-1, features) @ rotation

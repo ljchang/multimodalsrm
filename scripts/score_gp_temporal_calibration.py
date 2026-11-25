@@ -13,7 +13,6 @@ from pathlib import Path
 
 import jax
 import jax.numpy as jnp
-import jax.scipy as jsp
 import numpy as np
 from compare_gp_response_families import test_summary
 from gp_response_holdout import BLOCK_FOLDS
@@ -21,6 +20,7 @@ from investigate_gp_response_bounds import observation_summary
 from refit_gp_temporal_calibration import prepare, save
 
 from multimodalsrm.bayesian.grouped import factor
+from multimodalsrm.bayesian.precision_factor import score_solve
 from multimodalsrm.bayesian.prediction import project
 from multimodalsrm.bayesian.temporal_noise import (
     NoiseSystem,
@@ -51,14 +51,14 @@ class CachedPrediction:
         count = len(nodes.times)
 
         def coefficients(x):
-            _, q, _, lu = factor(base, x, run)
+            _, q, _, factored = factor(base, x, run)
             K, w, residual, variance, indices = operands(base, x, run)
             alpha = noise_system.precision(
                 residual - design_product(K @ q, w, indices, count), variance
             )
-            return K, w, variance, q, lu, alpha
+            return K, w, variance, q, factored, alpha
 
-        K, w, variance, q, lu, alpha = jax.block_until_ready(jax.jit(coefficients)(native))
+        K, w, variance, q, factored, alpha = jax.block_until_ready(jax.jit(coefficients)(native))
         weights, offsets, noise, _, _ = base.arrays(native)
         weights = weights.reshape(len(base.keys), base.features)
         groups = jnp.array([base.groups.index(key[:2]) for key in base.keys])
@@ -81,7 +81,7 @@ class CachedPrediction:
             rhs = observed_cross.T
             first = noise_system.precision(rhs, variance)
             score = design_transpose(first, w, indices, count)
-            coefficient = jsp.linalg.lu_solve(lu, score, trans=1)
+            coefficient = score_solve(factored, score)
             inverse = first - noise_system.precision(
                 design_product(K @ coefficient, w, indices, count), variance
             )

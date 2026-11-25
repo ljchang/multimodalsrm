@@ -198,8 +198,17 @@ class ResponseQuadrature:
         # float64 buffers just under that limit (32 x 256 nodes) overflow it and
         # kill the process, so keep every such buffer above the limit.
         sizes = [n for n in (len(u), len(v)) if n > 1]
-        batch = max(32, 65536 // (8 * min(sizes)) + 1) if sizes else 32
-        result = jax.lax.map(one, flat, batch_size=batch)
+        rows = 65536 // (8 * min(sizes)) + 1 if sizes else 1
+        batch = max(32, rows)
+        # lax.map evaluates a final partial batch on its own, and with fewer
+        # rows than that its buffers fall back under the limit (14 x 576 nodes
+        # is 63 KiB). Repeat the last difference until the partial batch is
+        # large enough and drop the repeats.
+        count = len(flat)
+        if 0 < count % batch < rows:
+            repeats = jnp.broadcast_to(flat[-1], (rows - count % batch,))
+            flat = jnp.concatenate([flat, repeats])
+        result = jax.lax.map(one, flat, batch_size=batch)[:count]
         return result.reshape(delta.shape)
 
     def covariance(self, x, times_a, modalities_a, times_b, modalities_b, *, length_scale=None):

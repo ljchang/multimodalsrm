@@ -406,6 +406,9 @@ def kernel_stationarity(kernels, responses, objective):
                         "projected_gradient": projected,
                         "at_lower_bound": at_lower,
                         "at_upper_bound": at_upper,
+                        "value": float(kernel.parameters[parameter]),
+                        "bounds": tuple(float(v) for v in response.parameter_bounds()[parameter]),
+                        "coordinate_range": float(hi - lo),
                     }
                 )
     success = bool(np.isfinite(before) and all(r["gradient"] is not None for r in rows))
@@ -417,4 +420,50 @@ def kernel_stationarity(kernels, responses, objective):
         "max_abs_projected_gradient": max((abs(r["projected_gradient"]) for r in rows), default=0.0)
         if success
         else None,
+    }
+
+
+def response_bound_report(stationarity, tolerance):
+    """Free response parameters resting at a bound, from ``kernel_stationarity``.
+
+    A bounded optimizer stops at a bound whether or not the objective has a
+    minimum there. ``objective_decreases_beyond`` marks a parameter whose
+    gradient points out of the allowed range strongly enough that extending
+    the range by its own width would, to first order, lower the objective by
+    more than ``tolerance`` (``projected_decrease``). Such a value is set by
+    the bound, not by the data. The gradient holds maps and latents fixed,
+    which equals the slope of the refitted objective once they are stationary.
+    """
+    rows = []
+    for r in stationarity.get("parameters", []):
+        if not (r["at_lower_bound"] or r["at_upper_bound"]):
+            continue
+        gradient = r["gradient"]
+        outward = gradient is not None and (
+            (r["at_upper_bound"] and gradient < 0) or (r["at_lower_bound"] and gradient > 0)
+        )
+        decrease = abs(gradient) * r["coordinate_range"] if outward else 0.0
+        rows.append(
+            {
+                "subjects": list(r["subjects"]),
+                "modality": r["modality"],
+                "parameter": r["parameter"],
+                "bound": "lower" if r["at_lower_bound"] else "upper",
+                "value": r["value"],
+                "bounds": r["bounds"],
+                "coordinate": r["coordinate"],
+                "gradient": gradient,
+                "projected_decrease": float(decrease),
+                "objective_decreases_beyond": bool(decrease > tolerance),
+            }
+        )
+    return {
+        "tolerance": float(tolerance),
+        "free_parameters": len(stationarity.get("parameters", [])),
+        "at_bounds": rows,
+        "limited_by_bounds": list(
+            dict.fromkeys(
+                f"{r['modality']}.{r['parameter']}" for r in rows if r["objective_decreases_beyond"]
+            )
+        ),
     }
