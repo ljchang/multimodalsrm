@@ -236,10 +236,13 @@ def test_a_lag_at_its_bound_is_flagged_and_has_no_standard_error(one_factor):
 
 def test_unsupported_fits_and_options_raise(one_factor):
     model = one_factor
-    with pytest.raises(ValueError, match="uncertainty must be None or 'laplace'"):
+    with pytest.raises(ValueError, match="uncertainty must be None, 'laplace' or 'robust'"):
         model.timing_report(uncertainty="bootstrap")
     with pytest.raises(ValueError, match="limit is 10"):
         lag_standard_errors(model, "A", max_parameters=10)
+    # One run cannot serve as clusters.
+    with pytest.raises(ValueError, match="needs at least 3; this fit has 1.*split_runs"):
+        model.timing_report(uncertainty="robust")
     for key, value, message in (
         ("inference", "posterior", "requires a MAP fit; a posterior fit already has"),
         ("parameter_source", "original_training_MAP", "requires the training fit"),
@@ -262,6 +265,23 @@ def test_unsupported_fits_and_options_raise(one_factor):
             model.timing_report(uncertainty="laplace")
     finally:
         model.problem_.linear_algebra = algebra
+
+
+def test_timing_report_passes_the_parameter_cap_through(one_factor):
+    count = len(one_factor.problem_.names)
+    assert count < 2000
+    with pytest.raises(ValueError, match=rf"all {count} parameters; the limit is {count - 1}\."):
+        one_factor.timing_report(uncertainty="laplace", max_parameters=count - 1)
+    # The message names the keyword and what raising it costs.
+    with pytest.raises(ValueError, match=r"timing_report\(\.\.\., max_parameters=N\).*minutes"):
+        one_factor.timing_report(uncertainty="laplace", max_parameters=10)
+    exact = one_factor.timing_report(uncertainty="laplace", max_parameters=count)
+    default = one_factor.timing_report(uncertainty="laplace")
+    for report in (exact, default):
+        report["lag_standard_error"].pop("hessian_seconds")
+    assert exact == default
+    # Without an uncertainty request nothing is built, so the cap is not consulted.
+    assert "lag_standard_error" not in one_factor.timing_report(max_parameters=1)
 
 
 def test_default_report_is_unchanged(one_factor):

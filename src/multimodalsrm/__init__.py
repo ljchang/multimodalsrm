@@ -2,7 +2,7 @@
 
 from ._version import __version__
 from .alignment import temporal_isc, time_segment_matching
-from .data import TimeSeries
+from .data import TimeSeries, split_runs
 from .estimator import MultimodalSRM
 from .inspection import KernelEstimate
 from .kernels import (
@@ -32,6 +32,7 @@ from .validation import CrossValidationResult, LeaveOneRunOut, cross_validate
 __all__ = [
     "__version__",
     "TimeSeries",
+    "split_runs",
     "temporal_isc",
     "time_segment_matching",
     "Identity",
