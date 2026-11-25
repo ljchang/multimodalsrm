@@ -222,6 +222,36 @@ def infer_latent(model, data, *, times=None):
     return output
 
 
+def residual_series(model, data):
+    """Observed and reconstructed values of every scored block, in fitted units.
+
+    The latent is solved from all supplied observations with the fitted
+    loadings and kernels, as in ``infer_latent``; the reconstruction is the
+    same product the objective scores. Values are standardized with the
+    training preprocessing, so offsets are already removed.
+    """
+    from .residuals import ResidualSeries
+
+    check_is_fitted(model, "loadings_")
+    selected = filter_data(data, lambda s, r, m: model.modality_weights_.get(m, 1) > 0)
+    z, _, _, blocks, _ = condition(model, selected)
+    series = []
+    for b in blocks:
+        fitted = (b.H @ z[b.subject][b.run]) @ model.loadings_[b.subject][b.modality].T
+        keep = b.mask & b.valid[:, None]
+        series.append(
+            ResidualSeries(
+                b.subject,
+                b.run,
+                b.modality,
+                b.times,
+                np.where(keep, b.values, np.nan),
+                np.where(keep, fitted, np.nan),
+            )
+        )
+    return series
+
+
 def predict(model, data, *, targets, source="within", times=None):
     check_is_fitted(model, "loadings_")
     if source not in ("within", "across", "both"):
