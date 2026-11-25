@@ -146,8 +146,14 @@ def operands(problem, x, run):
 
 
 def factor(problem, x, run):
-    """Woodbury sufficient statistics with non-diagonal A.T N^-1 A."""
-    _, jnp, jsp, _ = runtime()
+    """Woodbury sufficient statistics with non-diagonal A.T N^-1 A.
+
+    D couples nodes here, so it has no block root and I + K D has no cheap
+    symmetric form. Householder QR factors it stably; LU does not.
+    """
+    from .precision_factor import factorize_general, logdet, score_solve
+
+    _, jnp, _, _ = runtime()
     K, w, residual, variance, nodes = operands(problem, x, run)
     system = problem.noise_systems[run]
     count = len(K) // problem.features
@@ -162,11 +168,8 @@ def factor(problem, x, run):
     D = D.at[locations[i, :, None], locations[j, None, :]].add(blocks)
     D = D.at[locations[j, :, None], locations[i, None, :]].add(jnp.swapaxes(blocks, 1, 2))
     score = design_transpose(system.precision(residual, variance), w, nodes, count)
-    lu, pivots = jsp.linalg.lu_factor(jnp.eye(len(K)) + K @ D)
-    diagonal = jnp.diag(lu)
-    sign = jnp.prod(jnp.sign(diagonal)) * (-1.0) ** jnp.sum(pivots != jnp.arange(len(K)))
-    logdet = jnp.where(sign > 0, jnp.log(jnp.abs(diagonal)).sum(), jnp.inf)
-    q = jsp.linalg.lu_solve((lu, pivots), score, trans=1)
+    factored = factorize_general(K, D)
+    q = score_solve(factored, score)
     mean = K @ q
     error = residual - design_product(mean, w, nodes, count)
     quadratic = error @ system.precision(error, variance) + q @ mean
@@ -174,19 +177,20 @@ def factor(problem, x, run):
         quadratic
         + jnp.log(variance).sum()
         + system.logdet
-        + logdet
+        + logdet(factored)
         + len(residual) * np.log(2 * np.pi)
     )
-    return value, q, D, (lu, pivots)
+    return value, q, D, factored
 
 
-def solve(problem, x, run, rhs, lu):
+def solve(problem, x, run, rhs, factored):
     """Apply the full observation precision to vectors or narrow RHS batches."""
-    _, _, jsp, _ = runtime()
+    from .precision_factor import score_solve
+
     K, weights, _, variance, nodes = operands(problem, x, run)
     system = problem.noise_systems[run]
     count = len(K) // problem.features
     first = system.precision(rhs, variance)
     score = design_transpose(first, weights, nodes, count)
-    q = jsp.linalg.lu_solve(lu, score, trans=1)
+    q = score_solve(factored, score)
     return first - system.precision(design_product(K @ q, weights, nodes, count), variance)

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from math import fsum
 
 import numpy as np
-from scipy.linalg import cho_factor, cho_solve, eigh, lu_factor, lu_solve
+from scipy.linalg import cho_factor, cho_solve, eigh
 
 MAX_SELECTED_ROWS = 1024
 RHS_CHUNK = 32
@@ -94,12 +94,20 @@ def _grouped_solver(problem, x, run, diagnostics):
         np.add.at(result, nodes, a)
         return result
 
-    precision = np.bincount(nodes, weights=w * w / variance, minlength=len(K))
-    factor = lu_factor(np.eye(len(K)) + K * precision[None, :])
+    # I + K D is similar to the symmetric positive-definite I + s K s with
+    # s = sqrt(D). Cholesky of it is stable; LU of I + K D is not for smooth K.
+    scale = np.sqrt(np.bincount(nodes, weights=w * w / variance, minlength=len(K)))
+    symmetric = scale[:, None] * K * scale[None, :]
+    symmetric.flat[:: len(K) + 1] += 1.0
+    factor = cho_factor(symmetric, lower=True, overwrite_a=True)
 
     def first(rhs):
         score = segment(w[:, None] * rhs / variance[:, None])
-        q = lu_solve(factor, score, trans=1)
+        # The score is zero wherever the scale is: both sum the same loadings.
+        reduced = np.divide(
+            score, scale[:, None], out=np.zeros_like(score), where=scale[:, None] > 0
+        )
+        q = scale[:, None] * cho_solve(factor, reduced)
         return (rhs - w[:, None] * (K @ q)[nodes]) / variance[:, None]
 
     def product(a):
@@ -138,8 +146,10 @@ def _multifactor_solver(K, w, residual, variance, nodes, diagnostics):
 
     Node-major factor blocks form B = I + (K tensor I) D. D accumulates
     individual loading outer products, retaining zero/cancelling loadings.
-    Applying K separately to each factor avoids constructing its Kronecker
-    expansion or an explicit block-diagonal D.
+    With block roots D = R.T R, B is similar to the symmetric positive-definite
+    I + R (K tensor I) R.T, whose Cholesky factor is stable where LU of B is
+    not. Applying K separately to each factor avoids constructing its
+    Kronecker expansion or an explicit block-diagonal D.
     """
     m, factors = len(K), w.shape[1]
     size = m * factors
@@ -155,9 +165,16 @@ def _multifactor_solver(K, w, residual, variance, nodes, diagnostics):
                 nodes[selected],
                 w[selected, k, None] * w[selected] / variance[selected, None],
             )
-    B = np.einsum("ij,jab->iajb", K, blocks).reshape(size, size)
-    B.flat[:: size + 1] += 1.0
-    factor = lu_factor(B, overwrite_a=True)
+    eigenvalues, vectors = np.linalg.eigh(0.5 * (blocks + blocks.swapaxes(1, 2)))
+    # A PSD block has no negative eigenvalue; eigh may return one at roundoff.
+    positive = eigenvalues > 0
+    scale = np.sqrt(np.where(positive, eigenvalues, 0.0))
+    inverse = np.divide(1.0, scale, out=np.zeros_like(scale), where=positive)
+    root = scale[:, :, None] * vectors.swapaxes(1, 2)
+    coroot = inverse[:, :, None] * vectors.swapaxes(1, 2)
+    symmetric = np.einsum("iac,ij,jbc->iajb", root, K, root, optimize=True).reshape(size, size)
+    symmetric.flat[:: size + 1] += 1.0
+    factor = cho_factor(symmetric, lower=True, overwrite_a=True)
 
     def scatter(rhs):
         score = np.zeros((m, factors, rhs.shape[1]))
@@ -173,7 +190,11 @@ def _multifactor_solver(K, w, residual, variance, nodes, diagnostics):
         return result
 
     def first(rhs):
-        q = lu_solve(factor, scatter(rhs / variance[:, None]), trans=1)
+        score = scatter(rhs / variance[:, None]).reshape(m, factors, -1)
+        # Scores lie in the range of D, so the root form needs no subtraction.
+        reduced = np.einsum("iab,ibc->iac", coroot, score).reshape(size, -1)
+        q = cho_solve(factor, reduced).reshape(m, factors, -1)
+        q = np.einsum("iba,ibc->iac", root, q).reshape(size, -1)
         return (rhs - gather(q)) / variance[:, None]
 
     def product(a):

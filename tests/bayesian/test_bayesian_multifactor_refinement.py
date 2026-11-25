@@ -131,7 +131,7 @@ def test_multifactor_profile_guards_expanded_allocation(monkeypatch):
     monkeypatch.setattr(noise_profile, "MAX_FACTOR_ROWS", 1)
     monkeypatch.setattr(
         noise_profile,
-        "lu_factor",
+        "cho_factor",
         lambda *a, **k: pytest.fail("capacity must precede factorization"),
     )
     profile = noise_profile.variance_profile(p, x, p.indices[("noise", "a", "brain")])

@@ -61,25 +61,26 @@ def factor_arrays(K, w, residual, variance, observation_nodes):
     """Factor I + K D with no divisions by possibly zero loadings.
 
     K is covariance over shared functionals; D=A.T N^-1 A is diagonal.
-    The precision-weighted score is t=A.T N^-1 (y-offset). B need not be
-    symmetric, so LU solves (including transpose solves) are intentional.
+    The precision-weighted score is t=A.T N^-1 (y-offset). B = I + K D is
+    not symmetric and LU of it is unstable for smooth K, so the similar
+    symmetric positive-definite I + D^1/2 K D^1/2 is Cholesky factored.
     """
-    jax, jnp, jsp, _ = runtime()
+    from .precision_factor import factorize, logdet, score_solve
+
+    jax, jnp, _, _ = runtime()
     count = len(K)
     precision = jax.ops.segment_sum(w**2 / variance, observation_nodes, num_segments=count)
     score = jax.ops.segment_sum(w * residual / variance, observation_nodes, num_segments=count)
-    B = jnp.eye(count) + K * precision[None, :]
-    lu, pivots = jsp.linalg.lu_factor(B)
-    diagonal = jnp.diag(lu)
-    sign = jnp.prod(jnp.sign(diagonal)) * (-1.0) ** jnp.sum(pivots != jnp.arange(count))
-    logdet = jnp.where(sign > 0, jnp.log(jnp.abs(diagonal)).sum(), jnp.inf)
-    q = jsp.linalg.lu_solve((lu, pivots), score, trans=1)
+    factor = factorize(K, precision)
+    q = score_solve(factor, score)
     mean = K @ q
     # Equivalent to r.T N^-1 r - t.T K q, without subtracting large terms.
     error = residual - w * mean[observation_nodes]
     quadratic = jnp.sum(error**2 / variance) + q @ mean
-    nll = 0.5 * (quadratic + jnp.log(variance).sum() + logdet + len(residual) * np.log(2 * np.pi))
-    return nll, q, precision, (lu, pivots)
+    nll = 0.5 * (
+        quadratic + jnp.log(variance).sum() + logdet(factor) + len(residual) * np.log(2 * np.pi)
+    )
+    return nll, q, precision, factor
 
 
 def factor(problem, x, run):
