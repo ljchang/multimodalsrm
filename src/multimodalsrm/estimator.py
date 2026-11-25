@@ -24,6 +24,7 @@ from .kernel_optimization import (
     kernel_stationarity,
     likelihood_penalty_scale,
     optimize_kernels,
+    response_bound_report,
 )
 from .kernels import Identity, Response
 from .lags import LagScan, scan_lags
@@ -163,7 +164,20 @@ class MultimodalSRM(BaseEstimator):
     objective-only rule. ``kernel_extrapolation`` (default True) follows each
     iteration's response step further while refitted latents and maps keep
     lowering the complete objective, which shortens that slow phase without
-    changing the objective or its stationary points.
+    changing the objective or its stationary points. Each iteration's record in
+    ``restart_diagnostics_`` holds the accepted ``scale``, a multiple of that
+    iteration's own response step that doubles up to twelve times (at most
+    4095), and the ``displacement`` actually covered, in coordinate units after
+    clipping at bounds. A scale in the thousands means the alternating step was
+    that small a fraction of the distance over which the objective kept
+    falling, not that a response moved by thousands of units.
+
+    A response parameter that rests at one of its bounds stops moving, so a fit
+    whose free response parameters are all at bounds meets the stopping rule
+    however steeply the objective still falls outside them. ``converged_`` is
+    then true for the bounded problem only. ``fit`` warns when that happens and
+    ``optimization_diagnostics_["response_bounds"]`` lists each parameter at a
+    bound with its gradient and whether the objective decreases beyond it.
     """
 
     def __init__(
@@ -556,6 +570,7 @@ class MultimodalSRM(BaseEstimator):
             "stopping_rule": self.configuration_["stopping_rule"],
             "kernel_stationarity": copy.deepcopy(record["kernel_stationarity"]),
             "kernel_stationarity_checked": record["kernel_stationarity"]["success"],
+            "response_bounds": copy.deepcopy(record["response_bounds"]),
         }
         self.group_kernels_ = group_kernels(self.subject_kernels_, self.responses_)
         from .inference import component_support, coverage_metadata
@@ -611,6 +626,17 @@ class MultimodalSRM(BaseEstimator):
             warnings.warn(
                 "MultimodalSRM did not converge; returning best finite restart",
                 ConvergenceWarning,
+                stacklevel=2,
+            )
+        limited = self.optimization_diagnostics_["response_bounds"]["limited_by_bounds"]
+        if self.converged_ and limited:
+            warnings.warn(
+                "MultimodalSRM converged with response parameters held at their bounds while "
+                "the objective still decreases beyond them: "
+                + ", ".join(limited)
+                + ". These values are set by the bounds, not by the data; see "
+                "optimization_diagnostics_['response_bounds']",
+                UserWarning,
                 stacklevel=2,
             )
         return self
@@ -745,8 +771,9 @@ class MultimodalSRM(BaseEstimator):
                         self.loading_penalty_scaling,
                     )
                 current = objective(z, W, kernels, blocks)
-                extrapolation = {"accepted_steps": 0, "scale": 0.0}
-                direction = free_coordinates(kernels, self.responses_)
+                extrapolation = {"accepted_steps": 0, "scale": 0.0, "displacement": 0.0}
+                coordinates_stepped = free_coordinates(kernels, self.responses_)
+                direction = dict(coordinates_stepped)
                 for key, value in coordinates_before.items():
                     direction[key] -= value
                 if self.kernel_extrapolation and any(direction.values()):
@@ -796,6 +823,11 @@ class MultimodalSRM(BaseEstimator):
                         extrapolation["accepted_steps"] += 1
                         extrapolation["scale"] += scale
                         scale *= 2
+                    # ``scale`` multiplies this iteration's response step; the
+                    # distance covered is smaller once coordinates reach bounds.
+                    extrapolation["displacement"] = coordinate_step(
+                        coordinates_stepped, free_coordinates(kernels, self.responses_)
+                    )
                 kernel_step = coordinate_step(
                     coordinates_before, free_coordinates(kernels, self.responses_)
                 )
@@ -850,6 +882,9 @@ class MultimodalSRM(BaseEstimator):
                 kernels,
                 self.responses_,
                 lambda candidate: objective(z, W, candidate, blocks_for(candidate)),
+            )
+            record["response_bounds"] = response_bound_report(
+                record["kernel_stationarity"], self.tol * max(1.0, abs(history[-1]))
             )
             candidate = (
                 record,

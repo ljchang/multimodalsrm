@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Warning and diagnostic for `MultimodalSRM` fits that stop at response bounds.**
+  A response parameter resting at a bound no longer moves, so it passes the
+  `kernel_tol` test however steeply the objective still falls outside the bound,
+  and `converged_` was true with no further signal. In 66 synthetic fits with free
+  `Gamma` responses (eight participants, 300 s, two modalities, known kernels), 63
+  reported convergence with at least one response parameter at a bound, 108
+  parameters in all, and every one had a gradient pointing out of its range. `fit`
+  now warns when a converged fit has such parameters and names them, and
+  `optimization_diagnostics_["response_bounds"]` (also in each restart's record)
+  lists every parameter at a bound with its value, bounds, gradient, and the
+  first-order decrease in the objective from extending the range by its own width;
+  a parameter is flagged when that decrease exceeds the stopping tolerance.
+  `converged_` keeps its meaning: the bounded problem did converge. Each
+  iteration's `kernel_extrapolation` record gains `displacement`, the distance
+  actually covered in coordinate units, because `scale` is a multiple of that
+  iteration's own response step (up to 4095) and says little once coordinates are
+  clipped at bounds.
+
 - **`BayesianMultimodalSRM.timing_report(uncertainty="laplace")`.** A MAP fit gave
   lags without any measure of uncertainty. The option adds model-based standard
   errors for each lag relative to the reference modality and for each pairwise lag

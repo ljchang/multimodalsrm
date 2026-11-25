@@ -7,7 +7,7 @@ R-MSRM and GP-MSRM have different inference and prediction contracts. Start with
 
 ## MultimodalSRM
 
-`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L82)
+`from multimodalsrm import MultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/estimator.py#L83)
 
 ```python
 MultimodalSRM(
@@ -123,7 +123,20 @@ objective decrement stays below `tol`; `kernel_tol=None` restores the
 objective-only rule. `kernel_extrapolation` (default True) follows each
 iteration's response step further while refitted latents and maps keep
 lowering the complete objective, which shortens that slow phase without
-changing the objective or its stationary points.
+changing the objective or its stationary points. Each iteration's record in
+`restart_diagnostics_` holds the accepted `scale`, a multiple of that
+iteration's own response step that doubles up to twelve times (at most
+4095), and the `displacement` actually covered, in coordinate units after
+clipping at bounds. A scale in the thousands means the alternating step was
+that small a fraction of the distance over which the objective kept
+falling, not that a response moved by thousands of units.
+
+A response parameter that rests at one of its bounds stops moving, so a fit
+whose free response parameters are all at bounds meets the stopping rule
+however steeply the objective still falls outside them. `converged_` is
+then true for the bounded problem only. `fit` warns when that happens and
+`optimization_diagnostics_["response_bounds"]` lists each parameter at a
+bound with its gradient and whether the objective decreases beyond it.
 
 ### MultimodalSRM.fit
 
