@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`BayesianMultimodalSRM(estimate_noise_timescales=True)`: noise autocorrelation as a fitted parameter.**
+  The GP model treats observation noise as independent between samples unless
+  `noise_timescales` supplies each modality's autocorrelation timescale, which is
+  rarely known. Ignoring it has a cost. In simulations (one factor, two
+  modalities at 1 Hz, five participants, 200 s, 30 to 40 datasets per condition)
+  with AR(1) noise of lag-one correlation 0.7, 90% Laplace intervals from the
+  white-noise model contained the true lag 82% of the time, and 63% with
+  two participants and 60 s. With autocorrelated noise in only one modality
+  (0.8) the fitted response width was biased by -0.14 and +0.12 s on a true
+  1 s and its intervals covered 60% and 77%. `estimate_noise_timescales=True`
+  adds one parameter per modality, `("noise_timescale", modality)`, with a prior
+  (`BayesianPriors(noise_timescale=...)`, by default lognormal with median twice
+  the sampling interval) and bounds from a twentieth of the sampling interval to
+  the longest run; `noise_timescales` then gives starting values. The covariance
+  is exact at irregular sample times and differentiable in the timescale. In the
+  same simulations lag coverage became 95% and 93%, the width bias fell below
+  0.01 s, results matched a model given the true timescale,
+  and on white data the estimates were unchanged with fitted autocorrelations
+  below 0.03. The search starts from the white-noise MAP, because a cold start
+  put one fit in 30 at a lag bound, so a fit takes about 2.5 times as
+  long as a white-noise fit. `noise_timescales_`, `noise_autocorrelations_` (lag-one autocorrelation
+  at the median sampling interval) and `noise_report()` give the result for
+  fitted and fixed timescales; `noise_report(uncertainty="laplace")` adds
+  standard errors, and `fit` warns when a timescale ends on a bound. Dense or
+  grouped MAP with a fixed `length_scale` and no run baselines; posterior,
+  spectral and state-space fits raise an error. The default is off, and fits
+  without the option are bit-for-bit unchanged.
+
 - **Warning and diagnostic for `MultimodalSRM` fits that stop at response bounds.**
   A response parameter resting at a bound no longer moves, so it passes the
   `kernel_tol` test however steeply the objective still falls outside the bound,

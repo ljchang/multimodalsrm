@@ -8,7 +8,6 @@ boundaries from accidentally fitting a different target.
 
 import copy
 from collections.abc import Mapping
-from dataclasses import asdict
 from types import SimpleNamespace
 
 import numpy as np
@@ -18,6 +17,7 @@ from sklearn.utils.validation import check_is_fitted
 from ..data import normalize_data
 from . import _archive
 from .observation_adapter import BayesianObservationAdapter
+from .priors import record as prior_record
 from .problem import BayesianProblem
 from .response_scope import (
     quadrature_state,
@@ -244,7 +244,7 @@ def rebuild_target(state):
     specification = state["specification"]
     if (
         not _archive.same(specification, ref["specification"])
-        or not _archive.same(specification["priors"], asdict(state["priors"]))
+        or not _archive.same(specification["priors"], prior_record(state["priors"]))
         or specification["linear_algebra"] != state["linear_algebra"]
     ):
         raise ValueError("posterior update specification differs from reference")

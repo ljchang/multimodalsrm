@@ -1,6 +1,7 @@
 """Proper scalar priors in physical units, shared by MAP and sampling."""
 
-from dataclasses import dataclass, field, replace
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass, field, replace
 
 import numpy as np
 from scipy.stats import truncnorm
@@ -112,12 +113,22 @@ class BayesianPriors:
     ``noise`` is a prior on variance, not on standard deviation or log variance.
     Loading and offset scales are illustrative defaults; applications should
     set all scales from their measurement units and prior predictive checks.
+
+    ``noise_timescale`` is used only with ``estimate_noise_timescales=True``:
+    a prior in seconds on each modality's residual autocorrelation timescale,
+    either one ``Prior`` for every modality or a modality-to-``Prior`` mapping.
+    ``None``, or a modality left out of the mapping, gives a lognormal prior
+    whose median is twice that modality's median sampling interval, with a log
+    standard deviation of 1.25. Every prior is truncated to lie between a
+    twentieth of the sampling interval, below which the noise is white, and
+    the longest run, above which it is an offset.
     """
 
     noise: Prior
     loading_sd: float = 1.0
     offset_sd: float = 1.0
     filters: dict = field(default_factory=dict)
+    noise_timescale: Prior | dict | None = None
 
     def __post_init__(self):
         if not isinstance(self.noise, Prior) or self.noise.lower < 0:
@@ -133,6 +144,28 @@ class BayesianPriors:
         ):
             raise ValueError("filter priors must be Prior objects")
         object.__setattr__(self, "filters", copied)
+        timescale = self.noise_timescale
+        if isinstance(timescale, Mapping):
+            timescale = dict(timescale)
+            object.__setattr__(self, "noise_timescale", timescale)
+        supplied = (
+            list(timescale.values())
+            if isinstance(timescale, dict)
+            else ([] if timescale is None else [timescale])
+        )
+        if any(not isinstance(p, Prior) or p.upper <= 0 for p in supplied):
+            raise ValueError(
+                "noise_timescale prior must be a Prior on positive seconds, "
+                "or map modalities to such priors"
+            )
+
+
+def record(priors):
+    """``asdict`` without an unset noise-timescale prior, as before it existed."""
+    described = asdict(priors)
+    if described["noise_timescale"] is None:
+        del described["noise_timescale"]
+    return described
 
 
 def lag_priors(responses, *, sd=1.0):

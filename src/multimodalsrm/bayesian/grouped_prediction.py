@@ -64,11 +64,11 @@ def project(problem, draws, run, times, *, keys, include_noise, directions=None)
         from .temporal_noise import design_product, operands
 
         K, w, residual, variance, _ = operands(problem, x, run)
-        noise_system = problem.noise_systems[run]
+        noise_system = problem.noise_system(run, x)
         alpha = noise_system.precision(
             residual - design_product(K @ q, w, indices, count), variance
         )
-        return common, (K, w, variance, alpha)
+        return common, (K, w, variance, alpha, x)
 
     @jax.jit
     def temporal(x, query):
@@ -86,15 +86,10 @@ def project(problem, draws, run, times, *, keys, include_noise, directions=None)
         if correlated:
             from .temporal_noise import design_product, design_transpose
 
-            K, w, variance, alpha = private
-            noise_system = problem.noise_systems[run]
+            K, w, variance, alpha, x = private
+            noise_system = problem.noise_system(run, x)
             observed_cross = cross[:, indices] * (loading @ w.T)
-            safe = np.where(noise_system.lengths > 0, noise_system.lengths, 1.0)
-            observed_cross += (
-                jnp.exp(-jnp.abs(query[:, None] - system.times) / safe)
-                * ((output_keys[:, None] == noise_system.keys) & (noise_system.lengths > 0))
-                * variance
-            )
+            observed_cross += noise_system.cross(query, output_keys, variance)
             rhs = observed_cross.T
             first = noise_system.precision(rhs, variance)
             score = design_transpose(first, w, indices, count)

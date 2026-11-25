@@ -29,6 +29,9 @@ class BayesianProblem:
 
     # Historical pickled fixed-GP problems did not carry this optional field.
     length_scale_prior = None
+    # Nor these: their noise timescales, if any, were fixed.
+    estimate_noise_timescales = False
+    noise_sampling = {}
 
     def __init__(
         self,
@@ -46,6 +49,7 @@ class BayesianProblem:
         state_space_gaussian="auto",
         conventions_from=None,
         length_scale_prior=None,
+        estimate_noise_timescales=False,
     ):
         from .spectral import validate_config
 
@@ -68,16 +72,24 @@ class BayesianProblem:
             linear_algebra=linear_algebra,
             response_quadrature_order=response_quadrature_order,
             run_baseline_sd=run_baseline_sd,
-            noise_timescales=noise_timescales,
+            noise_timescales=noise_timescales or estimate_noise_timescales,
             responses=adapter.responses_,
         )
         self.length_scale_prior = length_scale_prior
         self.responses = adapter.responses_
         from .temporal_noise import validate as validate_noise
+        from .temporal_noise import validate_estimation
 
         self.noise_timescales = validate_noise(noise_timescales, self.responses)
         if self.noise_timescales and (linear_algebra == "spectral" or run_baseline_sd):
             raise ValueError("noise_timescales supports dense/grouped without run baselines")
+        self.estimate_noise_timescales = validate_estimation(estimate_noise_timescales)
+        if self.estimate_noise_timescales and (
+            linear_algebra not in ("dense", "grouped") or run_baseline_sd
+        ):
+            raise ValueError(
+                "estimate_noise_timescales supports dense/grouped without run baselines"
+            )
         from .baselines import validate
 
         self.run_baseline_sd = validate(run_baseline_sd, self.responses)
@@ -206,6 +218,23 @@ class BayesianProblem:
                 )
         if length_scale_prior is not None:
             add(LENGTH_SCALE, length_scale_prior)
+        self.noise_sampling = {}
+        if self.estimate_noise_timescales:
+            from .temporal_noise import NOISE_TIMESCALE, sampling, starting_values, timescale_priors
+
+            # Priors and bounds follow the training clocks, so conditioning on
+            # other runs or participants cannot move them.
+            self.noise_sampling = (
+                sampling(training_systems, list(self.responses))
+                if conventions_from is None
+                else dict(conventions_from.noise_sampling)
+            )
+            timescale = timescale_priors(priors.noise_timescale, self.noise_sampling)
+            # Supplied values are where the search starts; the rest start at
+            # their prior median. Every modality is OU from here on.
+            self.noise_timescales = starting_values(self.noise_timescales, timescale)
+            for m in self.responses:
+                add((NOISE_TIMESCALE, m), timescale[m])
         self.indices = {name: i for i, name in enumerate(self.names)}
         self.response_quadrature = None
         if response_quadrature_order is not None:
@@ -221,6 +250,11 @@ class BayesianProblem:
                 ),
             )
         self._prepare_parameter_priors()
+        self._noise_timescale_indices = np.array(
+            [i for i, name in enumerate(self.names) if name[0] == "noise_timescale"], dtype=int
+        )
+        for i in self._noise_timescale_indices:
+            self.initial[i] = self.noise_timescales[self.names[i][1]]
         jax, _, _, _ = runtime()
         self._packed = {}
         self.grouped_systems = {}
@@ -267,7 +301,13 @@ class BayesianProblem:
                         self.response_state_space,
                         self.features,
                     )
-            if self.noise_timescales:
+            if self.estimate_noise_timescales:
+                from .temporal_noise import EstimatedNoiseSystem
+
+                self.noise_systems[run] = EstimatedNoiseSystem.prepare(
+                    system.times, system.keys, self.keys, self.modalities
+                )
+            elif self.noise_timescales:
                 from .temporal_noise import NoiseSystem
 
                 self.noise_systems[run] = NoiseSystem.prepare(
@@ -324,6 +364,14 @@ class BayesianProblem:
         index = self.indices.get(LENGTH_SCALE)
         return self.length_scale if index is None else x[index]
 
+    def noise_system(self, run, x):
+        """This run's OU precision: prepared if fixed, evaluated at ``x`` if estimated."""
+        system = self.noise_systems[run]
+        if not self.estimate_noise_timescales:
+            return system
+        _, jnp, _, _ = runtime()
+        return system.at(jnp.asarray(x)[self._noise_timescale_indices])
+
     def arrays(self, x):
         _, jnp, _, _ = runtime()
         x = jnp.asarray(x)
@@ -362,7 +410,7 @@ class BayesianProblem:
             C = C + U @ U.T
         if include_noise:
             C = C + (
-                noise[gi, None] * self.noise_systems[run].correlation()
+                noise[gi, None] * self.noise_system(run, x).correlation()
                 if self.noise_timescales
                 else jnp.diag(noise[gi])
             )

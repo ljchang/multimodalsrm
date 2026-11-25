@@ -162,7 +162,7 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 
 | Arguments (defaults) | Choice and interpretation |
 | --- | --- |
-| `priors` required | `BayesianPriors(noise=..., loading_sd=..., offset_sd=..., filters=...)`. Noise is **variance**. Filter priors map modality names to free parameter names. |
+| `priors` required | `BayesianPriors(noise=..., loading_sd=..., offset_sd=..., filters=..., noise_timescale=None)`. Noise is **variance**. Filter priors map modality names to free parameter names. `noise_timescale` is a `Prior` in seconds, or a modality-to-`Prior` mapping, used only with `estimate_noise_timescales=True`. |
 | `features=1` | Number of factors; multifactor posterior fits require explicit training `factor_anchors`. |
 | `responses=None` | Fixed Identity by default. Explicit responses must use `pooling="shared"`; GP priors go in `BayesianPriors`, not `Response.prior` or `lag_prior`. |
 | `length_scale=3.0` | Positive fixed Matérn-3/2 timescale, or a `Prior` with finite positive bounds to learn one common timescale in supported dense/grouped workflows. GP variance stays one. No alternative latent covariance family selector exists. |
@@ -181,8 +181,56 @@ Import `BayesianMultimodalSRM`, `BayesianPriors`, and `Prior` from `multimodalsr
 | `spectral=None` | `SpectralConfig(rank=..., padding=...)` is required only for `linear_algebra="spectral"`. Padding is per side in timestamp units; rank/padding need joint accuracy checks. |
 | `run_baseline_sd=None` | Optional fixed per-modality Gaussian run-offset prior SDs. These are marginalized observation offsets, not private latent trajectories. Outside the full posterior workflow. |
 | `noise_timescales=None` | Optional fixed per-modality OU residual timescales for dense/grouped MAP, without run baselines. Distinct from the shared latent timescale and response width. |
+| `estimate_noise_timescales=False` | `True` fits one OU residual timescale per modality as a parameter, for every modality; `noise_timescales` then gives starting values. Dense/grouped MAP with a fixed `length_scale` and no run baselines. Results are in `noise_timescales_`, `noise_autocorrelations_` and `noise_report()`. See [autocorrelated observation noise](#autocorrelated-observation-noise). |
 
 Fixed- and learned-response state-space filtering and smoothing automatically group exactly matching modality/time observations when noise support is strictly positive. This is separate from selecting `linear_algebra="grouped"`; no new switch is needed. See [grouped state-space computation](grouped-state-space.md).
+
+### Autocorrelated observation noise
+
+By default each observation's noise is independent of the next one. Residuals of real recordings are usually not: after the shared signal is removed, consecutive samples of one feature stay correlated. A model that treats them as independent counts more information than the data hold, so model-based standard errors come out too small, and a learned response width can be pulled toward whatever smoothness the unmodelled noise has.
+
+`noise_timescales={modality: seconds}` gives the listed modalities Ornstein-Uhlenbeck (OU) noise instead: each feature of each participant and run has its own noise process whose correlation between two samples `d` seconds apart is `exp(-d / timescale)`, evaluated at the actual sample times. The noise variance is still fitted per participant and modality. `estimate_noise_timescales=True` fits the timescales instead of fixing them, one per modality, for every modality:
+
+```python
+model = BayesianMultimodalSRM(
+    priors=priors,
+    responses=responses,
+    linear_algebra="grouped",
+    estimate_noise_timescales=True,
+).fit(data)
+
+model.noise_timescales_  # {"brain": 2.6, "rating": 0.16}  seconds
+model.noise_autocorrelations_  # {"brain": 0.68, "rating": 0.002}
+report = model.noise_report(uncertainty="laplace")
+report["standard_error"]["modalities"]["brain"]  # timescale, standard_error, ...
+```
+
+Each timescale is a parameter named `("noise_timescale", modality)` with its own prior and bounds, so the search, the gradient check and the Laplace Hessian all include it. With estimation on, `noise_timescales` only gives starting values; a modality cannot be held fixed or white while others are estimated.
+
+**Reading the result.** `noise_autocorrelations_` is the correlation between consecutive samples that the timescale implies, `exp(-interval / timescale)` at the modality's median training sampling interval. Below about 0.05 the noise of that modality is white at its sampling rate and the fit is the white-noise fit. A timescale of a few sampling intervals (autocorrelation 0.5 to 0.9) is ordinary coloured noise. A timescale approaching the run length is drift that the model cannot separate from an offset. `noise_report()` returns the timescales, autocorrelations, sampling intervals, bounds and `timescales_at_bounds`; `fit` warns when a timescale ends on a bound, and `configuration_["temporal_noise"]` records the same values.
+
+**Prior and bounds.** `BayesianPriors(noise_timescale=...)` takes a `Prior` in seconds for every modality or a modality-to-`Prior` mapping. The default is lognormal with median twice the modality's median sampling interval and log standard deviation 1.25, which spans autocorrelations from about 0.003 to 0.96. Every prior is truncated to lie between a twentieth of the sampling interval, where the autocorrelation is below 3e-9, and the longest run. With white data the default leaves the timescale near 0.16 sampling intervals, inside the bounds.
+
+**Search.** The fit first finds the white-noise MAP and starts the full search from it, with the timescales at their starting values; the remaining restarts are the usual prior-quantile starts. Without this, a cold start could settle in an optimum where slow noise stands in for the shared signal. A fit therefore costs about one white-noise fit more than a fit with fixed timescales. `restart_diagnostics_[0]["initialization"]` and `phase_seconds_["white_noise_map"]` record that stage.
+
+**What it does and does not model.** The OU term is private to one feature of one participant. It does not model a signal that a participant's features share with each other but not with other participants; such a signal still raises the estimated timescale, because part of it is slow private variance. The timescale describes the residual of this model, not a property of the instrument.
+
+**Evidence, from one simulation design.** One factor, two modalities at 1 Hz with six features each, 200 s, five participants unless noted, 30 to 40 datasets per condition, 90% Laplace intervals for the learned lag and width of the second modality:
+
+| Data | Model | Lag coverage | Lag error sd | Width bias | Width coverage |
+| --- | --- | --- | --- | --- | --- |
+| AR(1) noise 0.7 in both modalities | white | 0.82 | 0.088 | +0.003 | 0.93 |
+| | estimated | 0.95 | 0.073 | +0.000 | 0.97 |
+| AR(1) noise 0.8 in the reference modality only | white | 0.90 | 0.072 | -0.143 | 0.60 |
+| | estimated | 0.93 | 0.070 | -0.002 | 0.90 |
+| AR(1) noise 0.8 in the learned-response modality only | white | 0.90 | 0.091 | +0.119 | 0.77 |
+| | estimated | 0.93 | 0.072 | -0.000 | 0.93 |
+| White noise | white | 0.95 | 0.060 | -0.013 | 0.93 |
+| | estimated | 0.95 | 0.060 | -0.013 | 0.93 |
+
+With equal noise in both modalities the white model's lag intervals were too narrow. With unequal noise it also misjudged the response width, true value 1 s: too narrow by 0.14 s when the reference modality's noise was slow and too wide by 0.12 s when the learned-response modality's was. Estimating the timescales removed both, matched a model given the true timescale where that was run, and changed nothing on white data, where fitted autocorrelations stayed below 0.03. A fit took about 2.5 times as long as a white-noise fit (2.1 to 2.7 across conditions) and about twice as long as one with fixed timescales. These are results for this design, not guarantees for other data.
+
+Fixed and estimated timescales need `inference="map"`, dense or grouped algebra, a fixed `length_scale` and no run baselines; other combinations raise an error. `transform(readout="instantaneous")` is unavailable for modalities with OU noise.
 
 ### Search and sampling
 

@@ -410,7 +410,7 @@ def _refine(problem, record, config, evaluate, *, progress=None):
     record["elapsed_seconds"] += refinement["elapsed_seconds"]
 
 
-def search(problem, config, seed, *, progress=None):
+def search(problem, config, seed, *, progress=None, first_start=None):
     """Optimize physical posterior density in unconstrained coordinates.
 
     No transform Jacobian enters MAP. Physical projected gradients are checked
@@ -421,6 +421,8 @@ def search(problem, config, seed, *, progress=None):
     successfully retained evidence. Parallel restarts share immutable prepared
     observations and compiled functions. Progress always runs on the caller's
     thread; returned records retain start order, regardless of completion order.
+    ``first_start=(point, record)`` replaces the first start and its recorded
+    initialization; a ``None`` point keeps the usual first start.
     """
     if config.conditioning == "diagonal":
         from .map_conditioning import validate
@@ -497,7 +499,11 @@ def search(problem, config, seed, *, progress=None):
 
     points = initial_points(problem, config.starts, seed)
     initialization = None
-    if config.r_init:
+    if first_start is not None:
+        point, initialization = first_start
+        if point is not None:
+            points[0] = point
+    elif config.r_init:
         from .r_initialization import r_initial_point
 
         point, initialization = r_initial_point(problem, seed)

@@ -129,6 +129,7 @@ def independent_transform(model, data, *, times, modalities, data_layout, readou
                 if m in model.adapter_.responses_
             )
             or chosen & set(model.noise_timescales or {})
+            or model.estimate_noise_timescales
             or chosen & set(model.run_baseline_sd or {})
         ):
             raise ValueError(
@@ -178,6 +179,7 @@ def independent_transform(model, data, *, times, modalities, data_layout, readou
                 state_space_gaussian=model.state_space_gaussian,
                 conventions_from=model.problem_,
                 length_scale_prior=model.problem_.length_scale_prior,
+                estimate_noise_timescales=model.estimate_noise_timescales,
             )
             current._condition_frozen()
             current.configuration_["conditioning_mode"] = "independent"

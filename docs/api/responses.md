@@ -266,7 +266,7 @@ KernelPrior(reference, strength)
 
 ## Prior
 
-`from multimodalsrm.bayesian import Prior` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L10)
+`from multimodalsrm.bayesian import Prior` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L11)
 
 ```python
 Prior(family, loc=0.0, scale=1.0, lower=-np.inf, upper=np.inf)
@@ -329,10 +329,16 @@ NumPyro distribution; also defines the MAP log density.
 
 ## BayesianPriors
 
-`from multimodalsrm.bayesian import BayesianPriors` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L109)
+`from multimodalsrm.bayesian import BayesianPriors` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L110)
 
 ```python
-BayesianPriors(noise, loading_sd=1.0, offset_sd=1.0, filters=dict())
+BayesianPriors(
+    noise,
+    loading_sd=1.0,
+    offset_sd=1.0,
+    filters=dict(),
+    noise_timescale=None,
+)
 ```
 
 
@@ -342,12 +348,22 @@ BayesianPriors(noise, loading_sd=1.0, offset_sd=1.0, filters=dict())
 | `loading_sd` | `float` | `1.0` |
 | `offset_sd` | `float` | `1.0` |
 | `filters` | `dict` | `dict() (new per instance)` |
+| `noise_timescale` | `Prior &#124; dict &#124; None` | `None` |
 
 Priors in supplied data units; filter priors map modality then parameter.
 
 `noise` is a prior on variance, not on standard deviation or log variance.
 Loading and offset scales are illustrative defaults; applications should
 set all scales from their measurement units and prior predictive checks.
+
+`noise_timescale` is used only with `estimate_noise_timescales=True`:
+a prior in seconds on each modality's residual autocorrelation timescale,
+either one `Prior` for every modality or a modality-to-`Prior` mapping.
+`None`, or a modality left out of the mapping, gives a lognormal prior
+whose median is twice that modality's median sampling interval, with a log
+standard deviation of 1.25. Every prior is truncated to lie between a
+twentieth of the sampling interval, below which the noise is white, and
+the longest run, above which it is an offset.
 
 ## scan_lags
 
@@ -448,7 +464,7 @@ against the shape parameters; the peak is far better determined.
 Identity is an impulse at zero.
 ## lag_priors
 
-`from multimodalsrm.bayesian import lag_priors` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L138)
+`from multimodalsrm.bayesian import lag_priors` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/priors.py#L171)
 
 ```python
 lag_priors(responses, *, sd=1.0)

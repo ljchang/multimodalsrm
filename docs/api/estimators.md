@@ -192,7 +192,7 @@ MultimodalSRM.plot_kernels(modality, show_subjects=True, ax=None)
 
 ## BayesianMultimodalSRM
 
-`from multimodalsrm.bayesian import BayesianMultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/model.py#L34)
+`from multimodalsrm.bayesian import BayesianMultimodalSRM` · [Source](https://github.com/ljchang/multimodalsrm/blob/main/src/multimodalsrm/bayesian/model.py#L36)
 
 ```python
 BayesianMultimodalSRM(
@@ -218,6 +218,7 @@ BayesianMultimodalSRM(
     response_quadrature_order=None,
     state_space_gaussian="auto",
     edge_observations="auto",
+    estimate_noise_timescales=ESTIMATE_BY_DEFAULT,
 )
 ```
 
@@ -321,6 +322,20 @@ Dense/grouped calculations support them; spectral does not yet. Prediction
 includes baseline uncertainty even with `include_noise=False`; the shared
 latent excludes these offsets. None/zero preserves the original model.
 
+`noise_timescales={modality: seconds}` gives the listed modalities
+Ornstein-Uhlenbeck observation noise with that fixed autocorrelation
+timescale; the others stay white. `estimate_noise_timescales=True`
+instead fits one timescale per modality, for every modality, as a
+parameter named `("noise_timescale", modality)`; `noise_timescales`
+then only supplies starting values. Its prior is
+`priors.noise_timescale`, by default lognormal with median twice the
+modality's median sampling interval and bounded between a twentieth of
+that interval and the longest run. The search first fits the white-noise
+model and starts from its MAP, so a fit costs about one white-noise fit
+more. Both options need dense or grouped MAP without run baselines and a
+fixed `length_scale`. `noise_timescales_`,
+`noise_autocorrelations_` and `noise_report()` give the result.
+
 ### BayesianMultimodalSRM.fit
 
 ```python
@@ -365,6 +380,57 @@ Frozen mode requires a MAP fit; uncertainty excludes parameter
 uncertainty. Returns an independent estimator. Chained calls retain
 the training/calibration reference and replace the current donor batch.
 Target payloads are removed before validation and support selection.
+
+### BayesianMultimodalSRM.noise_timescales_
+
+`BayesianMultimodalSRM.noise_timescales_` (property)
+
+Residual autocorrelation timescale per modality, in seconds.
+
+The MAP estimates with `estimate_noise_timescales=True`, otherwise
+the fixed `noise_timescales`. A modality with white noise is absent.
+
+### BayesianMultimodalSRM.noise_autocorrelations_
+
+`BayesianMultimodalSRM.noise_autocorrelations_` (property)
+
+Lag-one residual autocorrelation at each modality's median sampling interval.
+
+`exp(-interval / timescale)`, with the interval taken from the
+training observations. A modality with white noise is absent.
+
+### BayesianMultimodalSRM.noise_report
+
+```python
+BayesianMultimodalSRM.noise_report(*, uncertainty=None)
+```
+
+Residual autocorrelation of each modality's observation noise.
+
+The noise of a modality listed here is an Ornstein-Uhlenbeck process,
+independent across participants, runs and features, with one
+`timescale` in seconds per modality. `lag_one_autocorrelation` is
+the correlation it implies between consecutive samples,
+`exp(-sampling_interval / timescale)`, at the modality's median
+training sampling interval: near zero the noise is white at that
+sampling rate, and a timescale of several intervals means consecutive
+residuals are far from independent. `estimated` says whether the
+timescales were fitted (`estimate_noise_timescales=True`) or fixed;
+modalities with white noise are absent, and a white-noise model gives
+empty mappings and `family="white"`.
+
+For fitted timescales `bounds` gives each one's allowed range and
+`timescales_at_bounds` lists those the fit left on a bound: the
+lower bound, a twentieth of the sampling interval, means the noise is
+white at this sampling rate; the upper bound, the longest run, means a
+drift the model cannot tell from an offset.
+
+`uncertainty="laplace"` adds `standard_error` for fitted
+timescales, from the inverse Hessian of the negative log posterior at
+the MAP, as `timing_report` does for lags, with the matching
+delta-method error of the autocorrelation. They assume the model is
+correct. A timescale on a bound gives NaN, and
+`positive_definite=False` means the errors should not be used.
 
 ### BayesianMultimodalSRM.relative_lag_draws
 

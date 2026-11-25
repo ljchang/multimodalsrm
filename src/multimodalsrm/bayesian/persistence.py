@@ -145,7 +145,7 @@ def _prepare(model, training, *, conventions_from=None):
         model.linear_algebra,
         noise_prior=model.priors.noise,
         run_baseline_sd=model.run_baseline_sd,
-        noise_timescales=model.noise_timescales,
+        noise_timescales=model.noise_timescales or model.estimate_noise_timescales,
     )
     adapter._prepare(training)
     problem = BayesianProblem(
@@ -161,6 +161,7 @@ def _prepare(model, training, *, conventions_from=None):
         state_space_gaussian=model.state_space_gaussian,
         conventions_from=conventions_from,
         length_scale_prior=length_scale_prior,
+        estimate_noise_timescales=model.estimate_noise_timescales,
     )
     return adapter, problem
 
@@ -186,6 +187,8 @@ def _training_problem(model):
         "reference_convention",
         "run_baseline_sd",
         "noise_timescales",
+        "estimate_noise_timescales",
+        "noise_sampling",
         "noise_systems",
         "length_scale",
         "length_scale_prior",
@@ -236,7 +239,7 @@ def _parameters(model, names, point, fit):
     ):
         raise ValueError("invalid MAP shape, values or parameter support")
     for name, x in zip(names, point):
-        if name[0] == "noise" and x <= 0:
+        if name[0] in ("noise", "noise_timescale") and x <= 0:
             raise ValueError("MAP noise variance must be positive")
     if (
         not np.isfinite(fit["objective"])

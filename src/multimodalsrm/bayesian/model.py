@@ -20,7 +20,9 @@ from .gp_hyperparameters import (
     length_scale_settings,
     validate_length_scale_scope,
 )
+from .priors import record as prior_record
 from .problem import BayesianProblem
+from .temporal_noise import ESTIMATE_BY_DEFAULT
 
 
 class MAPFitError(RuntimeError):
@@ -131,6 +133,20 @@ class BayesianMultimodalSRM(BaseEstimator):
     Dense/grouped calculations support them; spectral does not yet. Prediction
     includes baseline uncertainty even with ``include_noise=False``; the shared
     latent excludes these offsets. None/zero preserves the original model.
+
+    ``noise_timescales={modality: seconds}`` gives the listed modalities
+    Ornstein-Uhlenbeck observation noise with that fixed autocorrelation
+    timescale; the others stay white. ``estimate_noise_timescales=True``
+    instead fits one timescale per modality, for every modality, as a
+    parameter named ``("noise_timescale", modality)``; ``noise_timescales``
+    then only supplies starting values. Its prior is
+    ``priors.noise_timescale``, by default lognormal with median twice the
+    modality's median sampling interval and bounded between a twentieth of
+    that interval and the longest run. The search first fits the white-noise
+    model and starts from its MAP, so a fit costs about one white-noise fit
+    more. Both options need dense or grouped MAP without run baselines and a
+    fixed ``length_scale``. ``noise_timescales_``,
+    ``noise_autocorrelations_`` and ``noise_report()`` give the result.
     """
 
     def __init__(
@@ -157,6 +173,7 @@ class BayesianMultimodalSRM(BaseEstimator):
         response_quadrature_order=None,
         state_space_gaussian="auto",
         edge_observations="auto",
+        estimate_noise_timescales=ESTIMATE_BY_DEFAULT,
     ):
         self.priors = priors
         self.anchor = anchor
@@ -179,6 +196,7 @@ class BayesianMultimodalSRM(BaseEstimator):
         self.response_quadrature_order = response_quadrature_order
         self.state_space_gaussian = state_space_gaussian
         self.edge_observations = edge_observations
+        self.estimate_noise_timescales = estimate_noise_timescales
 
     def _config(self):
         from .spectral import validate_config
@@ -189,7 +207,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             linear_algebra=self.linear_algebra,
             response_quadrature_order=self.response_quadrature_order,
             run_baseline_sd=self.run_baseline_sd,
-            noise_timescales=self.noise_timescales,
+            noise_timescales=self.noise_timescales or self.estimate_noise_timescales,
             responses=self.responses,
         )
         if self.state_space_gaussian not in ("auto", "laguerre", "rational"):
@@ -241,6 +259,16 @@ class BayesianMultimodalSRM(BaseEstimator):
             self.inference != "map" or self.linear_algebra == "spectral" or self.run_baseline_sd
         ):
             raise ValueError("noise_timescales requires dense/grouped MAP without run baselines")
+        from .temporal_noise import validate_estimation
+
+        if validate_estimation(self.estimate_noise_timescales) and (
+            self.inference != "map"
+            or self.linear_algebra not in ("dense", "grouped")
+            or self.run_baseline_sd
+        ):
+            raise ValueError(
+                "estimate_noise_timescales requires dense/grouped MAP without run baselines"
+            )
         validate_blocks(self.sample_blocks)
         if self.sample_blocks is not None and self.inference != "posterior":
             raise ValueError("sample_blocks requires posterior inference")
@@ -281,7 +309,7 @@ class BayesianMultimodalSRM(BaseEstimator):
     def _specification(self):
         return copy.deepcopy(
             dict(
-                priors=asdict(self.priors),
+                priors=prior_record(self.priors),
                 anchor=self.anchor,
                 **(
                     {"features": self.features, "factor_anchors": self.factor_anchors}
@@ -311,6 +339,7 @@ class BayesianMultimodalSRM(BaseEstimator):
                     else {}
                 ),
                 **({"noise_timescales": self.noise_timescales} if self.noise_timescales else {}),
+                **({"estimate_noise_timescales": True} if self.estimate_noise_timescales else {}),
                 **(
                     {"run_baseline_sd": self.run_baseline_sd}
                     if self.run_baseline_sd is not None
@@ -350,6 +379,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             or self.linear_algebra not in ("dense", "grouped")
             or self.run_baseline_sd
             or self.noise_timescales
+            or self.estimate_noise_timescales
             or self.sample_blocks is not None
             or type(self) is not BayesianMultimodalSRM
         ):
@@ -375,7 +405,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             self.linear_algebra,
             noise_prior=self.priors.noise,
             run_baseline_sd=self.run_baseline_sd,
-            noise_timescales=self.noise_timescales,
+            noise_timescales=self.noise_timescales or self.estimate_noise_timescales,
         )
         adapter._prepare(data)
         self.adapter_ = adapter
@@ -391,6 +421,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             response_quadrature_order=self.response_quadrature_order,
             state_space_gaussian=self.state_space_gaussian,
             length_scale_prior=length_scale_prior,
+            estimate_noise_timescales=self.estimate_noise_timescales,
         )
         if self.features > 1:
             from .multifactor import validate_anchors
@@ -454,8 +485,15 @@ class BayesianMultimodalSRM(BaseEstimator):
                 raise ValueError("posterior update model differs from its target contract")
         timing = PhaseTimings(progress)
         self.phase_seconds_ = timing.seconds
+        checkpoints = {} if search_progress is None else {"progress": search_progress}
+        if self.problem_.estimate_noise_timescales:
+            from .temporal_noise import white_start
+
+            with timing.phase("white_noise_map"):
+                checkpoints["first_start"] = white_start(
+                    self.problem_, self.search_config_, self.seed_
+                )
         with timing.phase("map"):
-            checkpoints = {} if search_progress is None else {"progress": search_progress}
             best, self.restart_diagnostics_ = search(
                 self.problem_, self.search_config_, self.seed_, **checkpoints
             )
@@ -518,6 +556,15 @@ class BayesianMultimodalSRM(BaseEstimator):
                 stacklevel=2,
             )
         self._set_configuration()
+        if self.problem_.estimate_noise_timescales and self._noise_timescales_at_bounds():
+            warnings.warn(
+                "Bayesian SRM noise timescales ended on a bound for modalities "
+                f"{self._noise_timescales_at_bounds()}: at the lower bound the noise is white "
+                "at this sampling rate, at the upper bound it is a drift the model cannot "
+                "tell from an offset; inspect noise_report()",
+                UserWarning,
+                stacklevel=2,
+            )
         return self
 
     def _set_configuration(self):
@@ -531,7 +578,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             parameter_density="physical",
             inference=self.inference,
             data_units="supplied_without_standardization",
-            priors=asdict(self.priors),
+            priors=prior_record(self.priors),
             anchor=self.anchor,
             reference_convention=copy.deepcopy(self.problem_.reference_convention),
             seed=self.seed_,
@@ -605,12 +652,30 @@ class BayesianMultimodalSRM(BaseEstimator):
         if self.problem_.noise_timescales:
             self.configuration_["temporal_noise"] = dict(
                 family="OU",
-                timescales=dict(self.problem_.noise_timescales),
+                timescales=self.noise_timescales_,
                 timescale_units="seconds",
                 unspecified_modalities="white",
                 variance="fitted_per_participant_modality_marginal_variance",
                 independence="participant_run_modality_feature",
                 include_noise="same_residual_process_at_query_times",
+            )
+        if self.problem_.estimate_noise_timescales:
+            # Recorded only when estimated, so fixed-timescale archives still validate.
+            problem = self.problem_
+            self.configuration_["temporal_noise"].update(
+                timescales_estimated=True,
+                timescale_configuration_value="MAP_summary",
+                timescale_parameters=[
+                    list(problem.names[i]) for i in problem._noise_timescale_indices
+                ],
+                timescale_priors={
+                    problem.names[i][1]: asdict(problem.parameter_priors[i])
+                    for i in problem._noise_timescale_indices
+                },
+                starting_timescales=dict(problem.noise_timescales),
+                sampling_intervals={m: dt for m, (dt, _) in problem.noise_sampling.items()},
+                lag_one_autocorrelations=self.noise_autocorrelations_,
+                timescales_at_bounds=self._noise_timescales_at_bounds(),
             )
         if self.problem_.run_baseline_sd:
             self.configuration_["run_baseline"] = dict(
@@ -652,6 +717,7 @@ class BayesianMultimodalSRM(BaseEstimator):
                     and self.sample_blocks is None
                     and not self.run_baseline_sd
                     and not self.noise_timescales
+                    and not self.estimate_noise_timescales
                 )
             )
         ):
@@ -720,6 +786,7 @@ class BayesianMultimodalSRM(BaseEstimator):
             state_space_gaussian=self.state_space_gaussian,
             conventions_from=self.problem_,
             length_scale_prior=self.problem_.length_scale_prior,
+            estimate_noise_timescales=self.estimate_noise_timescales,
         )
         result.specification_ = result._specification()
         if mode == "joint":
@@ -769,6 +836,113 @@ class BayesianMultimodalSRM(BaseEstimator):
         # These describe saved training diagnostics, not an executed refit.
         self.configuration_["search"] = copy.deepcopy(training["configuration"]["search"])
         self.configuration_["seed"] = training["configuration"]["seed"]
+
+    @property
+    def noise_timescales_(self):
+        """Residual autocorrelation timescale per modality, in seconds.
+
+        The MAP estimates with ``estimate_noise_timescales=True``, otherwise
+        the fixed ``noise_timescales``. A modality with white noise is absent.
+        """
+        check_is_fitted(self, "map_parameters_")
+        problem = self.problem_
+        if not problem.estimate_noise_timescales:
+            return dict(problem.noise_timescales)
+        return {
+            problem.names[i][1]: float(self.map_parameters_[i])
+            for i in problem._noise_timescale_indices
+        }
+
+    def _noise_sampling(self):
+        """Median training sampling interval and longest run per OU modality."""
+        from .temporal_noise import sampling
+
+        problem = self.problem_
+        if problem.noise_sampling or not problem.noise_timescales:
+            return problem.noise_sampling
+        adapter = problem.adapter
+        return sampling(
+            adapter._systems(adapter._training_data, adapter.domains_)[0],
+            list(problem.noise_timescales),
+        )
+
+    @property
+    def noise_autocorrelations_(self):
+        """Lag-one residual autocorrelation at each modality's median sampling interval.
+
+        ``exp(-interval / timescale)``, with the interval taken from the
+        training observations. A modality with white noise is absent.
+        """
+        from .temporal_noise import autocorrelation
+
+        sampled = self._noise_sampling()
+        return {m: autocorrelation(tau, sampled[m][0]) for m, tau in self.noise_timescales_.items()}
+
+    def _noise_timescales_at_bounds(self):
+        return [
+            tuple(name)[1]
+            for name in self.map_diagnostics_.get("boundary_parameters", [])
+            if tuple(name)[0] == "noise_timescale"
+        ]
+
+    def noise_report(self, *, uncertainty=None):
+        """Residual autocorrelation of each modality's observation noise.
+
+        The noise of a modality listed here is an Ornstein-Uhlenbeck process,
+        independent across participants, runs and features, with one
+        ``timescale`` in seconds per modality. ``lag_one_autocorrelation`` is
+        the correlation it implies between consecutive samples,
+        ``exp(-sampling_interval / timescale)``, at the modality's median
+        training sampling interval: near zero the noise is white at that
+        sampling rate, and a timescale of several intervals means consecutive
+        residuals are far from independent. ``estimated`` says whether the
+        timescales were fitted (``estimate_noise_timescales=True``) or fixed;
+        modalities with white noise are absent, and a white-noise model gives
+        empty mappings and ``family="white"``.
+
+        For fitted timescales ``bounds`` gives each one's allowed range and
+        ``timescales_at_bounds`` lists those the fit left on a bound: the
+        lower bound, a twentieth of the sampling interval, means the noise is
+        white at this sampling rate; the upper bound, the longest run, means a
+        drift the model cannot tell from an offset.
+
+        ``uncertainty="laplace"`` adds ``standard_error`` for fitted
+        timescales, from the inverse Hessian of the negative log posterior at
+        the MAP, as ``timing_report`` does for lags, with the matching
+        delta-method error of the autocorrelation. They assume the model is
+        correct. A timescale on a bound gives NaN, and
+        ``positive_definite=False`` means the errors should not be used.
+        """
+        check_is_fitted(self, "parameter_draws_")
+        if uncertainty not in (None, "laplace"):
+            raise ValueError("uncertainty must be None or 'laplace'")
+        problem = self.problem_
+        timescales = self.noise_timescales_
+        sampled = self._noise_sampling()
+        report = dict(
+            family="OU" if timescales else "white",
+            estimated=bool(problem.estimate_noise_timescales),
+            units="seconds",
+            timescale=timescales,
+            lag_one_autocorrelation=self.noise_autocorrelations_,
+            sampling_interval={m: sampled[m][0] for m in timescales},
+        )
+        if problem.estimate_noise_timescales:
+            report["bounds"] = {
+                problem.names[i][1]: tuple(problem.bounds[i])
+                for i in problem._noise_timescale_indices
+            }
+            report["timescales_at_bounds"] = self._noise_timescales_at_bounds()
+        if uncertainty == "laplace":
+            if not problem.estimate_noise_timescales:
+                raise ValueError(
+                    "uncertainty='laplace' requires estimate_noise_timescales=True: "
+                    "fixed timescales have no standard error"
+                )
+            from .laplace import noise_timescale_standard_errors
+
+            report["standard_error"] = noise_timescale_standard_errors(self)
+        return report
 
     def relative_lag_draws(self):
         """Relative modality lags, in timestamp units (normally seconds).

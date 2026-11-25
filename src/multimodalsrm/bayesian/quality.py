@@ -122,6 +122,8 @@ def summarize_fit(record):
     )
     if config.get("response_quadrature") is not None:
         result["response_quadrature"] = deepcopy(config["response_quadrature"])
+    if config.get("temporal_noise") is not None:
+        result["temporal_noise"] = deepcopy(config["temporal_noise"])
     names = record.get("parameter_names")
     metadata = config.get("response_metadata")
     reference_lag = reference.get("reference_lag_seconds")

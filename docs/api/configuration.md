@@ -174,6 +174,7 @@ BayesianProblem(
     state_space_gaussian="auto",
     conventions_from=None,
     length_scale_prior=None,
+    estimate_noise_timescales=False,
 )
 ```
 
@@ -191,6 +192,14 @@ BayesianProblem.gp_length_scale(x)
 ```
 
 Physical timescale for this draw, or the original fixed value.
+
+### BayesianProblem.noise_system
+
+```python
+BayesianProblem.noise_system(run, x)
+```
+
+This run's OU precision: prepared if fixed, evaluated at `x` if estimated.
 
 ### BayesianProblem.arrays
 

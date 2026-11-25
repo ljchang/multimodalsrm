@@ -160,6 +160,8 @@ class ParticipantCalibration:
                         "reference_convention",
                         "run_baseline_sd",
                         "noise_timescales",
+                        "estimate_noise_timescales",
+                        "noise_sampling",
                         "noise_systems",
                         "length_scale",
                         "linear_algebra",

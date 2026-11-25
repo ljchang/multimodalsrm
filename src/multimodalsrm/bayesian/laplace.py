@@ -98,11 +98,8 @@ def invariant_directions(problem, x):
     return directions
 
 
-def lag_standard_errors(model, reference, *, max_parameters=MAX_PARAMETERS, batch_size=32):
-    """Laplace standard errors of lags, relative lags and lag differences.
-
-    ``reference`` is the modality shown at zero. A fixed lag has zero
-    variance; a relative lag uses ``var_m + var_ref - 2 cov``.
+def _covariance(model, max_parameters, batch_size):
+    """Inverse Hessian at the MAP on the identified directions, with diagnostics.
 
     The Hessian is inverted on the orthogonal complement of the directions
     along which the objective is exactly invariant, which are known in closed
@@ -120,9 +117,7 @@ def lag_standard_errors(model, reference, *, max_parameters=MAX_PARAMETERS, batc
     need not curve upwards along it, so it is held fixed and the Hessian
     covers the remaining parameters (``parameters_at_bounds`` counts those
     held). Loadings of several factors are unbounded, so rotations are never
-    affected. A quantity is NaN when a lag it uses rests on a bound
-    (``lags_at_bounds``) or when it depends on an invariant direction
-    (``not_identified``). ``positive_definite`` is False when the Hessian has
+    affected. ``positive_definite`` is False when the Hessian has
     a nonpositive eigenvalue on the complement: the fit is then not at a local
     optimum and the errors should not be used.
     """
@@ -169,6 +164,39 @@ def lag_standard_errors(model, reference, *, max_parameters=MAX_PARAMETERS, batc
     covariance[np.ix_(free, free)] = (vectors / values[keep]) @ vectors.T
     null_vectors = np.zeros((len(x), nullity))
     null_vectors[free] = null_basis
+    return dict(
+        x=x,
+        free=free,
+        lags=lags,
+        contrasts=contrasts,
+        at_bounds=at_bounds,
+        covariance=covariance,
+        null_vectors=null_vectors,
+        diagnostics=dict(
+            positive_definite=positive_definite,
+            min_eigenvalue=float(values.min()),
+            null_directions=nullity,
+            null_direction_residual=residual,
+            parameters=len(x),
+            parameters_at_bounds=int((~free).sum()),
+            hessian_seconds=seconds,
+        ),
+    )
+
+
+def lag_standard_errors(model, reference, *, max_parameters=MAX_PARAMETERS, batch_size=32):
+    """Laplace standard errors of lags, relative lags and lag differences.
+
+    ``reference`` is the modality shown at zero. A fixed lag has zero
+    variance; a relative lag uses ``var_m + var_ref - 2 cov``. The covariance
+    is the inverse Hessian that ``_covariance`` describes. A quantity is NaN
+    when a lag it uses rests on a bound (``lags_at_bounds``) or when it
+    depends on an invariant direction (``not_identified``).
+    """
+    state = _covariance(model, max_parameters, batch_size)
+    problem = model.problem_
+    lags, contrasts, at_bounds = state["lags"], state["contrasts"], state["at_bounds"]
+    covariance, null_vectors = state["covariance"], state["null_vectors"]
 
     not_identified = []
 
@@ -211,11 +239,47 @@ def lag_standard_errors(model, reference, *, max_parameters=MAX_PARAMETERS, batc
         },
         lags_at_bounds=at_bounds,
         not_identified=not_identified,
-        positive_definite=positive_definite,
-        min_eigenvalue=float(values.min()),
-        null_directions=nullity,
-        null_direction_residual=residual,
-        parameters=len(x),
-        parameters_at_bounds=int((~free).sum()),
-        hessian_seconds=seconds,
+        **state["diagnostics"],
+    )
+
+
+def noise_timescale_standard_errors(model, *, max_parameters=MAX_PARAMETERS, batch_size=32):
+    """Laplace standard errors of estimated noise timescales, in seconds.
+
+    One entry per modality with the timescale, its standard error, and the
+    lag-one autocorrelation at the median sampling interval with its
+    delta-method standard error. A timescale resting on a bound is held fixed
+    in the Hessian and gets NaN.
+    """
+    state = _covariance(model, max_parameters, batch_size)
+    problem = model.problem_
+    x, free, covariance = state["x"], state["free"], state["covariance"]
+    modalities, at_bounds = {}, []
+    for index in problem._noise_timescale_indices:
+        modality = problem.names[index][1]
+        interval = problem.noise_sampling[modality][0]
+        timescale = float(x[index])
+        correlation = float(np.exp(-interval / timescale))
+        error = float("nan")
+        if free[index]:
+            error = float(np.sqrt(covariance[index, index]))
+        else:
+            at_bounds.append(modality)
+        modalities[modality] = dict(
+            timescale=timescale,
+            standard_error=error,
+            lag_one_autocorrelation=correlation,
+            autocorrelation_standard_error=correlation * interval / timescale**2 * error,
+        )
+    return dict(
+        method="laplace",
+        label=(
+            "Model-based (Laplace) standard errors of noise timescales at the MAP. "
+            "They assume the fitted model is correct and are too narrow when it is not."
+        ),
+        quantity="noise_timescale",
+        units="seconds",
+        modalities=modalities,
+        timescales_at_bounds=at_bounds,
+        **state["diagnostics"],
     )

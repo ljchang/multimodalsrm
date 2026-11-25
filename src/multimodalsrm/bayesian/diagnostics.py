@@ -236,6 +236,7 @@ def fixed_prediction(problem, parameters, run, times, *, target, drop_modalities
                 response_quadrature_order=problem.response_quadrature_order,
                 state_space_gaussian=problem.state_space_gaussian,
                 length_scale_prior=problem.length_scale_prior,
+                estimate_noise_timescales=problem.estimate_noise_timescales,
             )
             if reduced.names != problem.names:
                 raise ValueError("donor removal changed parameter coordinates")

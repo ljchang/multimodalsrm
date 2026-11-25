@@ -152,7 +152,7 @@ def project(problem, draws, run, times, *, key, include_noise, latent_loading=No
                 else (weights[ki] @ loading)[None, :]
             )
             if key is not None and include_noise:
-                cross = cross + problem.noise_systems[run].cross(
+                cross = cross + problem.noise_system(run, x).cross(
                     query, problem.keys.index(key), noise[problem._packed[run][1]]
                 )
             residual = jnp.asarray(system.values) - offsets[ki]
