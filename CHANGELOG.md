@@ -175,6 +175,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   log-likelihood was evaluated. The batch is now sized so these intermediates
   always exceed the stack-allocation limit. Each time difference is still
   evaluated by the same arithmetic.
+- **Bus error from a partial response-quadrature batch.** The batch sizing above
+  keeps whole batches over jaxlib 0.11's 64 KiB stack-allocation limit, but
+  `jax.lax.map` evaluates the last, partial batch on its own, and that one could
+  fall back under the limit. Order 64 on the nine Gamma panels gives 576 nodes:
+  fourteen distinct time differences made one 14 x 576 float64 buffer of 63 KiB,
+  and eight of those nested overflow the 544 KiB stack. A compiled Gamma covariance
+  over 14 timestamps killed the interpreter in 5 of 5 runs. Whether a larger
+  program crashed depended on which thread ran the kernel: an order-16 Gaussian
+  objective over 126 timestamps (a partial batch of 61 x 128) ran in every run or
+  died in every run according to unrelated details of the rest of the program. The
+  last time difference is now repeated until the partial batch is large enough,
+  and the repeats are dropped. Each time difference is still evaluated by the same
+  arithmetic. The cost is at most one batch of extra rows per pair of modalities:
+  0.1 ms on a 60-node objective, not measurable at 1,008 nodes.
 - **GP response-quadrature gradients at quadrature endpoints.** With
   `response_quadrature_order` set, the weighted Matérn sum bounded its exponential
   coordinates with `clip`, whose derivative is one half where the query equals the
