@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`MultimodalSRM.factor_report()`.** Reports how much of each modality every
+  fitted factor explains, to show whether a factor is shared across modalities or
+  carried by one of them. It works on the fitted signal (latent passed through the
+  response, times loadings), because loading sizes are not comparable across
+  modalities whose responses have different gain. The result holds per-factor
+  explained variance for each modality and participant, each factor's split
+  across modalities, and, with one shared latent, a `specificity` range that does
+  not depend on the rotation of the factors. On one recording of facial action
+  units and ratings with three factors, two factors could be rotated to be about
+  90% ratings; after smoothing the action units by 3 s two factors were close to
+  evenly split. These are training-fit descriptions, not held-out prediction.
+
 - **Warning and diagnostic for `MultimodalSRM` fits that stop at response bounds.**
   A response parameter resting at a bound no longer moves, so it passes the
   `kernel_tol` test however steeply the objective still falls outside the bound,

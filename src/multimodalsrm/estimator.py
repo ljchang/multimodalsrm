@@ -953,6 +953,20 @@ class MultimodalSRM(BaseEstimator):
         check_is_fitted(self, "subject_kernels_")
         return regularized_timing_report(self, reference)
 
+    def factor_report(self):
+        """Explained variance of each factor in each modality.
+
+        Use it to see whether a factor is shared across modalities or carried
+        by one of them: ``modality_share`` gives each factor's split in the
+        fitted coordinates, and ``specificity`` the range that split can take
+        under any rotation of the factors. Loading sizes are not comparable
+        across modalities with different responses; these values are. See
+        ``multimodalsrm.inspection.factor_report`` for the definitions.
+        """
+        from .inspection import factor_report
+
+        return factor_report(self)
+
     def kernel(self, modality, subject=None, level="subject", times=None):
         from .inspection import kernel
 
