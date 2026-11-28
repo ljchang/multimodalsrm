@@ -165,3 +165,125 @@ def plot_kernels(model, modality, *, show_subjects=True, ax=None):
     )
     ax.legend(frameon=False)
     return ax
+
+
+def factor_report(model):
+    """How much of each modality every fitted factor explains.
+
+    Loadings alone cannot be compared across modalities: a response kernel has
+    its own gain, so the same fitted signal needs different loading sizes under
+    different responses. This report uses the fitted signal instead. For one
+    participant, modality and feature the fit is ``sum_k w_k * u_k(t)``, with
+    ``u_k`` the latent factor passed through the response. Observations are
+    standardized per feature, so ``mean_t (w_k u_k(t))**2`` over observed
+    samples is the share of that feature's variance carried by factor ``k``
+    alone. Values are averaged over features, then over participants.
+
+    Returns a dictionary:
+
+    ``explained_variance[modality]``
+        One value per factor, in the fitted factor coordinates.
+    ``total_explained_variance[modality]``
+        Variance of the complete fitted signal. It differs from the sum over
+        factors when filtered factors are correlated.
+    ``modality_share[modality]``
+        Each factor's explained variance in this modality divided by its sum
+        over modalities. A factor near 1 in one modality is specific to it.
+    ``participants[subject][modality]``
+        The same per-factor values for one participant.
+    ``specificity[modality]``
+        Only with ``latent_pooling="shared"``. Factors are identified up to
+        rotation, so the table above depends on the fitted coordinates.
+        ``most`` and ``least`` are the largest and smallest share of a factor's
+        explained variance that this modality can take under any rotation, and
+        ``shares`` lists all of them in decreasing order. ``most`` near 1 with
+        ``least`` near 0 means the fit contains both a factor specific to this
+        modality and one absent from it. They are exact when the filtered
+        factors are uncorrelated with equal variance within each modality, and
+        an approximation otherwise.
+
+    These are descriptive training-fit quantities, not held-out prediction.
+    """
+    check_is_fitted(model, ["loadings_", "observation_blocks_", "_training_latent_arrays_"])
+    latents, loadings = model._training_latent_arrays_, model.loadings_
+    features = model.features
+    modalities = [m for m in model.responses_ if any(m in mods for mods in loadings.values())]
+    shared = model.latent_pooling == "shared"
+    unwhiten = None
+    if shared:
+        stacked = np.concatenate(list(latents[model.subjects_[0]].values()))
+        covariance = stacked.T @ stacked / len(stacked)
+        values, vectors = np.linalg.eigh(covariance)
+        if values[0] > 1e-12 * values[-1]:
+            # Symmetric square root: latent = whitened @ root, rotations orthogonal.
+            unwhiten = (vectors * np.sqrt(values)) @ vectors.T
+    # (subject, modality) -> [per-factor sum of squares, samples per feature, complete sum of squares]
+    own = {}
+    quadratic = {m: np.zeros((features, features)) for m in modalities}
+    for block in model.observation_blocks_:
+        key = (block.subject, block.modality)
+        weights = loadings[block.subject][block.modality]
+        observed = block.mask & block.valid[:, None]
+        n = observed.sum(0)
+        usable = n > 0
+        if not usable.any():
+            continue
+        filtered = np.asarray(block.H @ latents[block.subject][block.run])
+        # Per-feature second moments of the filtered factors over observed samples.
+        moments = np.einsum("tf,tk,tl->fkl", observed.astype(float), filtered, filtered)
+        entry = own.setdefault(key, [np.zeros(features), np.zeros(len(weights)), 0.0])
+        entry[0] += np.einsum("fk,fkk->k", weights**2, moments)
+        entry[1] += n
+        entry[2] += float(np.einsum("fk,fl,fkl->", weights, weights, moments))
+        if unwhiten is not None:
+            white = filtered @ np.linalg.inv(unwhiten)
+            second = np.einsum("tf,tk,tl->fkl", observed.astype(float), white, white)
+            scaled = weights @ unwhiten
+            for f in np.flatnonzero(usable):
+                vals, vecs = np.linalg.eigh(second[f])
+                root = (vecs * np.sqrt(np.maximum(vals, 0.0))) @ vecs.T
+                direction = root @ scaled[f]
+                quadratic[block.modality] += np.outer(direction, direction)
+    participants, by_modality, totals = {}, {m: [] for m in modalities}, {m: [] for m in modalities}
+    samples = {m: 0.0 for m in modalities}
+    for (subject, modality), (per_factor, n, complete) in own.items():
+        # A feature's variance share is its summed squares over its sample count;
+        # pooling numerator and denominator over features weights them by samples.
+        denominator = float(n.sum())
+        value = per_factor / denominator
+        participants.setdefault(subject, {})[modality] = value.tolist()
+        by_modality[modality].append(value)
+        totals[modality].append(complete / denominator)
+        samples[modality] += denominator
+    explained = {m: np.mean(by_modality[m], axis=0) for m in modalities if by_modality[m]}
+    summed = sum(explained.values())
+    report = {
+        "factors": features,
+        "modalities": list(explained),
+        "explained_variance": {m: v.tolist() for m, v in explained.items()},
+        "total_explained_variance": {m: float(np.mean(totals[m])) for m in explained},
+        "modality_share": {
+            m: np.divide(v, summed, out=np.zeros(features), where=summed > 0).tolist()
+            for m, v in explained.items()
+        },
+        "participants": participants,
+        "coordinates": "fitted factors; rotation is not identified without further constraints",
+        "specificity": None,
+    }
+    if unwhiten is not None and len(explained) > 1:
+        from scipy.linalg import eigh
+
+        normalized = {m: quadratic[m] / samples[m] for m in explained}
+        everything = sum(normalized.values())
+        scale = np.trace(everything) / features
+        if scale > 0:
+            regular = everything + 1e-10 * scale * np.eye(features)
+            report["specificity"] = {}
+            for m in explained:
+                shares = np.clip(eigh(normalized[m], regular, eigvals_only=True)[::-1], 0.0, 1.0)
+                report["specificity"][m] = {
+                    "most": float(shares[0]),
+                    "least": float(shares[-1]),
+                    "shares": shares.tolist(),
+                }
+    return report

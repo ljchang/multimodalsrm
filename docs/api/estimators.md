@@ -178,6 +178,21 @@ the pairwise differences are the same for every choice. By default it
 is the first modality whose lag is not estimated, or the first
 modality in `responses` when every lag is estimated.
 
+### MultimodalSRM.factor_report
+
+```python
+MultimodalSRM.factor_report()
+```
+
+Explained variance of each factor in each modality.
+
+Use it to see whether a factor is shared across modalities or carried
+by one of them: `modality_share` gives each factor's split in the
+fitted coordinates, and `specificity` the range that split can take
+under any rotation of the factors. Loading sizes are not comparable
+across modalities with different responses; these values are. See
+`multimodalsrm.inspection.factor_report` for the definitions.
+
 ### MultimodalSRM.kernel
 
 ```python
