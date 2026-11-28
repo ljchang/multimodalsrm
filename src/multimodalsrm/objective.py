@@ -11,6 +11,7 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
+from .data import constant_features
 from .grouping import latent_groups
 from .operators import observation_operator, response_operator_derivatives
 
@@ -155,7 +156,7 @@ def fit_preprocessing(data, weights):
                 raise ValueError(f"no observed training values for feature in {s}/{m}")
             mean = np.where(mask, x, 0).sum(0) / count
             scale = np.sqrt(np.where(mask, (x - mean) ** 2, 0).sum(0) / count)
-            constant = scale <= np.finfo(float).eps
+            constant = constant_features(x, mask, scale, count)
             scale[constant] = 1
             stats[s][m] = dict(mean=mean, scale=scale, constant_features=constant)
     return stats

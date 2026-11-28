@@ -1,8 +1,10 @@
 import numpy as np
 import pytest
+from numpy.testing import assert_array_equal
 from sklearn.exceptions import ConvergenceWarning
 
 from multimodalsrm import Identity, MultimodalSRM, Response, TimeSeries
+from multimodalsrm.data import constant_features
 
 
 def fixture():
@@ -250,3 +252,30 @@ def test_refit_clears_population_trajectory():
             fixture(), affinity={"s1": {"s2": 1}, "s2": {"s1": 1}}
         )
     assert not hasattr(model, "population_latents_")
+
+
+@pytest.mark.filterwarnings("ignore::sklearn.exceptions.ConvergenceWarning")
+@pytest.mark.parametrize("value", [0.3, 0.7, 1.1, -2.3, 5.123, 0.1, 0.0, 1e6, 1e-9])
+def test_repeated_value_is_a_constant_feature_despite_rounding(value):
+    rng = np.random.default_rng(0)
+    times = np.arange(200.0)
+    latent = rng.normal(size=(200, 2))
+    data = {}
+    for subject in range(4):
+        a = latent @ rng.normal(size=(2, 6)) + rng.normal(size=(200, 6))
+        a[:, 0] = value
+        b = latent @ rng.normal(size=(2, 5)) + rng.normal(size=(200, 5))
+        data[f"s{subject}"] = {"run": {"a": TimeSeries(a, times), "b": TimeSeries(b, times)}}
+    model = MultimodalSRM(features=2, latent_dt=1.0, max_iter=5, random_state=0).fit(data)
+    for subject in data:
+        stats = model.preprocessing_[subject]["a"]
+        assert_array_equal(stats["constant_features"], [True] + [False] * 5)
+        assert stats["scale"][0] == 1.0
+        assert np.abs(np.asarray(model.loadings_[subject]["a"])[0]).max() < 1e-12
+
+
+def test_small_but_real_variation_is_not_a_constant_feature():
+    values = 1e6 + 1e-3 * np.random.default_rng(0).normal(size=(500, 1))
+    mask = np.ones_like(values, bool)
+    scale = values.std(0)
+    assert not constant_features(values, mask, scale, mask.sum(0))[0]

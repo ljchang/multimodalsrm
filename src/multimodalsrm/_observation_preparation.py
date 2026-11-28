@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from .data import normalize_data
+from .data import constant_features, normalize_data
 from .kernels import DoubleGamma, Gaussian, Identity, Response
 
 
@@ -187,7 +187,7 @@ class ObservationPreparation(BaseEstimator):
                     raise ValueError(f"no support-eligible observations for a feature of {s}/{m}")
                 mean = np.where(mask, values, 0).sum(axis=0) / count
                 scale = np.sqrt(np.where(mask, (values - mean) ** 2, 0).sum(axis=0) / count)
-                constant = scale <= np.finfo(float).eps
+                constant = constant_features(values, mask, scale, count)
                 scale[constant] = 1.0
                 if not self.standardize:
                     mean, scale = np.zeros_like(mean), np.ones_like(scale)
