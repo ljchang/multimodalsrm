@@ -82,3 +82,18 @@ def normalize_data(data):
                 counts[key] = count
                 out[subject][run][modality] = series
     return out
+
+
+def constant_features(values, mask, scale, count):
+    """Features whose observed values do not vary, allowing for rounding.
+
+    A column holding one repeated value seldom has a computed standard
+    deviation of exactly zero: the mean carries rounding error of up to about
+    ``count * eps`` times the value, so the deviation comes out near ``1e-15``
+    rather than zero. Dividing by it would turn rounding noise into a
+    unit-variance feature. The tolerance therefore scales with the number of
+    observations and the largest observed magnitude.
+    """
+    eps = np.finfo(float).eps
+    largest = np.where(mask, np.abs(values), 0).max(axis=0)
+    return scale <= np.maximum(eps, count * eps * largest)

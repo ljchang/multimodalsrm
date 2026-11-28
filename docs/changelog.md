@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Constant features that escaped detection.** A feature was treated as
+  constant only when its computed standard deviation was at most machine epsilon
+  (`2.2e-16`). A column holding one repeated value usually misses that: the mean
+  carries rounding error, so the deviation comes out near `1e-15` (for example
+  `1.1e-15` for 200 samples of `0.3`). Such a feature was then standardized by
+  that deviation, which turned rounding noise into a unit-variance signal that
+  received loadings in the fit, and scaled any new data for the feature by about
+  `1e15`. Of six constant values tried (`0.3`, `0.7`, `1.1`, `-2.3`, `5.123`,
+  `0.1`), only `0.1` was flagged. The tolerance now scales with the number of
+  observations and the largest observed magnitude, in both `MultimodalSRM` and
+  `BayesianMultimodalSRM` preprocessing. Fits without constant features are
+  unchanged.
+
 ### Added
 
 - **Warning and diagnostic for `MultimodalSRM` fits that stop at response bounds.**
